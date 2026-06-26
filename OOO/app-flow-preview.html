@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猪实验管理系统 - 小程序页面流转图</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #2d5a87;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .flow-section {
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      color: #1ab394;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: #1ab394;
+      margin-right: 10px;
+      border-radius: 2px;
+    }
+
+    .phone-mockup {
+      width: 280px;
+      background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.3),
+        inset 0 2px 10px rgba(255,255,255,0.1);
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .phone-mockup:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 
+        0 30px 80px rgba(0,0,0,0.4),
+        inset 0 2px 10px rgba(255,255,255,0.1);
+    }
+
+    .phone-screen {
+      background: #f8f9fa;
+      border-radius: 32px;
+      overflow: hidden;
+      min-height: 580px;
+      position: relative;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 28px;
+      background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+
+    .phone-content {
+      padding-top: 30px;
+    }
+
+    .page-header {
+      padding: 15px 20px;
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .page-icon {
+      font-size: 20px;
+    }
+
+    .page-body {
+      padding: 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    .card-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1ab394;
+    }
+
+    .card-status {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    .status-active {
+      background: rgba(26, 179, 148, 0.1);
+      color: #1ab394;
+    }
+
+    .status-completed {
+      background: rgba(103, 194, 58, 0.1);
+      color: #67c23a;
+    }
+
+    .status-pending {
+      background: rgba(230, 162, 60, 0.1);
+      color: #e6a23c;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1ab394, #10b981);
+      border-radius: 3px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1ab394, #10b981);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 500;
+      width: 100%;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(26, 179, 148, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #666;
+      border: 1px solid #e0e0e0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .form-item {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      appearance: none;
+    }
+
+    .search-bar {
+      background: white;
+      padding: 10px 15px;
+      border-radius: 25px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .search-icon {
+      color: #999;
+      margin-right: 10px;
+    }
+
+    .search-input {
+      border: none;
+      flex: 1;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .list-item {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .list-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-size: 20px;
+    }
+
+    .icon-green {
+      background: rgba(26, 179, 148, 0.1);
+      color: #1ab394;
+    }
+
+    .icon-blue {
+      background: rgba(79, 172, 254, 0.1);
+      color: #4facfe;
+    }
+
+    .icon-orange {
+      background: rgba(230, 162, 60, 0.1);
+      color: #e6a23c;
+    }
+
+    .icon-red {
+      background: rgba(245, 108, 108, 0.1);
+      color: #f56c6c;
+    }
+
+    .list-content {
+      flex: 1;
+    }
+
+    .list-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .list-desc {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    .list-arrow {
+      color: #ccc;
+      font-size: 16px;
+    }
+
+    .chart-placeholder {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .chart-title {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      height: 80px;
+      justify-content: space-between;
+      padding: 0 5px;
+    }
+
+    .chart-bar {
+      width: 15px;
+      background: linear-gradient(180deg, #4facfe 0%, #0080ff 100%);
+      border-radius: 8px 8px 0 0;
+      min-height: 10px;
+    }
+
+    .chart-bar:nth-child(4) {
+      background: linear-gradient(180deg, #f56c6c 0%, #e74c3c 100%);
+    }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 10px;
+      color: #999;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .mini-table {
+      width: 100%;
+      font-size: 11px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .mini-table th, .mini-table td {
+      padding: 8px 6px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .mini-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .mini-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 10px;
+    }
+
+    .badge-success {
+      background: rgba(103, 194, 58, 0.15);
+      color: #67c23a;
+    }
+
+    .badge-warning {
+      background: rgba(230, 162, 60, 0.15);
+      color: #e6a23c;
+    }
+
+    .badge-danger {
+      background: rgba(245, 108, 108, 0.15);
+      color: #f56c6c;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .flow-connector {
+      display: flex;
+      align-items: center;
+      color: #ccc;
+      font-size: 20px;
+      margin: 0 10px;
+    }
+
+    .flow-arrow {
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 12px solid #1ab394;
+      margin: 0 15px;
+    }
+
+    .page-label {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .page-label span {
+      display: inline-block;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      padding: 20px;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🐷 猪实验管理系统</h1>
+      <p>手机小程序页面流转图</p>
+    </div>
+
+    <!-- 第一阶段：首页与实验列表 -->
+    <div class="flow-section">
+      <div class="section-title">🏠 首页与实验概览</div>
+      <div class="flow-row">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">实验概览</span>
+                <span class="page-icon">👤</span>
+              </div>
+              <div class="page-body">
+                <div class="search-bar">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="搜索实验编号...">
+                </div>
+                <div class="card">
+                  <div class="card-title">SWINE-NUR-XY-001-2026</div>
+                  <div class="card-subtitle">襄阳 · 保育阶段</div>
+                  <div class="card-content">
+                    <span class="card-value">进行中</span>
+                    <span class="card-status status-active">01-DRB</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-title">SWINE-FAT-NMG-002-2026</div>
+                  <div class="card-subtitle">内蒙古 · 育肥阶段</div>
+                  <div class="card-content">
+                    <span class="card-value">已完成</span>
+                    <span class="card-status status-completed">已结束</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
+                  </div>
+                </div>
+                <button class="btn-primary">+ 新建实验</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>首页 - 实验列表</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">实验详情</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="card">
+                  <div class="card-title">基本信息</div>
+                  <div style="font-size:12px;color:#666;line-height:1.8;">
+                    实验编号：SWINE-NUR-XY-001-2026<br>
+                    生长阶段：保育<br>
+                    实验场：襄阳<br>
+                    栋-单元：栋1-单元1, 栋1-单元2<br>
+                    当前阶段：01-DRB
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-title">进度统计</div>
+                  <div class="card-content">
+                    <div style="text-align:center;">
+                      <div style="font-size:28px;font-weight:bold;color:#1ab394;">85%</div>
+                      <div style="font-size:12px;color:#999;">完成进度</div>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn-primary">进入日常记录</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>实验详情页</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第二阶段：新建实验与分组 -->
+    <div class="flow-section">
+      <div class="section-title">➕ 新建实验与分组</div>
+      <div class="flow-row">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">新建实验</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="form-item">
+                  <label class="form-label">实验编号</label>
+                  <input type="text" class="form-input" value="SWINE-NUR-XY-001-2026" readonly>
+                </div>
+                <div class="form-item">
+                  <label class="form-label">生长阶段</label>
+                  <select class="form-select">
+                    <option>保育</option>
+                    <option>育肥</option>
+                    <option>保育到育肥</option>
+                  </select>
+                </div>
+                <div class="form-item">
+                  <label class="form-label">实验场</label>
+                  <select class="form-select">
+                    <option>襄阳</option>
+                    <option>内蒙古</option>
+                    <option>东营</option>
+                  </select>
+                </div>
+                <button class="btn-primary">下一步：实验分组</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>新建实验</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">实验分组</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="card">
+                  <div class="card-title">处理组设置</div>
+                  <div class="mini-table">
+                    <tr><th>处理组</th><th>栋舍单元</th><th>数量</th><th>状态</th></tr>
+                    <tr><td>处理组1</td><td>栋1-单元1</td><td>50</td><td><span class="status-badge badge-success">已分配</span></td></tr>
+                    <tr><td>处理组2</td><td>栋1-单元2</td><td>50</td><td><span class="status-badge badge-success">已分配</span></td></tr>
+                    <tr><td>处理组3</td><td>-</td><td>-</td><td><span class="status-badge badge-warning">待分配</span></td></tr>
+                  </div>
+                </div>
+                <button class="btn-primary">确认分组</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>实验分组</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第三阶段：日常记录 -->
+    <div class="flow-section">
+      <div class="section-title">📝 日常记录</div>
+      <div class="flow-row">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">日常巡栏</span>
+                <span class="page-icon">➕</span>
+              </div>
+              <div class="page-body">
+                <div style="background:linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);border-radius:16px;padding:20px;margin-bottom:15px;color:white;">
+                  <div style="font-size:16px;font-weight:bold;margin-bottom:8px;">SWINE-NUR-XY-001-2026</div>
+                  <div style="font-size:12px;opacity:0.8;">襄阳实验场 · 保育阶段</div>
+                  <div style="display:flex;gap:8px;margin-top:15px;">
+                    <span style="background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:12px;font-size:11px;">01-DRB</span>
+                    <span style="background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:12px;font-size:11px;">栋1-单元1</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-bottom:15px;">
+                  <div class="card" style="flex:1;text-align:center;padding:15px;">
+                    <div style="font-size:24px;font-weight:bold;color:#f56c6c;">3</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">今日死亡</div>
+                  </div>
+                  <div class="card" style="flex:1;text-align:center;padding:15px;">
+                    <div style="font-size:24px;font-weight:bold;color:#e6a23c;">1</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">今日淘汰</div>
+                  </div>
+                  <div class="card" style="flex:1;text-align:center;padding:15px;">
+                    <div style="font-size:24px;font-weight:bold;color:#4facfe;">6</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">腹泻头数</div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:15px;">
+                  <div class="card" style="display:flex;align-items:center;padding:15px;">
+                    <div style="width:40px;height:40px;background:rgba(245,108,108,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                      <span style="font-size:20px;">💀</span>
+                    </div>
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#333;">死亡记录</div>
+                      <div style="font-size:11px;color:#999;">录入死亡信息</div>
+                    </div>
+                  </div>
+                  <div class="card" style="display:flex;align-items:center;padding:15px;">
+                    <div style="width:40px;height:40px;background:rgba(230,162,60,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                      <span style="font-size:20px;">📦</span>
+                    </div>
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#333;">淘汰记录</div>
+                      <div style="font-size:11px;color:#999;">录入淘汰信息</div>
+                    </div>
+                  </div>
+                  <div class="card" style="display:flex;align-items:center;padding:15px;">
+                    <div style="width:40px;height:40px;background:rgba(79,172,254,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                      <span style="font-size:20px;">💧</span>
+                    </div>
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#333;">腹泻记录</div>
+                      <div style="font-size:11px;color:#999;">录入腹泻信息</div>
+                    </div>
+                  </div>
+                  <div class="card" style="display:flex;align-items:center;padding:15px;">
+                    <div style="width:40px;height:40px;background:rgba(103,194,58,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                      <span style="font-size:20px;">💉</span>
+                    </div>
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#333;">药品疫苗</div>
+                      <div style="font-size:11px;color:#999;">用药/免疫记录</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="padding:15px;">
+                  <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:10px;">今日记录</div>
+                  <div style="font-size:12px;color:#666;">暂无新记录，点击上方卡片添加</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>日常记录首页</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">死亡记录</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div style="background:#f8f9fa;border-radius:12px;padding:15px;margin-bottom:15px;">
+                  <div style="font-size:12px;color:#999;margin-bottom:5px;">记录日期</div>
+                  <div style="font-size:16px;font-weight:bold;color:#333;">2026/6/1</div>
+                </div>
+
+                <div class="form-item">
+                  <label class="form-label">处理组</label>
+                  <select class="form-select">
+                    <option>处理组1</option>
+                    <option>处理组2</option>
+                    <option>处理组3</option>
+                  </select>
+                </div>
+
+                <div class="form-item">
+                  <label class="form-label">栏位</label>
+                  <select class="form-select">
+                    <option>栋1-单元1-栏1</option>
+                    <option>栋1-单元1-栏2</option>
+                    <option>栋1-单元2-栏1</option>
+                  </select>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">日龄</label>
+                    <input type="number" class="form-input" placeholder="日龄">
+                  </div>
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">数量</label>
+                    <input type="number" class="form-input" placeholder="数量">
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">性别</label>
+                    <select class="form-select">
+                      <option>公</option>
+                      <option>母</option>
+                    </select>
+                  </div>
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">原因</label>
+                    <select class="form-select">
+                      <option>疾病</option>
+                      <option>外伤</option>
+                      <option>其他</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button class="btn-primary">保存记录</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>死亡记录录入</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">药品疫苗</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div style="background:#f8f9fa;border-radius:12px;padding:15px;margin-bottom:15px;">
+                  <div style="font-size:12px;color:#999;margin-bottom:5px;">记录日期</div>
+                  <div style="font-size:16px;font-weight:bold;color:#333;">2026/6/1</div>
+                </div>
+
+                <div class="form-item">
+                  <label class="form-label">处理组</label>
+                  <select class="form-select">
+                    <option>处理组1</option>
+                    <option>处理组2</option>
+                    <option>处理组3</option>
+                  </select>
+                </div>
+
+                <div class="form-item">
+                  <label class="form-label">栏位</label>
+                  <select class="form-select">
+                    <option>栋1-单元1-栏1</option>
+                    <option>栋1-单元1-栏2</option>
+                    <option>栋1-单元2-栏1</option>
+                  </select>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">产品名称</label>
+                    <input type="text" class="form-input" placeholder="产品名称">
+                  </div>
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">产品代码</label>
+                    <input type="text" class="form-input" placeholder="产品代码">
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">疫苗状态</label>
+                    <select class="form-select">
+                      <option>液体</option>
+                      <option>固体</option>
+                    </select>
+                  </div>
+                  <div class="form-item" style="flex:1;">
+                    <label class="form-label">免疫途径</label>
+                    <select class="form-select">
+                      <option>肌肉注射</option>
+                      <option>皮下注射</option>
+                      <option>滴鼻</option>
+                      <option>口服</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-item">
+                  <label class="form-label">免疫范围</label>
+                  <input type="text" class="form-input" placeholder="免疫范围">
+                </div>
+
+                <div class="form-item">
+                  <label class="form-label">用量</label>
+                  <input type="number" class="form-input" placeholder="用量" step="0.01">
+                </div>
+
+                <button class="btn-primary">保存记录</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>药品疫苗录入</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第四阶段：报表分析 -->
+    <div class="flow-section">
+      <div class="section-title">📊 报表分析</div>
+      <div class="flow-row">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">数据分析</span>
+                <span class="page-icon">📈</span>
+              </div>
+              <div class="page-body">
+                <div style="background:linear-gradient(135deg, #1ab394 0%, #11998e 100%);border-radius:16px;padding:20px;margin-bottom:15px;color:white;">
+                  <div style="font-size:12px;opacity:0.8;margin-bottom:8px;">实验编号</div>
+                  <div style="font-size:16px;font-weight:bold;">SWINE-NUR-XY-001-2026</div>
+                  <div style="display:flex;gap:12px;margin-top:12px;font-size:11px;opacity:0.9;">
+                    <span>栋1-单元1/2</span>
+                    <span>·</span>
+                    <span>01-DRB阶段</span>
+                    <span>·</span>
+                    <span>6/1 18:00更新</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:15px;">
+                  <div class="card" style="flex:1;text-align:center;padding:15px;background:#fff;border:1px solid #e0e0e0;">
+                    <div style="font-size:22px;font-weight:bold;color:#f56c6c;">3</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">死淘数</div>
+                    <div style="font-size:9px;color:#f56c6c;margin-top:2px;">↑ 同比昨日 +1</div>
+                  </div>
+                  <div class="card" style="flex:1;text-align:center;padding:15px;background:#fff;border:1px solid #e0e0e0;">
+                    <div style="font-size:22px;font-weight:bold;color:#1ab394;">97</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">存栏数</div>
+                    <div style="font-size:9px;color:#f56c6c;margin-top:2px;">↓ 同比昨日 -3</div>
+                  </div>
+                  <div class="card" style="flex:1;text-align:center;padding:15px;background:#fff;border:1px solid #e0e0e0;">
+                    <div style="font-size:22px;font-weight:bold;color:#4facfe;">1.0%</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">死淘率</div>
+                    <div style="font-size:9px;color:#67c23a;margin-top:2px;">↓ 同比上周 -0.2%</div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:15px;">
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">📅</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">日报表</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">📊</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">阶段报表</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">💀</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">死淘明细</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">💧</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">腹泻明细</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">💉</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">药品疫苗</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">🌡️</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">环境监控</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">⚖️</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">称重明细</div>
+                  </div>
+                  <div class="card" style="text-align:center;padding:12px;">
+                    <div style="font-size:18px;">📋</div>
+                    <div style="font-size:10px;color:#333;font-weight:500;margin-top:4px;">实验总结</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>报表首页</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">日报表</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div style="background:#f8f9fa;border-radius:12px;padding:15px;margin-bottom:15px;">
+                  <div style="display:flex;justify-content:space-between;">
+                    <div>
+                      <div style="font-size:12px;color:#999;">实验编号</div>
+                      <div style="font-size:14px;font-weight:bold;color:#333;">SWINE-NUR-XY-001-2026</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="font-size:12px;color:#999;">更新时间</div>
+                      <div style="font-size:14px;font-weight:bold;color:#333;">2026/6/1 18:00</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:15px;">
+                  <div class="card" style="flex:1;padding:14px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-size:11px;color:#999;">当日死淘数</div>
+                    <div style="font-size:24px;font-weight:bold;color:#f56c6c;">3</div>
+                    <div style="display:flex;gap:8px;margin-top:4px;">
+                      <span style="font-size:10px;color:#f56c6c;">↑ 昨日 +1</span>
+                      <span style="font-size:10px;color:#67c23a;">↓ 上周 -2</span>
+                    </div>
+                  </div>
+                  <div class="card" style="flex:1;padding:14px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-size:11px;color:#999;">当日存栏数</div>
+                    <div style="font-size:24px;font-weight:bold;color:#1ab394;">97</div>
+                    <div style="display:flex;gap:8px;margin-top:4px;">
+                      <span style="font-size:10px;color:#f56c6c;">↓ 昨日 -3</span>
+                      <span style="font-size:10px;color:#f56c6c;">↓ 上周 -8</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:15px;">
+                  <div class="card" style="flex:1;padding:14px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-size:11px;color:#999;">日下料量</div>
+                    <div style="font-size:24px;font-weight:bold;color:#4facfe;">1,400</div>
+                    <div style="font-size:10px;color:#67c23a;margin-top:4px;">↑ 昨日 +50kg</div>
+                  </div>
+                  <div class="card" style="flex:1;padding:14px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-size:11px;color:#999;">腹泻头数</div>
+                    <div style="font-size:24px;font-weight:bold;color:#e6a23c;">6</div>
+                    <div style="font-size:10px;color:#f56c6c;margin-top:4px;">↑ 昨日 +2</div>
+                  </div>
+                </div>
+
+                <div class="card" style="background:#fff;border-radius:12px;overflow:hidden;">
+                  <div style="padding:12px;border-bottom:1px solid #f0f0f0;">
+                    <span style="font-size:13px;font-weight:bold;color:#333;">数据列表</span>
+                  </div>
+                  <div style="overflow-x:auto;">
+                    <table class="mini-table" style="font-size:11px;">
+                      <tr><th>日期</th><th>处理组</th><th>死亡</th><th>淘汰</th><th>存栏</th><th>死淘率</th></tr>
+                      <tr><td>6/1</td><td>处理组1</td><td>2</td><td>0</td><td>49</td><td>4.0%</td></tr>
+                      <tr><td>6/1</td><td>处理组2</td><td>1</td><td>0</td><td>48</td><td>2.0%</td></tr>
+                      <tr><td>5/31</td><td>处理组1</td><td>1</td><td>0</td><td>51</td><td>1.9%</td></tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>日报表详情</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">死淘明细</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="card" style="background:#fff;border-radius:12px;overflow:hidden;margin-bottom:15px;">
+                  <div style="padding:12px;border-bottom:1px solid #f0f0f0;">
+                    <span style="font-size:13px;font-weight:bold;color:#333;">死淘趋势图</span>
+                  </div>
+                  <div style="padding:15px;">
+                    <div style="height:120px;position:relative;">
+                      <div style="position:absolute;top:0;left:30%;width:22%;height:100%;background:rgba(245,108,108,0.12);border-radius:8px;border:1px dashed rgba(245,108,108,0.3);"></div>
+                      <div style="display:flex;align-items:flex-end;height:100%;justify-content:space-around;">
+                        <div style="width:24px;background:linear-gradient(180deg, #f56c6c, #e74c3c);border-radius:6px 6px 0 0;height:40%;"></div>
+                        <div style="width:24px;background:linear-gradient(180deg, #f56c6c, #e74c3c);border-radius:6px 6px 0 0;height:25%;"></div>
+                        <div style="width:24px;background:linear-gradient(180deg, #f56c6c, #e74c3c);border-radius:6px 6px 0 0;height:10%;"></div>
+                        <div style="width:24px;background:linear-gradient(180deg, #ff6b6b, #ee5a5a);border-radius:6px 6px 0 0;height:85%;box-shadow:0 0 8px rgba(245,108,108,0.4);"></div>
+                        <div style="width:24px;background:linear-gradient(180deg, #f56c6c, #e74c3c);border-radius:6px 6px 0 0;height:35%;"></div>
+                        <div style="width:24px;background:linear-gradient(180deg, #f56c6c, #e74c3c);border-radius:6px 6px 0 0;height:30%;"></div>
+                        <div style="width:24px;background:linear-gradient(180deg, #f56c6c, #e74c3c);border-radius:6px 6px 0 0;height:60%;"></div>
+                      </div>
+                      <div style="display:flex;justify-content:space-around;margin-top:8px;font-size:10px;color:#999;">
+                        <span>5/26</span><span>5/27</span><span>5/28</span><span style="color:#f56c6c;">5/29</span><span>5/30</span><span>5/31</span><span>6/1</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background:rgba(245,108,108,0.1);border-radius:12px;padding:12px;margin-bottom:15px;">
+                  <div style="display:flex;align-items:center;">
+                    <span style="font-size:16px;margin-right:8px;">⚠️</span>
+                    <span style="font-size:12px;color:#c0392b;">5/29日死亡3头，死淘率1.2%，数据异常</span>
+                  </div>
+                </div>
+
+                <div class="card" style="background:#fff;border-radius:12px;overflow:hidden;">
+                  <div style="overflow-x:auto;">
+                    <table class="mini-table" style="font-size:11px;">
+                      <tr><th>日期(日龄)</th><th>处理组</th><th>死亡</th><th>淘汰</th><th>死淘率</th></tr>
+                      <tr><td>6/1(36)</td><td>合计</td><td>3</td><td>0</td><td>1.0%</td></tr>
+                      <tr><td>5/31(35)</td><td>合计</td><td>2</td><td>0</td><td>0.6%</td></tr>
+                      <tr><td>5/30(34)</td><td>合计</td><td>2</td><td>1</td><td>0.8%</td></tr>
+                      <tr><td>5/29(33)</td><td>合计</td><td><span style="color:#f56c6c;">3</span></td><td>0</td><td><span style="color:#f56c6c;">1.2%</span></td></tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>死淘明细表</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第五阶段：阶段管理 -->
+    <div class="flow-section">
+      <div class="section-title">✅ 阶段管理</div>
+      <div class="flow-row">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">阶段结束申请</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="card">
+                  <div class="card-title">阶段信息</div>
+                  <div style="font-size:12px;color:#666;line-height:1.8;">
+                    当前阶段：01-DRB<br>
+                    阶段天数：32天<br>
+                    累计死淘：11头<br>
+                    死淘率：7.3%
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-title">确认信息</div>
+                  <div style="font-size:12px;color:#666;margin-bottom:15px;">
+                    确认结束当前阶段并进入下一阶段？
+                  </div>
+                  <div style="display:flex;gap:10px;">
+                    <button class="btn-secondary" style="flex:1;">取消</button>
+                    <button class="btn-primary" style="flex:1;">确认提交</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>阶段结束申请</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">阶段确认</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="card">
+                  <div style="text-align:center;padding:20px;">
+                    <div style="font-size:48px;margin-bottom:15px;">✅</div>
+                    <div style="font-size:16px;font-weight:600;color:#1ab394;">阶段结束确认成功</div>
+                    <div style="font-size:12px;color:#999;margin-top:8px;">已进入下一阶段：02-ZZB</div>
+                  </div>
+                </div>
+                <button class="btn-primary">返回实验概览</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>阶段确认成功</span></div>
+        </div>
+
+        <div class="flow-arrow"></div>
+
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="page-header">
+                <span class="page-title">实验结束</span>
+                <span class="page-icon">←</span>
+              </div>
+              <div class="page-body">
+                <div class="card">
+                  <div class="card-title">实验总结</div>
+                  <div style="font-size:12px;color:#666;line-height:1.8;">
+                    实验编号：SWINE-NUR-XY-001-2026<br>
+                    总天数：120天<br>
+                    总死淘率：8.5%<br>
+                    平均日增重：420g
+                  </div>
+                </div>
+                <div style="background:rgba(245,108,108,0.1);padding:15px;border-radius:12px;margin-bottom:15px;">
+                  <div style="font-size:13px;color:#f56c6c;font-weight:500;margin-bottom:5px;">⚠️ 确认结束</div>
+                  <div style="font-size:12px;color:#666;">实验结束后将无法修改数据，请确认所有数据已录入完毕。</div>
+                </div>
+                <button class="btn-primary">确认结束实验</button>
+              </div>
+            </div>
+          </div>
+          <div class="page-label"><span>实验结束</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>🐷 猪实验管理系统 - 手机小程序页面流转图</p>
+      <p style="margin-top:8px;">页面总数：首页、实验详情、新建实验、实验分组、日常记录、报表分析、阶段管理、实验结束</p>
+    </div>
+  </div>
+</body>
+</html>

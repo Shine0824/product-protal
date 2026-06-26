@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猪实验数据管理系统 - 董事会汇报</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; 
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .ppt-container { 
+      max-width: 1920px; 
+      margin: 0 auto; 
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .slide { 
+      background: #ffffff; 
+      border-radius: 20px; 
+      padding: 60px 80px; 
+      min-height: 1080px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 第一页：为什么建设 */
+    .slide1 .header { text-align: center; margin-bottom: 50px; }
+    .slide1 h1 { 
+      font-size: 44px; 
+      color: #0f172a; 
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+    .slide1 .subtitle { 
+      font-size: 20px; 
+      color: #64748b;
+      font-weight: 400;
+    }
+    
+    .slide1 .challenge-section { margin-bottom: 50px; }
+    .slide1 .section-title { 
+      font-size: 24px; 
+      color: #0f172a; 
+      font-weight: 600;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slide1 .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%);
+      border-radius: 2px;
+    }
+    
+    .slide1 .challenges-grid { 
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 24px; 
+    }
+    .slide1 .challenge-card { 
+      background: #f8fafc; 
+      padding: 28px; 
+      border-radius: 16px; 
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+    .slide1 .challenge-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    }
+    .slide1 .challenge-card .icon { 
+      font-size: 36px; 
+      margin-bottom: 16px; 
+      display: block;
+    }
+    .slide1 .challenge-card .title { 
+      font-size: 16px; 
+      font-weight: 600; 
+      color: #1e293b; 
+      margin-bottom: 8px; 
+    }
+    .slide1 .challenge-card .desc { 
+      font-size: 14px; 
+      color: #64748b; 
+      line-height: 1.6;
+    }
+    
+    .slide1 .solution-section { margin-bottom: 50px; }
+    .slide1 .solution-flow {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      padding: 40px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+    .slide1 .solution-step {
+      text-align: center;
+      color: white;
+    }
+    .slide1 .solution-step .step-num {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 auto 12px;
+    }
+    .slide1 .solution-step .step-title {
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+    .slide1 .solution-arrow {
+      color: #475569;
+      font-size: 24px;
+    }
+    
+    .slide1 .value-section { margin-top: auto; }
+    .slide1 .values-grid { 
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 20px; 
+    }
+    .slide1 .value-card { 
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      padding: 32px; 
+      border-radius: 16px; 
+      color: white;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .slide1 .value-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(14, 165, 233, 0.3);
+    }
+    .slide1 .value-card .icon { font-size: 40px; margin-bottom: 14px; }
+    .slide1 .value-card .title { 
+      font-size: 18px; 
+      font-weight: 600; 
+      margin-bottom: 8px; 
+    }
+    .slide1 .value-card .desc { 
+      font-size: 13px; 
+      opacity: 0.9; 
+      line-height: 1.5;
+    }
+
+    /* 第二页：系统能力架构 */
+    .slide2 h2 { 
+      font-size: 36px; 
+      color: #0f172a; 
+      font-weight: 700;
+      margin-bottom: 40px;
+      letter-spacing: -0.5px;
+    }
+    
+    .slide2 .capability-center {
+      background: #f8fafc;
+      padding: 40px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+    }
+    .slide2 .capability-hub {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .slide2 .center-node {
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+    }
+    .slide2 .center-node .icon { font-size: 36px; margin-bottom: 6px; }
+    .slide2 .center-node .label { font-size: 14px; font-weight: 600; }
+    
+    .slide2 .spoke-node {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+    .slide2 .spoke-node:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+    }
+    .slide2 .spoke-node .icon { font-size: 28px; margin-bottom: 4px; }
+    .slide2 .spoke-node .label { font-size: 12px; color: #475569; text-align: center; }
+    
+    .slide2 .spoke-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0;
+    }
+    
+    .slide2 .mapping-section {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 30px;
+    }
+    
+    .slide2 .mapping-table {
+      background: #f8fafc;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .slide2 .mapping-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .slide2 .mapping-table th,
+    .slide2 .mapping-table td {
+      padding: 20px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .slide2 .mapping-table th {
+      background: #0f172a;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .slide2 .mapping-table td {
+      font-size: 14px;
+      color: #334155;
+    }
+    .slide2 .mapping-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .slide2 .kpi-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .slide2 .kpi-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      padding: 24px;
+      border-radius: 16px;
+      color: white;
+    }
+    .slide2 .kpi-card .value { 
+      font-size: 48px; 
+      font-weight: 700; 
+      color: #22d3ee;
+      margin-bottom: 4px;
+    }
+    .slide2 .kpi-card .label { 
+      font-size: 14px; 
+      opacity: 0.8; 
+    }
+
+    /* 第三页：实施路线与价值回报 */
+    .slide3 h2 { 
+      font-size: 36px; 
+      color: #0f172a; 
+      font-weight: 700;
+      margin-bottom: 50px;
+      letter-spacing: -0.5px;
+    }
+    
+    .slide3 .roadmap {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+    .slide3 .roadmap-phase {
+      background: #f8fafc;
+      padding: 30px;
+      border-radius: 16px;
+      border-top: 4px solid #0ea5e9;
+      position: relative;
+    }
+    .slide3 .roadmap-phase.active {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: white;
+    }
+    .slide3 .roadmap-phase.active .phase-title,
+    .slide3 .roadmap-phase.active .phase-time,
+    .slide3 .roadmap-phase.active .phase-tasks,
+    .slide3 .roadmap-phase.active .phase-deliverable {
+      color: white;
+    }
+    .slide3 .roadmap-phase.active .phase-deliverable {
+      background: rgba(255,255,255,0.2);
+    }
+    .slide3 .roadmap-phase::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      width: 24px;
+      height: 24px;
+      background: #0ea5e9;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+    }
+    .slide3 .roadmap-phase.active::before {
+      background: #22d3ee;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.3), 0 2px 12px rgba(34, 211, 238, 0.5);
+    }
+    .slide3 .phase-title { 
+      font-size: 18px; 
+      font-weight: 600; 
+      color: #1e293b; 
+      margin-bottom: 8px; 
+    }
+    .slide3 .phase-time { 
+      font-size: 13px; 
+      color: #64748b; 
+      margin-bottom: 16px; 
+    }
+    .slide3 .phase-tasks { 
+      font-size: 13px; 
+      color: #475569; 
+      line-height: 1.8; 
+      margin-bottom: 16px;
+    }
+    .slide3 .phase-deliverable { 
+      font-size: 12px; 
+      color: #0ea5e9; 
+      background: #e0f2fe;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    
+    .slide3 .benefits-section {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      padding: 40px;
+      border-radius: 20px;
+    }
+    .slide3 .benefits-title {
+      font-size: 22px;
+      color: white;
+      font-weight: 600;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .slide3 .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+    }
+    .slide3 .benefit-card {
+      text-align: center;
+      color: white;
+    }
+    .slide3 .benefit-card .value {
+      font-size: 56px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #22d3ee 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .slide3 .benefit-card .label {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* 响应式 */
+    @media (max-width: 1200px) {
+      .slide { padding: 30px; min-height: auto; }
+      .slide1 h1 { font-size: 28px; }
+      .slide1 .challenges-grid { grid-template-columns: repeat(2, 1fr); }
+      .slide1 .values-grid { grid-template-columns: repeat(2, 1fr); }
+      .slide1 .solution-flow { flex-wrap: wrap; gap: 20px; }
+      .slide2 .capability-hub { flex-wrap: wrap; }
+      .slide2 .mapping-section { grid-template-columns: 1fr; }
+      .slide3 .roadmap { grid-template-columns: repeat(2, 1fr); }
+      .slide3 .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      .slide1 .challenges-grid { grid-template-columns: 1fr; }
+      .slide1 .values-grid { grid-template-columns: 1fr; }
+      .slide2 .spoke-row { flex-direction: column; align-items: center; gap: 20px; }
+      .slide3 .roadmap { grid-template-columns: 1fr; }
+      .slide3 .benefits-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ppt-container">
+    
+    <!-- 第一页：为什么建设 -->
+    <div class="slide slide1">
+      <div class="header">
+        <h1>猪实验数据管理系统推动养殖业务数字化升级</h1>
+        <div class="subtitle">通过统一数据底座，实现实验全过程可视化管理</div>
+      </div>
+      
+      <div class="challenge-section">
+        <div class="section-title">当前挑战</div>
+        <div class="challenges-grid">
+          <div class="challenge-card">
+            <div class="icon">📊</div>
+            <div class="title">数据分散</div>
+            <div class="desc">实验数据分散在多个系统和纸质记录中，难以统一管理和分析</div>
+          </div>
+          <div class="challenge-card">
+            <div class="icon">✏️</div>
+            <div class="title">人工记录</div>
+            <div class="desc">日常记录依赖人工录入，效率低下且易出错</div>
+          </div>
+          <div class="challenge-card">
+            <div class="icon">⚠️</div>
+            <div class="title">异常发现滞后</div>
+            <div class="desc">问题发现依赖人工巡检，异常预警不及时</div>
+          </div>
+          <div class="challenge-card">
+            <div class="icon">🔍</div>
+            <div class="title">难以追溯</div>
+            <div class="desc">数据追溯困难，无法满足审计和合规要求</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="solution-section">
+        <div class="section-title">核心解决方案</div>
+        <div class="solution-flow">
+          <div class="solution-step">
+            <div class="step-num">1</div>
+            <div class="step-title">实验设计</div>
+          </div>
+          <span class="solution-arrow">→</span>
+          <div class="solution-step">
+            <div class="step-num">2</div>
+            <div class="step-title">过程采集</div>
+          </div>
+          <span class="solution-arrow">→</span>
+          <div class="solution-step">
+            <div class="step-num">3</div>
+            <div class="step-title">实时监测</div>
+          </div>
+          <span class="solution-arrow">→</span>
+          <div class="solution-step">
+            <div class="step-num">4</div>
+            <div class="step-title">异常预警</div>
+          </div>
+          <span class="solution-arrow">→</span>
+          <div class="solution-step">
+            <div class="step-num">5</div>
+            <div class="step-title">数据分析</div>
+          </div>
+          <span class="solution-arrow">→</span>
+          <div class="solution-step">
+            <div class="step-num">6</div>
+            <div class="step-title">知识沉淀</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="value-section">
+        <div class="section-title">四大价值</div>
+        <div class="values-grid">
+          <div class="value-card">
+            <div class="icon">⚡</div>
+            <div class="title">效率提升</div>
+            <div class="desc">日常记录数字化，告别纸质台账，数据实时同步</div>
+          </div>
+          <div class="value-card">
+            <div class="icon">🚨</div>
+            <div class="title">风险预警</div>
+            <div class="desc">数据异常自动追踪推送，方便及时调整猪只健康</div>
+          </div>
+          <div class="value-card">
+            <div class="icon">📊</div>
+            <div class="title">科学决策</div>
+            <div class="desc">实验数据集中化，线上化管理，沉淀数据资产</div>
+          </div>
+          <div class="value-card">
+            <div class="icon">✅</div>
+            <div class="title">合规追溯</div>
+            <div class="desc">实验数据动态追踪，全方位健康、环境、饲喂管理追踪</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 第二页：系统能力架构 -->
+    <div class="slide slide2">
+      <h2>构建实验全生命周期数字化能力体系</h2>
+      
+      <div class="capability-center">
+        <div class="capability-hub">
+          <div class="spoke-row" style="width: 100%;">
+            <div class="spoke-node">
+              <div class="icon">📋</div>
+              <div class="label">实验管理</div>
+            </div>
+            <div class="center-node">
+              <div class="icon">💎</div>
+              <div class="label">数据中心</div>
+            </div>
+            <div class="spoke-node">
+              <div class="icon">🌡️</div>
+              <div class="label">环境监控</div>
+            </div>
+          </div>
+        </div>
+        <div class="spoke-row">
+          <div class="spoke-node">
+            <div class="icon">📝</div>
+            <div class="label">日常记录</div>
+          </div>
+          <div class="spoke-node">
+            <div class="icon">🔔</div>
+            <div class="label">分析预警</div>
+          </div>
+          <div class="spoke-node">
+            <div class="icon">✅</div>
+            <div class="label">阶段管理</div>
+          </div>
+        </div>
+        <div class="spoke-row" style="justify-content: center;">
+          <div class="spoke-node">
+            <div class="icon">📱</div>
+            <div class="label">移动应用</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mapping-section">
+        <div class="mapping-table">
+          <table>
+            <tr>
+              <th>能力</th>
+              <th>价值</th>
+            </tr>
+            <tr>
+              <td>实验管理</td>
+              <td>流程标准化，实验编号自动生成，阶段进度可视化追踪</td>
+            </tr>
+            <tr>
+              <td>数据采集</td>
+              <td>实时记录，死亡/淘汰/腹泻/疫苗记录线上化</td>
+            </tr>
+            <tr>
+              <td>环境监控</td>
+              <td>风险控制，温湿度实时监测，环境异常预警</td>
+            </tr>
+            <tr>
+              <td>数据分析</td>
+              <td>科学决策，多维度报表分析，死淘趋势预测</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="kpi-cards">
+          <div class="kpi-card">
+            <div class="value">97</div>
+            <div class="label">当前存栏</div>
+          </div>
+          <div class="kpi-card">
+            <div class="value">3</div>
+            <div class="label">当日死淘</div>
+          </div>
+          <div class="kpi-card">
+            <div class="value">1.0%</div>
+            <div class="label">死淘率</div>
+          </div>
+          <div class="kpi-card">
+            <div class="value">24h</div>
+            <div class="label">实时同步</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 第三页：实施路线与价值回报 -->
+    <div class="slide slide3">
+      <h2>分阶段建设，持续释放数字化价值</h2>
+      
+      <div class="roadmap">
+        <div class="roadmap-phase">
+          <div class="phase-title">基础建设</div>
+          <div class="phase-time">第1-4周</div>
+          <div class="phase-tasks">
+            • 实验管理核心功能<br>
+            • 日常记录模块开发<br>
+            • 数据基础架构搭建
+          </div>
+          <div class="phase-deliverable">Web端基础版</div>
+        </div>
+        
+        <div class="roadmap-phase active">
+          <div class="phase-title">分析体系</div>
+          <div class="phase-time">第5-8周</div>
+          <div class="phase-tasks">
+            • 数据分析报表开发<br>
+            • 死淘趋势图实现<br>
+            • 异常预警系统
+          </div>
+          <div class="phase-deliverable">报表分析模块</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <div class="phase-title">移动应用</div>
+          <div class="phase-time">第9-12周</div>
+          <div class="phase-tasks">
+            • 环境监控模块<br>
+            • 小程序版本开发<br>
+            • 移动端适配
+          </div>
+          <div class="phase-deliverable">小程序版本</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <div class="phase-title">全面运营</div>
+          <div class="phase-time">第13-16周</div>
+          <div class="phase-tasks">
+            • 阶段管理功能<br>
+            • 系统集成测试<br>
+            • 用户培训上线
+          </div>
+          <div class="phase-deliverable">完整系统交付</div>
+        </div>
+      </div>
+      
+      <div class="benefits-section">
+        <div class="benefits-title">📈 经营收益</div>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="value">60%</div>
+            <div class="label">数据录入效率提升</div>
+          </div>
+          <div class="benefit-card">
+            <div class="value">48h</div>
+            <div class="label">风险发现提前</div>
+          </div>
+          <div class="benefit-card">
+            <div class="value">80%</div>
+            <div class="label">追溯效率提升</div>
+          </div>
+          <div class="benefit-card">
+            <div class="value">100%</div>
+            <div class="label">实验数据线上化</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</body>
+</html>

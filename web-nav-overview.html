@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web端功能页面概览 — 猪实验模块</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8ecf1; color: #333; }
+
+    .page-wrap { max-width: 1400px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 12px; margin-bottom: 24px; }
+
+    /* ===== Section Title ===== */
+    .section-title { font-size: 16px; font-weight: 700; margin: 32px 0 14px; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; display: flex; align-items: center; gap: 8px; }
+    .section-title .st-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #2d5a87; color: #fff; font-size: 13px; font-weight: 700; }
+
+    /* ===== Shell Preview ===== */
+    .shell-wrap { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+    .shell-label { font-size: 13px; font-weight: 700; color: #2d5a87; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .shell-label .dot { width: 8px; height: 8px; border-radius: 50%; background: #1ab394; }
+
+    /* ===== Mini Browser Frame ===== */
+    .browser-frame { border: 1px solid #d0d0d0; border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+    .browser-topbar { height: 32px; background: #e8e8e8; display: flex; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 1px solid #d0d0d0; }
+    .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dot.r { background: #ff5f57; }
+    .browser-dot.y { background: #febc2e; }
+    .browser-dot.g { background: #28c840; }
+    .browser-url { font-size: 10px; color: #999; margin-left: 8px; background: #fff; padding: 2px 12px; border-radius: 4px; flex: 1; }
+
+    .browser-body { min-height: 420px; position: relative; overflow: hidden; background: #f5f7fa; }
+
+    /* ===== Web Shell Sidebar ===== */
+    .ws-sidebar { width: 180px; background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%); color: #fff; position: absolute; left: 0; top: 0; bottom: 0; z-index: 2; }
+    .ws-logo { padding: 14px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; }
+    .ws-menu-item { display: flex; align-items: center; padding: 10px 16px; font-size: 12px; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.8); }
+    .ws-menu-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .ws-menu-item.active { background: #1ab394; color: #fff; }
+    .ws-menu-item .ws-ic { font-size: 15px; margin-right: 10px; width: 18px; text-align: center; }
+
+    /* ===== Web Shell Top Bar ===== */
+    .ws-topbar { height: 42px; background: #fff; border-bottom: 1px solid #e6e6e6; display: flex; align-items: center; padding: 0 16px; position: absolute; left: 180px; top: 0; right: 0; z-index: 1; }
+    .ws-topbar .ws-title { font-size: 14px; font-weight: 700; color: #676a6c; }
+
+    /* ===== Web Shell Content ===== */
+    .ws-content { position: absolute; left: 180px; top: 42px; right: 0; bottom: 0; padding: 16px; overflow-y: auto; }
+
+    /* ===== Summary Cards ===== */
+    .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat-card { background: #fff; border-radius: 8px; padding: 16px; border-left: 4px solid #1ab394; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .stat-card.blue { border-left-color: #3b82f6; }
+    .stat-card.orange { border-left-color: #f59e0b; }
+    .stat-card.purple { border-left-color: #8b5cf6; }
+    .stat-card .sv { font-size: 24px; font-weight: 700; color: #333; }
+    .stat-card .sl { font-size: 11px; color: #888; margin-top: 4px; }
+
+    /* ===== Table Mini ===== */
+    .table-mini { width: 100%; border-collapse: collapse; font-size: 10px; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .table-mini th { background: #f0f3f5; padding: 8px 6px; text-align: left; font-weight: 600; color: #555; white-space: nowrap; }
+    .table-mini td { padding: 7px 6px; border-bottom: 1px solid #f0f0f0; }
+    .table-mini .tag { font-size: 9px; padding: 2px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tag-green { background: #e8f5e9; color: #2e7d32; }
+    .tag-blue { background: #e3f2fd; color: #1976d2; }
+    .tag-orange { background: #fff3e0; color: #f57c00; }
+
+    /* ===== Form Mini ===== */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .form-row.col2 { grid-template-columns: 1fr 1fr; }
+    .form-row.col4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .ff { }
+    .ff .lbl { font-size: 10px; color: #888; margin-bottom: 3px; }
+    .ff .inp { padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 10px; background: #fafafa; color: #333; }
+    .ff .sel { padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 10px; background: #fafafa; color: #333; }
+
+    .btn-mini { font-size: 10px; padding: 6px 14px; border-radius: 4px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: #1ab394; color: #fff; }
+    .btn-default { background: #e8e8e8; color: #666; }
+    .btn-blue { background: #3b82f6; color: #fff; }
+
+    /* ===== Layout Shell Zoomed ===== */
+    .flow-section { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 24px; }
+    .preview-col { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .preview-label { font-size: 12px; font-weight: 700; color: #2d5a87; text-align: center; }
+    .note-col { flex: 1; min-width: 260px; }
+    .note-card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 10px; }
+    .note-card h3 { font-size: 14px; margin-bottom: 8px; }
+    .note-card ul { font-size: 12px; line-height: 2; padding-left: 16px; color: #555; }
+    .note-card p { font-size: 12px; line-height: 1.8; color: #555; }
+
+    .callout { background: #e8f5e9; border-left: 4px solid #1ab394; padding: 12px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; font-size: 12px; line-height: 1.8; }
+    .callout.warn { background: #fffde7; border-left-color: #ffc107; }
+    .callout strong { color: #2e7d32; }
+    .callout.warn strong { color: #e65100; }
+
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .cmp-table th { background: #f5f5f5; padding: 8px 10px; text-align: left; font-weight: 600; font-size: 11px; }
+    .cmp-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+
+    .arrow-section { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .arrow-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .arrow-col .arr { font-size: 24px; color: #bbb; }
+    .arrow-col .txt { font-size: 9px; color: #888; margin-top: 2px; text-align: center; }
+
+    /* ===== Grouping Table zoomed ===== */
+    .group-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+    .gs-card { padding: 12px; border-radius: 8px; text-align: center; color: #fff; font-size: 10px; }
+    .gs-card .gsv { font-size: 20px; font-weight: 700; }
+    .gs-card .gsl { font-size: 9px; opacity: 0.9; margin-top: 2px; }
+    .gs1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .gs2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .gs3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .gs4 { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; }
+
+    /* ===== Stage Flow Nodes ===== */
+    .stage-flow { display: flex; align-items: center; gap: 0; padding: 12px 8px; background: #f8f9fa; border-radius: 8px; overflow-x: auto; }
+    .sf-node { flex-shrink: 0; padding: 10px 12px; border-radius: 8px; font-size: 10px; font-weight: 600; text-align: center; min-width: 70px; border: 2px solid #e0e0e0; background: #fff; }
+    .sf-node.done { border-color: #1ab394; background: #e8f5e9; color: #1ab394; }
+    .sf-node.current { border-color: #1ab394; background: #1ab394; color: #fff; }
+    .sf-node.locked { border-color: #e0e0e0; background: #f5f5f5; color: #ccc; }
+    .sf-arr { margin: 0 4px; color: #ccc; font-size: 14px; flex-shrink: 0; }
+    .sf-arr.done { color: #1ab394; }
+
+    /* ===== Full-width layout preview ===== */
+    .full-preview { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .full-preview h3 { font-size: 14px; margin-bottom: 14px; color: #2d5a87; }
+
+    /* ===== Tabs ===== */
+    .tabs-row { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid #e8e8e8; }
+    .tab-btn { padding: 8px 16px; font-size: 12px; border: none; background: none; cursor: pointer; color: #888; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .tab-btn.on { color: #1ab394; border-bottom-color: #1ab394; font-weight: 700; }
+
+    @media (max-width: 800px) {
+      .flow-section { flex-direction: column; align-items: center; }
+      .stat-cards { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <h1>猪实验数据管理系统 — Web端页面概览</h1>
+  <p class="subtitle">原型方案评估用 · 基于 index-web.html 外壳（侧边栏 + 顶部导航 + iframe内容区）· 页面 00~10 · 2026/6/26</p>
+
+  <!-- ==================== 架构总览 ==================== -->
+  <div class="section-title"><span class="st-num">A</span> Web端整体架构 — index-web.html 外壳</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="preview-label">Web App 外壳布局</div>
+      <div class="browser-frame" style="width:720px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">index-web.html</span>
+        </div>
+        <div class="browser-body" style="height:460px;position:relative;">
+          <!-- Sidebar -->
+          <div class="ws-sidebar">
+            <div class="ws-logo">🧪 实验管理系统</div>
+            <div class="ws-menu-item active">
+              <span class="ws-ic">📊</span> 实验概览
+            </div>
+            <div class="ws-menu-item" style="font-weight:700;color:rgba(255,255,255,0.5);font-size:10px;padding-top:14px;">
+              <span class="ws-ic">🧪</span> 实验管理 ▼
+            </div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">➕</span> 新增实验</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">📝</span> 实验分组</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">📅</span> 日常记录1</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">🔚</span> 阶段结束1</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">✅</span> 阶段确认1</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">📅</span> 日常记录2</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">🔚</span> 阶段结束2</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">✅</span> 阶段确认2</div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">🏁</span> 实验结束</div>
+            <div class="ws-menu-item" style="font-weight:700;color:rgba(255,255,255,0.5);font-size:10px;padding-top:14px;">
+              <span class="ws-ic">📈</span> 数据分析
+            </div>
+            <div class="ws-menu-item" style="padding-left:36px;"><span class="ws-ic">📊</span> 数据分析</div>
+          </div>
+          <!-- Topbar -->
+          <div class="ws-topbar"><span class="ws-title">实验概览</span></div>
+          <!-- Content Area (iframe) -->
+          <div class="ws-content">
+            <div class="stat-cards">
+              <div class="stat-card"><div class="sv">12</div><div class="sl">实验总数</div></div>
+              <div class="stat-card blue"><div class="sv">5</div><div class="sl">进行中</div></div>
+              <div class="stat-card orange"><div class="sv">3</div><div class="sl">已完成</div></div>
+              <div class="stat-card purple"><div class="sv">4</div><div class="sl">待开始</div></div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="table-mini">
+                <thead><tr><th>实验编号</th><th>物种</th><th>类型</th><th>实验场</th><th>负责人</th><th>状态</th><th>进度</th></tr></thead>
+                <tbody>
+                  <tr><td>SWINE-NUR-XY-001</td><td>猪-保育</td><td>饲料对比</td><td>襄阳</td><td>虞泽鹏</td><td><span class="tag tag-blue">进行中</span></td><td>85%</td></tr>
+                  <tr><td>SWINE-FAT-NMG-002</td><td>猪-育肥</td><td>饲料对比</td><td>内蒙古</td><td>虞泽鹏</td><td><span class="tag tag-green">已完成</span></td><td>92%</td></tr>
+                  <tr><td>SWINE-NF-DY-003</td><td>猪-保育育肥</td><td>饲料营养</td><td>东营</td><td>李一一</td><td><span class="tag tag-orange">待开始</span></td><td>60%</td></tr>
+                  <tr><td>POULTRY-LAY-HZ-007</td><td>家禽-蛋鸡</td><td>营养对比</td><td>杭州</td><td>张大明</td><td><span class="tag tag-blue">进行中</span></td><td>73%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-col">
+      <div class="note-card">
+        <h3>🏗️ Web外壳架构 (index-web.html)</h3>
+        <ul>
+          <li><strong>左侧栏 (220px)</strong> — 深蓝渐变背景，三级导航菜单</li>
+          <li><strong>顶部栏 (50px)</strong> — 白色背景，显示当前页面标题</li>
+          <li><strong>iframe 内容区</strong> — 加载 00~10 号独立HTML页面</li>
+          <li>纯前端实现，点击导航 → 切换 iframe src</li>
+          <li>每个子页面 (00~10) 自带独立的侧边栏 + 顶部导航（嵌入在 iframe 内时与外壳侧边栏形成双重导航）</li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#fffde7;border:1px solid #ffc107;">
+        <h3>⚠️ 注意</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          00~10 各页面内部也包含独立的侧边栏与顶部导航（作为独立页面打开时有完整布局）。<br>
+          当嵌入 index-web.html 的 iframe 时，子页面自身的 sidebar 仍在 iframe 内可见，形成双层导航结构。<br>
+          <strong>建议：</strong>通过 index-web.html 外壳访问时，子页面可考虑隐藏自有导航，仅保留内容区。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 导航层级 ==================== -->
+  <div class="section-title"><span class="st-num">B</span> 导航结构 — 三级菜单树</div>
+
+  <div class="note-card" style="text-align:center;overflow-x:auto;">
+    <pre style="font-size:11px;line-height:2.2;text-align:left;display:inline-block;font-family:SF Mono,Consolas,monospace;color:#333;">
+
+  <span style="color:#1ab394;font-weight:700;">L1 — 顶级入口</span>
+    └─ 📊 实验概览 (00)  ← 默认页，直接跳转，无子项
+
+  <span style="color:#3b82f6;font-weight:700;">L2 — 功能分组（可折叠）</span>
+    ├─ 🧪 实验管理（展开）
+    │   ├─ <span style="color:#888;">L3</span> ➕ 新增实验 (01)
+    │   ├─ <span style="color:#888;">L3</span> 📝 实验分组 (02)
+    │   ├─ <span style="color:#888;">L3</span> 📅 日常记录1 (03)
+    │   ├─ <span style="color:#888;">L3</span> 🔚 阶段结束1 (04)
+    │   ├─ <span style="color:#888;">L3</span> ✅ 阶段确认1 (05)
+    │   ├─ <span style="color:#888;">L3</span> 📅 日常记录2 (06)
+    │   ├─ <span style="color:#888;">L3</span> 🔚 阶段结束2 (07)
+    │   ├─ <span style="color:#888;">L3</span> ✅ 阶段确认2 (08)
+    │   └─ <span style="color:#888;">L3</span> 🏁 实验结束 (09)
+    └─ 📈 数据分析（折叠）
+        └─ <span style="color:#888;">L3</span> 📊 数据分析 (10)
+
+  <span style="color:#999;">══════════════════════════════════════════════════</span>
+  <span style="color:#e65100;">  ★ 核心流程：01新增 → 02分组 → 03记录 → 04阶段结束 → 05确认 →</span>
+  <span style="color:#e65100;">    06记录(阶段2) → 07阶段结束 → 08确认 → 09实验结束 → 10分析</span>
+  <span style="color:#999;">══════════════════════════════════════════════════</span>
+    </pre>
+  </div>
+
+  <!-- ==================== 页面00: 实验概览 ==================== -->
+  <div class="section-title"><span class="st-num">00</span> 实验概览 — Experiment Overview（入口首页）</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:640px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">00-Experiment_overview.html</span>
+        </div>
+        <div class="browser-body" style="height:380px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">➕</span>新增实验</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📝</span>实验分组</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📅</span>日常记录</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">实验概览</span>
+            <span style="margin-left:auto;font-size:10px;color:#1ab394;cursor:pointer;">+ 新建实验</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <div class="stat-cards" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+              <div class="stat-card" style="padding:10px;"><div class="sv" style="font-size:18px;">12</div><div class="sl" style="font-size:9px;">实验总数</div></div>
+              <div class="stat-card blue" style="padding:10px;"><div class="sv" style="font-size:18px;">5</div><div class="sl" style="font-size:9px;">进行中</div></div>
+              <div class="stat-card orange" style="padding:10px;"><div class="sv" style="font-size:18px;">3</div><div class="sl" style="font-size:9px;">已完成</div></div>
+              <div class="stat-card purple" style="padding:10px;"><div class="sv" style="font-size:18px;">4</div><div class="sl" style="font-size:9px;">待开始</div></div>
+            </div>
+            <!-- 搜索栏 -->
+            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+              <div class="ff" style="flex:1;min-width:80px;"><div class="lbl" style="font-size:9px;">实验编号</div><div class="inp" style="font-size:9px;padding:4px 6px;">请输入</div></div>
+              <div class="ff" style="flex:1;min-width:80px;"><div class="lbl" style="font-size:9px;">实验场</div><div class="sel" style="font-size:9px;padding:4px 6px;">全部 ▼</div></div>
+              <div class="ff" style="flex:1;min-width:80px;"><div class="lbl" style="font-size:9px;">状态</div><div class="sel" style="font-size:9px;padding:4px 6px;">全部 ▼</div></div>
+              <button class="btn-mini btn-primary" style="font-size:9px;padding:4px 10px;align-self:flex-end;">查询</button>
+              <button class="btn-mini btn-default" style="font-size:9px;padding:4px 10px;align-self:flex-end;">重置</button>
+            </div>
+            <!-- 表格 -->
+            <table class="table-mini" style="font-size:9px;">
+              <thead><tr><th>编号</th><th>物种</th><th>实验场</th><th>负责人</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>SWINE-NUR-XY-001</td><td>猪-保育</td><td>襄阳</td><td>虞泽鹏</td><td><span class="tag tag-blue">进行中</span></td><td><span style="color:#3b82f6;font-size:9px;">查看</span></td></tr>
+                <tr><td>SWINE-FAT-NMG-002</td><td>猪-育肥</td><td>内蒙古</td><td>虞泽鹏</td><td><span class="tag tag-green">已完成</span></td><td><span style="color:#3b82f6;font-size:9px;">查看</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>📊 页面功能</h3>
+        <ul>
+          <li><strong>统计卡片</strong> — 实验总数/进行中/已完成/待开始</li>
+          <li><strong>搜索筛选</strong> — 按编号、实验场、状态过滤</li>
+          <li><strong>实验列表</strong> — 表格展示所有实验项目</li>
+          <li><strong>新建入口</strong> — 顶部"新建实验"按钮</li>
+          <li>作为Web端的<strong>默认首页</strong></li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#e8f5e9;border:1px solid #a5d6a7;">
+        <h3>🔗 导航来源</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          从 index-web.html 侧边栏 L1 "实验概览" 进入<br>
+          或从任何页面侧边栏点击 "实验概览" 返回
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面01: 新增实验 ==================== -->
+  <div class="section-title"><span class="st-num">01</span> 新增实验项目 — Add New Experiment</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:680px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">01-Add_New.html</span>
+        </div>
+        <div class="browser-body" style="height:440px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">➕</span>新增实验</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📝</span>实验分组</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📅</span>日常记录</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">新增实验项目</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- 主表单 + 右侧产品备注面板 -->
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:700;color:#2d5a87;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e8e8e8;">基本信息</div>
+                <div class="form-row col4" style="font-size:9px;">
+                  <div class="ff"><div class="lbl">动物方向 *</div><div class="sel">猪 ▼</div></div>
+                  <div class="ff"><div class="lbl">实验类型 *</div><div class="sel">饲料营养实验 ▼</div></div>
+                  <div class="ff"><div class="lbl">生长阶段 *</div><div class="sel">保育 ▼</div></div>
+                  <div class="ff"><div class="lbl">实验场 *</div><div class="sel">请选择 ▼</div></div>
+                </div>
+                <div class="form-row col2" style="font-size:9px;margin-top:6px;">
+                  <div class="ff"><div class="lbl">负责人</div><div class="inp">请输入负责人姓名</div></div>
+                  <div class="ff"><div class="lbl">成员</div><div class="inp">请输入成员姓名</div></div>
+                </div>
+                <div class="form-row col2" style="font-size:9px;">
+                  <div class="ff"><div class="lbl">开始日期</div><div class="inp">YYYY-MM-DD</div></div>
+                  <div class="ff"><div class="lbl">预计结束日期</div><div class="inp">YYYY-MM-DD</div></div>
+                </div>
+                <div style="font-size:11px;font-weight:700;color:#2d5a87;margin:12px 0 8px;padding-bottom:6px;border-bottom:1px solid #e8e8e8;">阶段配置</div>
+                <div class="form-row col4" style="font-size:9px;">
+                  <div class="ff"><div class="lbl">阶段名称</div><div class="inp">如: DRB</div></div>
+                  <div class="ff"><div class="lbl">阶段顺序</div><div class="sel">1 ▼</div></div>
+                  <div class="ff"><div class="lbl">阶段开始</div><div class="inp">YYYY-MM-DD</div></div>
+                  <div class="ff"><div class="lbl">阶段天数</div><div class="inp">预估天数</div></div>
+                </div>
+              </div>
+              <!-- 右侧产品备注面板 -->
+              <div style="width:140px;min-width:100px;background:#e8f5e9;border-radius:0 6px 6px 0;padding:10px;border:1px solid #a5d6a7;border-left:none;">
+                <div style="font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:6px;">📋 产品备注</div>
+                <div style="font-size:9px;color:#666;line-height:1.6;">
+                  产品1: 保育后期料<br>
+                  产品2: 保育前期料<br>
+                  产品3: 教槽料
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+              <button class="btn-mini btn-default">取消</button>
+              <button class="btn-mini btn-primary">保存草稿</button>
+              <button class="btn-mini btn-blue">提交</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>➕ 页面功能</h3>
+        <ul>
+          <li><strong>基本信息表单</strong> — 动物方向、实验类型、生长阶段、实验场</li>
+          <li><strong>人员信息</strong> — 负责人、项目成员</li>
+          <li><strong>日期选择</strong> — 开始日期、预计结束日期</li>
+          <li><strong>阶段配置</strong> — 多阶段添加（阶段名、顺序、天数）</li>
+          <li><strong>右侧备注面板</strong> — 可展开/收起的"产品备注"侧面板</li>
+          <li>操作按钮：取消 / 保存草稿 / 提交</li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#e3f2fd;border:1px solid #90caf9;">
+        <h3>💡 设计特点</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          提交后自动进入 02-实验分组页面。<br>
+          右侧备注面板可拖拽调整宽度。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面02: 实验分组 ==================== -->
+  <div class="section-title"><span class="st-num">02</span> 实验分组 — Experiment Grouping</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:720px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">02-Grouping.html</span>
+        </div>
+        <div class="browser-body" style="height:440px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">➕</span>新增实验</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📝</span>实验分组</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📅</span>日常记录</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">实验分组 — SWINE-NUR-XY-001</span>
+            <span style="margin-left:auto;font-size:10px;color:#3b82f6;cursor:pointer;">📥 下载模板</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- 实验信息 -->
+            <div style="font-size:10px;color:#555;margin-bottom:8px;background:#f8f9fa;padding:8px;border-radius:4px;">
+              动物方向: 猪 | 实验类型: 饲料营养 | 阶段: 保育 | 实验场: DY | 负责人: 虞泽鹏
+            </div>
+            <!-- 分组统计 -->
+            <div class="group-summary" style="margin-bottom:10px;">
+              <div class="gs-card gs1"><div class="gsv">2</div><div class="gsl">栋数</div></div>
+              <div class="gs-card gs2"><div class="gsv">4</div><div class="gsl">单元数</div></div>
+              <div class="gs-card gs3"><div class="gsv">60</div><div class="gsl">栏位数</div></div>
+              <div class="gs-card gs4"><div class="gsv">5</div><div class="gsl">处理组</div></div>
+            </div>
+            <!-- 分组大表格 -->
+            <div style="overflow-x:auto;">
+              <table class="table-mini" style="font-size:9px;">
+                <thead>
+                  <tr><th>处理</th><th>区组</th><th>栋</th><th>单元</th><th>栏位</th><th>品系</th><th>性别</th><th>初始头数</th><th>初始均重(kg)</th><th>操作</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>处理1</td><td>1</td><td><span style="color:#3b82f6;cursor:pointer;">栋1</span></td><td><span style="color:#3b82f6;cursor:pointer;">单元1</span></td><td>栏1</td><td>杜长大</td><td>公</td><td>10</td><td>7.5</td><td><span style="color:#f56c6c;font-size:9px;">删除</span></td></tr>
+                  <tr><td>处理1</td><td>1</td><td>栋1</td><td>单元1</td><td>栏2</td><td>杜长大</td><td>母</td><td><span style="color:#3b82f6;">10</span></td><td>7.2</td><td><span style="color:#f56c6c;font-size:9px;">删除</span></td></tr>
+                  <tr><td>处理2</td><td>1</td><td>栋1</td><td>单元2</td><td>栏3</td><td>杜长大</td><td>公</td><td>10</td><td>7.8</td><td><span style="color:#f56c6c;font-size:9px;">删除</span></td></tr>
+                  <tr><td>处理3</td><td>2</td><td>栋2</td><td>单元1</td><td>栏5</td><td>三元</td><td>公</td><td>10</td><td>7.0</td><td><span style="color:#f56c6c;font-size:9px;">删除</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
+              <button class="btn-mini btn-default">↩ 返回</button>
+              <button class="btn-mini btn-default">📥 导出Excel</button>
+              <button class="btn-mini btn-blue">📤 导入Excel</button>
+              <button class="btn-mini btn-primary">✅ 完成分组并锁定</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>📝 页面功能 — Web端核心能力</h3>
+        <ul>
+          <li><strong>大表格编辑</strong> — 处理/区组/栋/单元/栏位/品系/性别/头数/均重，支持单元格内编辑</li>
+          <li><strong>统计卡片</strong> — 栋数/单元数/栏位数/处理组数</li>
+          <li><strong>Excel 导入导出</strong> — 下载模板 + 批量导入 + 导出当前数据</li>
+          <li><strong>完成分组锁定</strong> — 提交后数据锁定，同步到App端（只读查看）</li>
+          <li>此页面为<strong>Web端独占核心功能</strong>，App端仅查看分组结果</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面03/06: 日常记录 ==================== -->
+  <div class="section-title"><span class="st-num">03 / 06</span> 日常记录 — Daily Records（阶段1 & 阶段2）</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:700px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">03-DailyRecords.html / 06-DailyRecord2.html</span>
+        </div>
+        <div class="browser-body" style="height:420px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📝</span>实验分组</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📅</span>日常记录</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">🔚</span>阶段结束</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">日常记录 — 阶段1 DRB — SWINE-NUR-XY-001</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- Tabs -->
+            <div class="tabs-row" style="margin-bottom:8px;">
+              <span class="tab-btn on">死淘</span>
+              <span class="tab-btn">采食</span>
+              <span class="tab-btn">腹泻</span>
+              <span class="tab-btn">药品</span>
+              <span class="tab-btn">疫苗</span>
+              <span class="tab-btn">环控</span>
+              <span class="tab-btn">称重</span>
+            </div>
+            <!-- 栏位选择 + 日期 -->
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px;background:#f8f9fa;padding:8px;border-radius:6px;">
+              <span style="font-size:11px;font-weight:600;">栏位:</span>
+              <span class="sel" style="font-size:10px;padding:4px 8px;border:1px solid #1ab394;border-radius:4px;color:#1ab394;font-weight:600;">栋1-单元1-栏1 ▼</span>
+              <span style="font-size:11px;font-weight:600;">日期:</span>
+              <span class="sel" style="font-size:10px;padding:4px 8px;">2026-06-01 ▼</span>
+              <span style="margin-left:auto;font-size:10px;color:#3b82f6;cursor:pointer;">📥 下载模板</span>
+              <span style="font-size:10px;color:#3b82f6;cursor:pointer;">📤 批量导入</span>
+            </div>
+            <!-- 表单 - 死淘 -->
+            <div style="font-size:10px;font-weight:700;color:#666;margin-bottom:4px;">💀 死淘记录</div>
+            <div class="form-row col4" style="font-size:9px;">
+              <div class="ff"><div class="lbl">死亡数量 *</div><div class="inp">0</div></div>
+              <div class="ff"><div class="lbl">死亡重量(kg)</div><div class="inp">—</div></div>
+              <div class="ff"><div class="lbl">死亡性别</div><div class="sel">请选择 ▼</div></div>
+              <div class="ff"><div class="lbl">死亡原因</div><div class="sel">请选择 ▼</div></div>
+              <div class="ff"><div class="lbl">淘汰数量</div><div class="inp">0</div></div>
+              <div class="ff"><div class="lbl">淘汰重量(kg)</div><div class="inp">—</div></div>
+              <div class="ff"><div class="lbl">淘汰性别</div><div class="sel">请选择 ▼</div></div>
+            </div>
+            <!-- 自动计算区 -->
+            <div style="font-size:9px;color:#999;border-top:1px dashed #e0e0e0;margin-top:6px;padding-top:6px;">▸ 自动计算: 死亡日龄 | 累计死亡/淘汰 | 当日存栏</div>
+            <div style="text-align:right;margin-top:10px;">
+              <button class="btn-mini btn-primary">提交记录</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>📅 页面功能</h3>
+        <ul>
+          <li><strong>7个录入模块Tab</strong> — 死淘 / 采食 / 腹泻 / 药品 / 疫苗 / 环控 / 称重</li>
+          <li><strong>栏位选择器</strong> — 下拉选择栋-单元-栏位</li>
+          <li><strong>日期选择</strong> — 选择记录日期</li>
+          <li><strong>表单录入</strong> — 各模块独立字段，自动计算区</li>
+          <li><strong>批量导入</strong> — 下载模板 + Excel批量导入（Web端优势）</li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#e8f5e9;">
+        <h3>03 vs 06 区别</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          <strong>03-DailyRecords</strong> = 阶段1（如 DRB 保育阶段）的日常巡栏<br>
+          <strong>06-DailyRecord2</strong> = 阶段2（如 ZZB 仔猪阶段）的日常巡栏<br>
+          两个页面结构相同，区别在于实验阶段上下文和栏位配置不同。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面04/07: 阶段结束 ==================== -->
+  <div class="section-title"><span class="st-num">04 / 07</span> 阶段结束 — Stage Done（阶段1 & 阶段2）</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:680px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">04-StageDone.html / 07-StageDone2.html</span>
+        </div>
+        <div class="browser-body" style="height:380px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📅</span>日常记录</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">🔚</span>阶段结束</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">✅</span>阶段确认</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">阶段结束 — DRB 保育阶段</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- 阶段摘要 -->
+            <div class="group-summary" style="margin-bottom:10px;">
+              <div class="gs-card gs1"><div class="gsv">33</div><div class="gsl">阶段天数</div></div>
+              <div class="gs-card gs2"><div class="gsv">618</div><div class="gsl">阶段增重(kg)</div></div>
+              <div class="gs-card gs3"><div class="gsv">0.386</div><div class="gsl">ADG(kg)</div></div>
+              <div class="gs-card gs4"><div class="gsv">1.62</div><div class="gsl">FCR</div></div>
+            </div>
+            <!-- 结束记录表单 -->
+            <div style="font-weight:700;font-size:11px;color:#555;margin-bottom:6px;">处理组结束记录</div>
+            <div class="form-row col4" style="font-size:9px;">
+              <div class="ff"><div class="lbl">结束日期</div><div class="sel">2026-06-28 ▼</div></div>
+              <div class="ff"><div class="lbl">料号</div><div class="inp">FEED-001</div></div>
+              <div class="ff"><div class="lbl">饲料价格(元/kg)</div><div class="inp">3.50</div></div>
+              <div class="ff"><div class="lbl">猪价(元/kg)</div><div class="inp">18.00</div></div>
+            </div>
+            <div style="text-align:right;margin-top:10px;">
+              <button class="btn-mini btn-primary">提交阶段结束 → 进入阶段确认</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>🔚 页面功能</h3>
+        <ul>
+          <li><strong>自动汇总指标</strong> — 阶段天数、增重、ADG、FCR</li>
+          <li><strong>结束记录表单</strong> — 结束日期、料号、饲料价格、猪价</li>
+          <li><strong>提交后流转</strong> — 自动进入 05/08 阶段确认页面</li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#fff3e0;border:1px solid #ffb74d;">
+        <h3>⚠️ 注意</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          阶段结束提交后<strong>不可直接修改</strong>原始数据。<br>
+          如需调整，需通过阶段确认页面回退。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面05/08: 阶段确认 ==================== -->
+  <div class="section-title"><span class="st-num">05 / 08</span> 阶段确认 — Stage Confirm（审核归档）</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:680px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">05-StageConfirm.html / 08-StageConfirm2.html</span>
+        </div>
+        <div class="browser-body" style="height:400px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">🔚</span>阶段结束</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">✅</span>阶段确认</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">🏁</span>实验结束</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">阶段归档确认 — DRB 保育阶段</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- 阶段汇总 -->
+            <div class="group-summary" style="margin-bottom:10px;">
+              <div class="gs-card gs1"><div class="gsv">33</div><div class="gsl">阶段天数</div></div>
+              <div class="gs-card gs2"><div class="gsv">618</div><div class="gsl">增重(kg)</div></div>
+              <div class="gs-card gs3"><div class="gsv">2.5</div><div class="gsl">死亡率%</div></div>
+              <div class="gs-card gs4"><div class="gsv">1.62</div><div class="gsl">FCR</div></div>
+            </div>
+            <!-- 成本利润 -->
+            <div style="display:flex;gap:12px;margin-bottom:10px;">
+              <div style="flex:1;background:#f8f9fa;padding:8px;border-radius:6px;text-align:center;">
+                <div style="font-size:9px;color:#888;">饲料成本</div><div style="font-size:14px;font-weight:700;">2,163元</div>
+              </div>
+              <div style="flex:1;background:#f8f9fa;padding:8px;border-radius:6px;text-align:center;">
+                <div style="font-size:9px;color:#888;">利润</div><div style="font-size:14px;font-weight:700;color:#2e7d32;">8,961元</div>
+              </div>
+              <div style="flex:1;background:#f8f9fa;padding:8px;border-radius:6px;text-align:center;">
+                <div style="font-size:9px;color:#888;">ROF</div><div style="font-size:14px;font-weight:700;color:#3b82f6;">414%</div>
+              </div>
+            </div>
+            <!-- 各处理组明细 -->
+            <div style="overflow-x:auto;">
+              <table class="table-mini" style="font-size:9px;">
+                <thead><tr><th>处理组</th><th>初始头数</th><th>结束头数</th><th>死亡数</th><th>死亡率</th><th>ADG</th><th>FCR</th><th>利润</th></tr></thead>
+                <tbody>
+                  <tr><td>处理1</td><td>120</td><td>117</td><td>3</td><td>2.5%</td><td>0.42</td><td>1.55</td><td>3,210</td></tr>
+                  <tr><td>处理2</td><td>118</td><td>114</td><td>4</td><td>3.4%</td><td>0.38</td><td>1.68</td><td>2,890</td></tr>
+                  <tr><td>处理3</td><td>115</td><td>113</td><td>2</td><td>1.7%</td><td>0.36</td><td>1.62</td><td>2,861</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
+              <button class="btn-mini btn-default">↩ 阶段回退</button>
+              <button class="btn-mini btn-primary">✅ 确认阶段归档</button>
+            </div>
+            <!-- 确认弹窗提示 -->
+            <div style="margin-top:8px;padding:8px 12px;background:#fffde7;border:1px solid #ffc107;border-radius:6px;font-size:9px;color:#856404;">
+              ⚠️ 归档后数据锁定不可修改。可在报表分析页面查看。设置实验总结（选填）。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>✅ 页面功能 — 博士审核节点</h3>
+        <ul>
+          <li><strong>阶段全量汇总</strong> — 天数、增重、死亡率、FCR、成本、利润、ROF</li>
+          <li><strong>处理组对比表</strong> — 各处理组的指标明细对比</li>
+          <li><strong>阶段回退</strong> — 发现数据问题可回退到上一阶段</li>
+          <li><strong>归档锁定</strong> — 确认后数据锁定不可修改</li>
+          <li><strong>实验总结</strong> — 可选填写文字总结</li>
+          <li>此步骤为<strong>博士角色核心操作</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面09: 实验结束 ==================== -->
+  <div class="section-title"><span class="st-num">09</span> 实验结束 — Experiment End</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:680px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">09-ExperimentEnd.html</span>
+        </div>
+        <div class="browser-body" style="height:380px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">✅</span>阶段确认</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">🏁</span>实验结束</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">实验结束 — SWINE-NUR-XY-001-2026</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- 实验总汇总 -->
+            <div class="group-summary" style="margin-bottom:10px;">
+              <div class="gs-card gs1"><div class="gsv">1,236</div><div class="gsl">总增重(kg)</div></div>
+              <div class="gs-card gs2"><div class="gsv">66</div><div class="gsl">总天数</div></div>
+              <div class="gs-card gs3"><div class="gsv">5.2</div><div class="gsl">总死亡率%</div></div>
+              <div class="gs-card gs4"><div class="gsv">8,961</div><div class="gsl">总利润(元)</div></div>
+            </div>
+            <!-- 各阶段汇总 -->
+            <div style="font-weight:700;font-size:11px;color:#555;margin-bottom:6px;">各阶段汇总</div>
+            <div style="overflow-x:auto;">
+              <table class="table-mini" style="font-size:9px;">
+                <thead><tr><th>阶段</th><th>天数</th><th>增重</th><th>ADG</th><th>FCR</th><th>死亡率</th><th>成本</th><th>利润</th></tr></thead>
+                <tbody>
+                  <tr><td>01-DRB 保育</td><td>33</td><td>618</td><td>0.386</td><td>1.62</td><td>2.5%</td><td>2,163</td><td>3,210</td></tr>
+                  <tr><td>02-ZZB 仔猪</td><td>33</td><td>618</td><td>0.386</td><td>1.62</td><td>2.7%</td><td>2,450</td><td>2,890</td></tr>
+                  <tr style="font-weight:700;background:#f8f9fa;"><td>合计</td><td>66</td><td>1,236</td><td>—</td><td>—</td><td>5.2%</td><td>4,613</td><td>8,961</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
+              <button class="btn-mini btn-default">↩ 实验回退</button>
+              <button class="btn-mini" style="background:#c62828;color:#fff;">🏁 确认实验结束</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>🏁 页面功能 — 实验终点</h3>
+        <ul>
+          <li><strong>全阶段汇总</strong> — 汇总所有阶段的指标数据</li>
+          <li><strong>各阶段对比表</strong> — 阶段间指标横向对比</li>
+          <li><strong>实验回退</strong> — 可回退到上一阶段</li>
+          <li><strong>确认结束</strong> — 实验进入"已完成"状态，不可再修改</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面10: 数据分析 ==================== -->
+  <div class="section-title"><span class="st-num">10</span> 数据分析 — Analysis Report</div>
+
+  <div class="flow-section">
+    <div class="preview-col">
+      <div class="browser-frame" style="width:720px;">
+        <div class="browser-topbar">
+          <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+          <span class="browser-url">10-AnalysisReport.html</span>
+        </div>
+        <div class="browser-body" style="height:420px;position:relative;">
+          <div class="ws-sidebar" style="width:140px;">
+            <div class="ws-logo" style="font-size:11px;">🧪 实验管理</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📊</span>实验概览</div>
+            <div class="ws-menu-item" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">🏁</span>实验结束</div>
+            <div class="ws-menu-item active" style="font-size:10px;padding:8px 12px;"><span class="ws-ic" style="font-size:13px;">📈</span>数据分析</div>
+          </div>
+          <div class="ws-topbar" style="left:140px;height:36px;padding:0 12px;">
+            <span style="font-size:12px;font-weight:700;color:#676a6c;">数据分析 — SWINE-NUR-XY-001-2026</span>
+            <span style="margin-left:auto;font-size:10px;color:#3b82f6;cursor:pointer;">📤 导出报告</span>
+          </div>
+          <div class="ws-content" style="left:140px;top:36px;padding:12px;">
+            <!-- 筛选 -->
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:600;">实验选择:</span>
+              <span class="sel" style="font-size:10px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;">SWINE-NUR-XY-001 ▼</span>
+              <span style="font-size:10px;font-weight:600;">报表类型:</span>
+              <span class="sel" style="font-size:10px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;">日报告 ▼</span>
+            </div>
+            <!-- 图表占位 + 表格 -->
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;">
+                <!-- 图表区 -->
+                <div style="background:linear-gradient(135deg,#f8f9fa,#e8f5e9);border:1px dashed #1ab394;border-radius:8px;height:140px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#1ab394;">
+                  📈 图表区域（柱状图 / 折线图 / 饼图）<br><span style="font-size:9px;color:#999;">Element Plus Charts / ECharts</span>
+                </div>
+                <!-- 统计卡片 -->
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <div style="flex:1;text-align:center;padding:8px;background:#e3f2fd;border-radius:6px;">
+                    <div style="font-size:9px;color:#1976d2;">平均ADG</div><div style="font-size:14px;font-weight:700;color:#333;">0.386</div>
+                  </div>
+                  <div style="flex:1;text-align:center;padding:8px;background:#e8f5e9;border-radius:6px;">
+                    <div style="font-size:9px;color:#2e7d32;">平均FCR</div><div style="font-size:14px;font-weight:700;color:#333;">1.62</div>
+                  </div>
+                  <div style="flex:1;text-align:center;padding:8px;background:#fff3e0;border-radius:6px;">
+                    <div style="font-size:9px;color:#f57c00;">总死亡率</div><div style="font-size:14px;font-weight:700;color:#333;">5.2%</div>
+                  </div>
+                </div>
+              </div>
+              <!-- 明细表 -->
+              <div style="flex:1.2;overflow-x:auto;">
+                <table class="table-mini" style="font-size:9px;">
+                  <thead><tr><th>日期</th><th>栏位</th><th>死亡</th><th>存栏</th><th>下料(kg)</th><th>温度℃</th></tr></thead>
+                  <tbody>
+                    <tr><td>6/1</td><td>栋1-栏1</td><td>1</td><td>24</td><td>340</td><td>25.8</td></tr>
+                    <tr><td>6/1</td><td>栋1-栏2</td><td>0</td><td>25</td><td>360</td><td>26.1</td></tr>
+                    <tr><td>5/31</td><td>栋1-栏1</td><td>0</td><td>25</td><td>345</td><td>25.2</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-col">
+      <div class="note-card">
+        <h3>📈 页面功能</h3>
+        <ul>
+          <li><strong>实验选择器</strong> — 切换查看不同实验的数据</li>
+          <li><strong>报表类型Tab</strong> — 日报告 / 阶段报告 / 汇总 / 死淘 / 腹泻 / 药品 / 环控 / 称重</li>
+          <li><strong>图表可视化</strong> — 柱状图 / 折线图 / 饼图（Element Plus / ECharts）</li>
+          <li><strong>统计摘要</strong> — 关键指标卡片</li>
+          <li><strong>明细数据表</strong> — 支持导出</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 完整流程 ==================== -->
+  <div class="section-title"><span class="st-num">C</span> Web端完整实验流程</div>
+
+  <div class="note-card" style="text-align:center;overflow-x:auto;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;min-width:max-content;padding:16px 0;">
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #3b82f6;background:#e3f2fd;color:#3b82f6;min-width:90px;">01 新增实验<div style="font-size:9px;font-weight:400;color:#555;">基本信息<br>阶段配置</div></div>
+      <span style="margin:0 6px;color:#3b82f6;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #1ab394;background:#e8f5e9;color:#1ab394;min-width:90px;">02 实验分组<div style="font-size:9px;font-weight:400;color:#555;">大表格编辑<br>Excel导入导出</div></div>
+      <span style="margin:0 6px;color:#1ab394;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #1ab394;background:#e8f5e9;color:#1ab394;min-width:90px;">03 日常记录1<div style="font-size:9px;font-weight:400;color:#555;">7模块Tab<br>批量导入</div></div>
+      <span style="margin:0 6px;color:#ccc;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #f59e0b;background:#fff3e0;color:#f59e0b;min-width:90px;">04 阶段结束1<div style="font-size:9px;font-weight:400;color:#555;">汇总卡片<br>结束录入</div></div>
+      <span style="margin:0 6px;color:#ccc;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #8b5cf6;background:#f3e8ff;color:#8b5cf6;min-width:90px;">05 阶段确认1<div style="font-size:9px;font-weight:400;color:#555;">博士审核<br>归档锁定</div></div>
+    </div>
+    <div style="font-size:10px;color:#999;margin:4px 0;">阶段2 重复上述流程 ↓</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;min-width:max-content;padding:8px 0;">
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #ccc;background:#fafafa;color:#999;min-width:90px;">06 日常记录2</div>
+      <span style="margin:0 6px;color:#ccc;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #ccc;background:#fafafa;color:#999;min-width:90px;">07 阶段结束2</div>
+      <span style="margin:0 6px;color:#ccc;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #ccc;background:#fafafa;color:#999;min-width:90px;">08 阶段确认2</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;min-width:max-content;padding:8px 0;">
+      <span style="margin:0 6px;color:#c62828;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #c62828;background:#fce4ec;color:#c62828;min-width:90px;">09 实验结束<div style="font-size:9px;font-weight:400;color:#555;">全阶段汇总<br>确认结束</div></div>
+      <span style="margin:0 6px;color:#c62828;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #2d5a87;background:#e8eaf6;color:#2d5a87;min-width:90px;">10 数据分析<div style="font-size:9px;font-weight:400;color:#555;">图表+明细<br>导出报告</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== Web vs App 分工 ==================== -->
+  <div class="section-title"><span class="st-num">D</span> Web端与App端分工</div>
+
+  <div class="note-card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th style="width:16%;">模块</th><th style="width:42%;">Web端（PC浏览器）</th><th style="width:42%;">App端（手机）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>实验概览</strong></td><td>✅ 统计卡片 + 完整表格 + 搜索筛选 + 新建入口</td><td>📋 卡片式列表 + 统计胶囊筛选</td></tr>
+        <tr><td><strong>新增实验</strong></td><td>✅ 完整表单 + 阶段配置 + 产品备注面板</td><td>✅ 分步表单，适配移动端</td></tr>
+        <tr><td><strong>实验分组</strong></td><td>✅ <strong>核心模式：可编辑大表格 + Excel导入/导出 + 下载模板 + 完成分组锁定</strong></td><td>📋 <strong>仅展示分组结果（只读）</strong></td></tr>
+        <tr><td><strong>日常巡栏</strong></td><td>✅ 7模块Tab表单 + 栏位切换 + 批量导入Excel</td><td>✏️ 栏位锚定 + 模块漂移 · 纯手动表单录入</td></tr>
+        <tr><td><strong>阶段结束</strong></td><td>✅ 自动汇总指标 + 结束记录表单</td><td>✅ 同Web端，适配移动端</td></tr>
+        <tr><td><strong>阶段确认/归档</strong></td><td>✅ 全量汇总 + 处理组对比 + 博士审核 + 归档锁定</td><td>✅ 同Web端，适配移动端</td></tr>
+        <tr><td><strong>实验结束</strong></td><td>✅ 全阶段汇总 + 阶段对比表 + 确认结束</td><td>✅ 同Web端，适配移动端</td></tr>
+        <tr><td><strong>数据报告</strong></td><td>✅ 图表可视化 + 明细表 + 报表Tab切换 + 导出</td><td>✅ 图表适配手机 + 明细表横向滑动</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==================== 页面间跳转关系 ==================== -->
+  <div class="section-title"><span class="st-num">E</span> Web端页面跳转关系图</div>
+
+  <div class="note-card" style="text-align:center;overflow-x:auto;">
+    <pre style="font-size:10.5px;line-height:2.2;text-align:left;display:inline-block;font-family:SF Mono,Consolas,monospace;color:#333;">
+
+  <span style="color:#999;">════════════════════════════════════════════════════════════════════════════</span>
+  <span style="color:#999;">  index-web.html 外壳 — 左侧导航树 + iframe内容区</span>
+  <span style="color:#999;">════════════════════════════════════════════════════════════════════════════</span>
+
+                          ┌──────────────────────────┐
+                          │  <span style="color:#1ab394;font-weight:700;">00 实验概览</span>（首页）      │
+                          │  统计 + 搜索 + 实验列表    │
+                          └──────────┬───────────────┘
+                                     │ "+ 新建实验"
+                                     ▼
+                          ┌──────────────────────────┐
+                          │  <span style="color:#3b82f6;font-weight:700;">01 新增实验</span>              │
+                          │  基本信息 + 阶段配置       │
+                          └──────────┬───────────────┘
+                                     │ 提交
+                                     ▼
+                          ┌──────────────────────────┐
+                          │  <span style="color:#1ab394;font-weight:700;">02 实验分组</span> ⭐ Web核心   │
+                          │  大表格 + Excel导入导出    │
+                          └──────────┬───────────────┘
+                                     │ 完成分组锁定
+                                     ▼
+                    ┌────────────────────────────────────┐
+                    │          <span style="color:#e65100;">阶段1: 日常巡栏 → 结束 → 确认</span>        │
+                    │                                    │
+                    │  ┌──────────┐   ┌──────────┐   ┌──────────┐  │
+                    │  │ <span style="color:#f59e0b;">03 日常</span>  │──→│ <span style="color:#f59e0b;">04 阶段</span>  │──→│ <span style="color:#8b5cf6;">05 阶段</span>  │  │
+                    │  │ <span style="color:#f59e0b;">记录1</span>   │   │ <span style="color:#f59e0b;">结束1</span>   │   │ <span style="color:#8b5cf6;">确认1</span>   │  │
+                    │  │ 批量导入  │   │ 汇总录入  │   │ 博士审核  │  │
+                    │  └──────────┘   └──────────┘   └────┬─────┘  │
+                    └────────────────────────────────────┼────────┘
+                                                         │ 归档锁定 → 进入阶段2
+                                                         ▼
+                    ┌────────────────────────────────────┐
+                    │          <span style="color:#1565c0;">阶段2: 日常巡栏 → 结束 → 确认</span>        │
+                    │                                    │
+                    │  ┌──────────┐   ┌──────────┐   ┌──────────┐  │
+                    │  │ <span style="color:#1565c0;">06 日常</span>  │──→│ <span style="color:#1565c0;">07 阶段</span>  │──→│ <span style="color:#1565c0;">08 阶段</span>  │  │
+                    │  │ <span style="color:#1565c0;">记录2</span>   │   │ <span style="color:#1565c0;">结束2</span>   │   │ <span style="color:#1565c0;">确认2</span>   │  │
+                    │  └──────────┘   └──────────┘   └────┬─────┘  │
+                    └────────────────────────────────────┼────────┘
+                                                         │ 全部阶段完成
+                                                         ▼
+                                              ┌──────────────────────┐
+                                              │  <span style="color:#c62828;font-weight:700;">09 实验结束</span>          │
+                                              │  全阶段汇总 + 确认结束  │
+                                              └──────────┬───────────┘
+                                                         │
+                                                         ▼
+                                              ┌──────────────────────┐
+                                              │  <span style="color:#2d5a87;font-weight:700;">10 数据分析</span>          │
+                                              │  图表可视化 + 报表导出  │
+                                              └──────────────────────┘
+
+  <span style="color:#999;">════════════════════════════════════════════════════════════════════════════</span>
+  <span style="color:#e65100;">  ★ 核心入口: index-web.html → iframe加载各页面 → 侧边栏直接切换</span>
+  <span style="color:#e65100;">  ★ 串联流程: 01→02→03→04→05→06→07→08→09→10（阶段循环）</span>
+  <span style="color:#999;">════════════════════════════════════════════════════════════════════════════</span>
+    </pre>
+  </div>
+
+  <!-- ==================== 技术要点 ==================== -->
+  <div class="section-title"><span class="st-num">F</span> 技术要点与注意事项</div>
+
+  <div class="note-row" style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div class="note-col" style="flex:1;min-width:280px;">
+      <div class="note-card">
+        <h3>🏗️ 架构特点</h3>
+        <ul>
+          <li><strong>iframe 沙箱隔离</strong> — 各子页面独立运行，互不影响</li>
+          <li><strong>双层导航</strong> — 外壳有侧边栏，子页面 (00~10) 内部也有独立侧边栏</li>
+          <li><strong>Element Plus</strong> — 子页面使用 CDN 引入 Element Plus 组件库</li>
+          <li><strong>Vue 3 (App端)</strong> — index-app.html 使用 Vue 3 CDN 构建 SPA</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note-col" style="flex:1;min-width:280px;">
+      <div class="note-card">
+        <h3>📌 页面编号对应</h3>
+        <table class="cmp-table">
+          <thead><tr><th>编号</th><th>页面</th><th>对应阶段</th></tr></thead>
+          <tbody>
+            <tr><td>00</td><td>实验概览</td><td>入口首页</td></tr>
+            <tr><td>01</td><td>新增实验</td><td>立项</td></tr>
+            <tr><td>02</td><td>实验分组</td><td>⭐ Web核心能力</td></tr>
+            <tr><td>03</td><td>日常记录1</td><td>阶段1巡栏</td></tr>
+            <tr><td>04</td><td>阶段结束1</td><td>阶段1结束</td></tr>
+            <tr><td>05</td><td>阶段确认1</td><td>阶段1归档</td></tr>
+            <tr><td>06</td><td>日常记录2</td><td>阶段2巡栏</td></tr>
+            <tr><td>07</td><td>阶段结束2</td><td>阶段2结束</td></tr>
+            <tr><td>08</td><td>阶段确认2</td><td>阶段2归档</td></tr>
+            <tr><td>09</td><td>实验结束</td><td>全阶段汇总</td></tr>
+            <tr><td>10</td><td>数据分析</td><td>报表分析</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-col" style="flex:1;min-width:280px;">
+      <div class="note-card" style="background:#fffde7;border:1px solid #ffc107;">
+        <h3>⚠️ 已知问题 / 建议</h3>
+        <ul>
+          <li>通过 index-web.html 外壳访问时，iframe 内的子页面仍显示自有侧边栏，形成<strong>双层导航</strong></li>
+          <li>建议子页面 (00~10) 在 iframe 内时隐藏自有侧边栏，仅展示内容区</li>
+          <li>Element Plus CDN 依赖外网，离线环境需本地化</li>
+          <li>部分页面 (01) 样式与整体风格略有差异（灰色背景 vs 白色背景）</li>
+          <li>建议统一子页面的颜色主题和布局规范</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 角色权限 ==================== -->
+  <div class="section-title"><span class="st-num">G</span> 角色与权限（Web端）</div>
+
+  <div class="note-card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th>角色</th><th>新建实验</th><th>实验分组</th><th>日常巡栏</th><th>阶段结束</th><th>阶段归档</th><th>实验结束</th><th>数据分析</th></tr></thead>
+      <tbody>
+        <tr><td><strong>记录员</strong></td><td>—</td><td>查看</td><td>✅ 录入</td><td>✅ 提交</td><td>查看</td><td>查看</td><td>查看</td></tr>
+        <tr><td><strong>博士</strong></td><td>✅ 创建</td><td>✅ 编辑+锁定</td><td>录入+修改</td><td>提交+修改</td><td>✅ 审核归档</td><td>✅ 确认</td><td>查看</td></tr>
+        <tr><td><strong>场长</strong></td><td>—</td><td>查看</td><td>录入+编辑栏位</td><td>查看</td><td>查看</td><td>查看</td><td>查看</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="text-align:center;color:#bbb;font-size:11px;margin:40px 0 20px;">
+    猪实验数据管理系统 — Web端页面概览 · 基于 index-web.html 外壳 · 页面 00~10 · 2026/6/26
+  </p>
+
+</div>
+</body>
+</html>

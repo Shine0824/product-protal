@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新增实验项目</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus/dist/index.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #d9d9d9;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #d9d9d9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+      gap: 0;
+    }
+    .product-notes {
+      background-color: #e8f5e9;
+      width: 200px;
+      min-width: 150px;
+      max-width: 400px;
+      border-radius: 0 8px 8px 0;
+      border: 1px solid #a5d6a7;
+      border-left: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width 0.3s;
+    }
+    .product-notes-header {
+      padding: 12px 16px;
+      background-color: #c8e6c9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .product-notes-header label {
+      font-size: 14px;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    .product-notes-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .product-notes-content textarea {
+      width: 100%;
+      min-height: 100px;
+      border: none;
+      background-color: transparent;
+      resize: none;
+      font-family: inherit;
+      font-size: 14px;
+      color: #333;
+    }
+    .product-notes-content textarea:focus {
+      outline: none;
+    }
+    .expand-icon {
+      font-size: 16px;
+      color: #2e7d32;
+      transition: transform 0.3s;
+    }
+    .expand-icon.expanded {
+      transform: rotate(180deg);
+    }
+    .notes-resizer {
+      width: 6px;
+      background-color: #a5d6a7;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .notes-resizer:hover {
+      background-color: #81c784;
+    }
+    .notes-resizer::after {
+      content: '|||';
+      font-size: 10px;
+      color: #66bb6a;
+      letter-spacing: 1px;
+    }
+    .modal-content {
+      background-color: #fff;
+      width: 650px;
+      border-radius: 8px 0 0 8px;
+      overflow: hidden;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-right: none;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e6e6e6;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #fafafa;
+    }
+    .modal-header .close-btn {
+      cursor: pointer;
+      font-size: 20px;
+      color: #999;
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+    .form-item {
+      flex: 1;
+    }
+    .form-item label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+    .form-item label.required::before {
+      content: '*';
+      color: #f56c6c;
+      margin-right: 4px;
+    }
+    .form-item label.new-field {
+      font-weight: bold;
+      color: #1e88e5;
+    }
+    .form-item .el-input, .form-item .el-select, .form-item .el-textarea {
+      width: 100%;
+    }
+    .stage-list {
+      margin-top: 10px;
+    }
+    .stage-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .stage-number {
+      width: 60px;
+      padding: 8px 12px;
+      background-color: #f5f7fa;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+      color: #666;
+      border: 1px solid #e6e6e6;
+    }
+    .stage-name-input {
+      flex: 1;
+    }
+    .stage-remove-btn {
+      color: #999;
+      cursor: pointer;
+    }
+    .stage-remove-btn:hover {
+      color: #f56c6c;
+    }
+    .add-stage-btn {
+      margin-top: 10px;
+      color: #1ab394;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .add-stage-btn:hover {
+      text-decoration: underline;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid #e6e6e6;
+      background-color: #fafafa;
+    }
+    .el-button--primary {
+      background-color: #1ab394;
+      border-color: #1ab394;
+    }
+    .el-button--primary:hover {
+      background-color: #18a689;
+      border-color: #18a689;
+    }
+    .exp-code-row {
+      background-color: #f5f7fa;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .exp-code-row label {
+      font-size: 13px;
+      color: #666;
+      margin-right: 10px;
+    }
+    .exp-code-row .el-input {
+      display: inline-block;
+      width: auto;
+      min-width: 200px;
+    }
+    .exp-code-row .exp-code-value {
+      font-family: monospace;
+      font-size: 14px;
+      color: #1ab394;
+      font-weight: bold;
+    }
+    .error-message {
+      color: #f56c6c;
+      font-size: 12px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .error-message::before {
+      content: '✕';
+      margin-right: 4px;
+    }
+    .stage-templates {
+      margin-bottom: 10px;
+    }
+    .stage-templates .el-select {
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div v-if="showAddModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>新增实验项目</span>
+          <span class="close-btn" @click="handleClose">×</span>
+        </div>
+        
+        <div class="exp-code-row">
+          <label>实验编号：</label>
+          <el-input v-model="formData.expCode" class="exp-code-value" placeholder="自动生成"></el-input>
+          <span style="font-size: 12px; color: #999; margin-left: 10px;">格式：SWINE-生长阶段-猪场地点-栋舍单元编号-序号及年份</span>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-item">
+              <label class="required new-field">动物方向</label>
+              <el-select v-model="formData.animalType" placeholder="请选择">
+                <el-option label="猪" value="swine"></el-option>
+              </el-select>
+              <div v-if="errors.animalType" class="error-message">{{ errors.animalType }}</div>
+            </div>
+            <div class="form-item">
+              <label class="required new-field">实验类型</label>
+              <el-select v-model="formData.experimentType" placeholder="请选择">
+                <el-option label="饲料营养实验 - 营养实验" value="nutrition"></el-option>
+                <el-option label="饲料营养实验 - 其他" value="other"></el-option>
+              </el-select>
+              <div v-if="errors.experimentType" class="error-message">{{ errors.experimentType }}</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-item">
+              <label class="required">项目负责人</label>
+              <el-input v-model="formData.projectManager" placeholder="请输入"></el-input>
+              <div v-if="errors.projectManager" class="error-message">{{ errors.projectManager }}</div>
+            </div>
+            <div class="form-item">
+              <label>实验负责人</label>
+              <el-select v-model="formData.experimentManager" placeholder="请选择">
+                <el-option label="请选择" value=""></el-option>
+                <el-option label="项目成员" value="member"></el-option>
+              </el-select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-item">
+              <label class="required">COO Area</label>
+              <el-select v-model="formData.cooArea" placeholder="请选择">
+                <el-option label="请选择" value=""></el-option>
+                <el-option label="COO 1" value="coo1"></el-option>
+                <el-option label="COO 2" value="coo2"></el-option>
+              </el-select>
+              <div v-if="errors.cooArea" class="error-message">{{ errors.cooArea }}</div>
+            </div>
+            <div class="form-item">
+              <label class="required">实验场</label>
+              <el-select v-model="formData.farm" placeholder="请选择">
+                <el-option label="请选择" value=""></el-option>
+                <el-option label="DY" value="dy"></el-option>
+                <el-option label="NM" value="nm"></el-option>
+                <el-option label="XY" value="xy"></el-option>
+              </el-select>
+              <div v-if="errors.farm" class="error-message">{{ errors.farm }}</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-item">
+              <label class="required">实验周期</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <el-input v-model="formData.startDate" type="date" placeholder="开始日期"></el-input>
+                <span>至</span>
+                <el-input v-model="formData.endDate" type="date" placeholder="结束日期"></el-input>
+              </div>
+              <div v-if="errors.startDate" class="error-message">{{ errors.startDate }}</div>
+              <div v-if="errors.endDate" class="error-message">{{ errors.endDate }}</div>
+            </div>
+            <div class="form-item">
+              <label class="required">实验名称</label>
+              <el-input v-model="formData.name" placeholder="请输入"></el-input>
+              <div v-if="errors.name" class="error-message">{{ errors.name }}</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-item">
+              <label class="required new-field">生长阶段</label>
+              <el-select v-model="formData.growthStage" placeholder="请选择">
+                <el-option label="保育" value="nursing"></el-option>
+                <el-option label="育肥" value="fattening"></el-option>
+                <el-option label="保育到育肥" value="nursing-to-fattening"></el-option>
+              </el-select>
+              <div v-if="errors.growthStage" class="error-message">{{ errors.growthStage }}</div>
+            </div>
+            <div class="form-item">
+              <label class="required new-field">试验阶段名称</label>
+              <div class="stage-templates">
+                <el-select v-model="stageTemplate" placeholder="常用阶段模板" @change="applyStageTemplate">
+                  <el-option label="标准三段式（DRB/RZB/ZZB）" value="standard"></el-option>
+                  <el-option label="保育两段式（DRB/ZZB）" value="nursing"></el-option>
+                  <el-option label="育肥两段式（RZB/ZZB）" value="fattening"></el-option>
+                  <el-option label="单阶段（DRB）" value="single"></el-option>
+                </el-select>
+              </div>
+              <div class="stage-list">
+                <div v-for="(stage, index) in formData.stages" :key="index" class="stage-item">
+                  <span class="stage-number">{{ String(index + 1).padStart(2, '0') }}</span>
+                  <el-input 
+                    v-model="stage.name" 
+                    class="stage-name-input" 
+                    :placeholder="getStagePlaceholder(index)"
+                  ></el-input>
+                  <span v-if="formData.stages.length > 1" class="stage-remove-btn" @click="removeStage(index)">×</span>
+                </div>
+                <div class="add-stage-btn" @click="addStage">+ 添加实验阶段</div>
+              </div>
+              <div v-if="errors.stages" class="error-message">{{ errors.stages }}</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-item" style="flex: 2;">
+              <label class="required">关键词</label>
+              <el-input v-model="formData.keywords" placeholder="请输入中文关键词"></el-input>
+              <el-input v-model="formData.keywordsEn" placeholder="请输入英文关键词" style="margin-top: 8px;"></el-input>
+              <div v-if="errors.keywords" class="error-message">{{ errors.keywords }}</div>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label>实验描述</label>
+            <el-textarea v-model="formData.description" rows="4" placeholder="请输入中英文实验描述"></el-textarea>
+            <span style="font-size: 12px; color: #999;">支持 pdf, xlsx, docx, pptx, jpg, png, mp4 等文件类型</span>
+            <div v-if="errors.description" class="error-message">{{ errors.description }}</div>
+          </div>
+
+          <div class="form-item">
+            <label>附件</label>
+            <el-upload
+              class="upload-demo"
+              action=""
+              :auto-upload="false"
+              :file-list="formData.attachments"
+            >
+              <el-button type="primary">上传</el-button>
+            </el-upload>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button type="primary" :loading="submitting" @click="handleSubmit">提交</el-button>
+        </div>
+      </div>
+
+      <div class="notes-resizer" @mousedown="startResize"></div>
+      
+      <div class="product-notes">
+        <div class="product-notes-header" @click="toggleNotes">
+          <label>产品说明</label>
+          <span :class="['expand-icon', notesExpanded ? 'expanded' : '']">▼</span>
+        </div>
+        <div v-show="notesExpanded" class="product-notes-content">
+          <textarea v-model="formData.productNotes" placeholder="请录入产品说明内容"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus/dist/index.full.js"></script>
+
+  <script>
+    const { createApp, ref, reactive, watch } = Vue
+    const { ElSelect, ElOption, ElInput, ElButton, ElTextarea, ElUpload, ElMessageBox } = ElementPlus
+
+    createApp({
+      components: {
+        ElSelect,
+        ElOption,
+        ElInput,
+        ElButton,
+        ElTextarea,
+        ElUpload
+      },
+      setup() {
+        const showAddModal = ref(true)
+        const notesExpanded = ref(true)
+        const stageTemplate = ref('')
+        const submitting = ref(false)
+        const notesWidth = ref(200)
+        const isResizing = ref(false)
+
+        const originalFormData = {
+          animalType: '',
+          experimentType: '',
+          projectManager: '',
+          experimentManager: '',
+          cooArea: '',
+          farm: '',
+          startDate: '',
+          endDate: '',
+          name: '',
+          growthStage: '',
+          stages: [
+            { name: '' },
+            { name: '' },
+            { name: '' }
+          ],
+          keywords: '',
+          keywordsEn: '',
+          productNotes: '1.选定猪方向后，下拉实验场仅限于猪本身。\n2.当选择饲料营养类实验，才显示出新增的字段（生长阶段和试验阶段名称）',
+          description: '',
+          attachments: [],
+          expCode: ''
+        }
+
+        const formData = reactive(JSON.parse(JSON.stringify(originalFormData)))
+        const errors = reactive({})
+
+        const stageTemplates = {
+          standard: ['DRB', 'RZB', 'ZZB'],
+          nursing: ['DRB', 'ZZB'],
+          fattening: ['RZB', 'ZZB'],
+          single: ['DRB']
+        }
+
+        const getStagePlaceholder = (index) => {
+          const placeholders = ['例如：DRB（断奶保育期）', '例如：RZB（育仔期）', '例如：ZZB（育肥期）', '例如：第四阶段']
+          return placeholders[index] || '请输入阶段名称'
+        }
+
+        const generateExpCode = () => {
+          const growthStageMap = {
+            'nursing': 'NUR',
+            'fattening': 'FAT',
+            'nursing-to-fattening': 'NF'
+          }
+          const farmMap = {
+            'dy': 'DY',
+            'nm': 'NM',
+            'xy': 'XY'
+          }
+          
+          const stageCode = growthStageMap[formData.growthStage] || 'XXX'
+          const farmCode = farmMap[formData.farm] || 'XX'
+          const year = new Date().getFullYear().toString().slice(-2)
+          const seq = String(Math.floor(Math.random() * 99) + 1).padStart(2, '0')
+          
+          return `SWINE-${stageCode}-${farmCode}-${seq}${year}`
+        }
+
+        watch([() => formData.growthStage, () => formData.farm], () => {
+          if (formData.growthStage && formData.farm && !formData.expCode) {
+            formData.expCode = generateExpCode()
+          }
+        }, { immediate: true })
+
+        const applyStageTemplate = (template) => {
+          if (!template) return
+          const names = stageTemplates[template] || []
+          formData.stages = names.map(name => ({ name }))
+        }
+
+        const toggleNotes = () => {
+          notesExpanded.value = !notesExpanded.value
+        }
+
+        const addStage = () => {
+          formData.stages.push({ name: '' })
+        }
+
+        const removeStage = (index) => {
+          formData.stages.splice(index, 1)
+        }
+
+        const validateForm = () => {
+          Object.keys(errors).forEach(key => delete errors[key])
+          let isValid = true
+
+          if (!formData.animalType) {
+            errors.animalType = '请选择动物方向'
+            isValid = false
+          }
+          if (!formData.experimentType) {
+            errors.experimentType = '请选择实验类型'
+            isValid = false
+          }
+          if (!formData.projectManager) {
+            errors.projectManager = '请输入项目负责人'
+            isValid = false
+          }
+          if (!formData.cooArea) {
+            errors.cooArea = '请选择COO Area'
+            isValid = false
+          }
+          if (!formData.farm) {
+            errors.farm = '请选择实验场'
+            isValid = false
+          }
+          if (!formData.startDate) {
+            errors.startDate = '请选择开始日期'
+            isValid = false
+          }
+          if (!formData.endDate) {
+            errors.endDate = '请选择结束日期'
+            isValid = false
+          }
+          if (!formData.name) {
+            errors.name = '请输入实验名称'
+            isValid = false
+          }
+          if (!formData.growthStage) {
+            errors.growthStage = '请选择生长阶段'
+            isValid = false
+          }
+          const validStages = formData.stages.filter(s => s.name.trim())
+          if (validStages.length === 0) {
+            errors.stages = '请至少填写一个阶段名称'
+            isValid = false
+          }
+          if (!formData.keywords) {
+            errors.keywords = '请输入中文关键词'
+            isValid = false
+          }
+
+
+          return isValid
+        }
+
+        const hasChanges = () => {
+          return JSON.stringify(formData) !== JSON.stringify(originalFormData)
+        }
+
+        const handleClose = async () => {
+          if (hasChanges()) {
+            try {
+              await ElMessageBox.confirm(
+                '表单内容已修改，确定要关闭吗？未保存的内容将丢失。',
+                '确认关闭',
+                {
+                  confirmButtonText: '确定关闭',
+                  cancelButtonText: '继续编辑',
+                  type: 'warning'
+                }
+              )
+              showAddModal.value = false
+            } catch {
+              return
+            }
+          } else {
+            showAddModal.value = false
+          }
+        }
+
+        const handleSubmit = async () => {
+          if (!validateForm()) return
+
+          submitting.value = true
+          
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          
+          console.log('提交表单', formData)
+          
+          window.location.href = '02-Grouping.html?exp=' + formData.expCode
+        }
+
+        const startResize = (e) => {
+          isResizing.value = true
+          document.addEventListener('mousemove', onResize)
+          document.addEventListener('mouseup', stopResize)
+        }
+
+        const onResize = (e) => {
+          if (!isResizing.value) return
+          const notesEl = document.querySelector('.product-notes')
+          if (notesEl) {
+            const rect = notesEl.parentElement.getBoundingClientRect()
+            const newWidth = e.clientX - rect.left - notesEl.parentElement.querySelector('.modal-content').offsetWidth - 6
+            notesWidth.value = Math.max(150, Math.min(400, newWidth))
+            notesEl.style.width = notesWidth.value + 'px'
+          }
+        }
+
+        const stopResize = () => {
+          isResizing.value = false
+          document.removeEventListener('mousemove', onResize)
+          document.removeEventListener('mouseup', stopResize)
+        }
+
+        return {
+          showAddModal,
+          notesExpanded,
+          stageTemplate,
+          submitting,
+          formData,
+          errors,
+          toggleNotes,
+          addStage,
+          removeStage,
+          applyStageTemplate,
+          getStagePlaceholder,
+          handleSubmit,
+          handleClose,
+          startResize
+        }
+      }
+    }).use(ElementPlus).mount('#app')
+  </script>
+</body>
+</html>

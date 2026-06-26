@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CPRI Innovation - Product Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #1e3a5f;
+      --primary-light: #2d4f7c;
+      --accent: #0ea5e9;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --border: rgba(226, 232, 240, 0.6);
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--primary); }
+    .hero {
+      padding: 140px 32px 80px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+    }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 300;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 strong { font-weight: 600; }
+    .hero p {
+      font-size: 16px;
+      opacity: 0.8;
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 64px 32px;
+    }
+    .section-title {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .section-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .product-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 32px;
+      border: 1px solid var(--border);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(14, 165, 233, 0.3);
+    }
+    .product-card:hover::before { opacity: 1; }
+    .product-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .product-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .product-name-zh {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .product-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .product-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tag {
+      font-size: 12px;
+      padding: 4px 12px;
+      background: rgba(30, 58, 95, 0.06);
+      color: var(--primary);
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .product-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .product-version {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .product-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    .footer {
+      background: var(--primary);
+      color: rgba(255,255,255,0.7);
+      padding: 32px;
+      text-align: center;
+      font-size: 13px;
+    }
+    @media (max-width: 768px) {
+      .header { padding: 0 16px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 16px 60px; }
+      .hero h1 { font-size: 28px; }
+      .section { padding: 48px 16px; }
+      .section-title { font-size: 22px; }
+      .product-grid { grid-template-columns: 1fr; }
+      .product-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">CPRI Innovation</div>
+    <nav class="nav-links">
+      <a href="#products">Products</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Research & Development<br><strong>Product Center</strong></h1>
+    <p>Explore our innovative digital solutions for livestock research and data management</p>
+  </section>
+
+  <section id="products" class="section">
+    <div class="section-title">Products</div>
+    <div class="section-desc">Our portfolio of research tools and platforms</div>
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <section id="about" class="section" style="text-align: center;">
+    <div class="section-title">About</div>
+    <div class="section-desc">Advancing livestock research through digital innovation</div>
+    <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+      CPRI Innovation develops intelligent tools that bridge experimental design and data-driven insights, empowering researchers with comprehensive solutions for the entire research lifecycle.
+    </p>
+  </section>
+
+  <footer class="footer">
+    CPRI Innovation © 2026. All rights reserved.
+  </footer>
+
+  <script>
+    const productsData = [
+      {
+        "id": "cpri-rd-swine",
+        "name": "Swine RD Platform Dual Demo",
+        "nameZh": "猪实验数据管理系统",
+        "description": "A dual-platform (Web + App) experiment management system for swine R&D. Covers full lifecycle from experiment creation through stage-based data collection to analysis and reporting.",
+        "icon": "🐷",
+        "version": "2.3",
+        "status": "active",
+        "tags": ["R&D", "Swine", "Dual-Platform"],
+        "links": {
+          "demo": "Swine RD Platform Dual Demo.html"
+        }
+      }
+    ];
+
+    function renderProducts(products) {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = products.map(product => `
+        <div class="product-card" onclick="openProduct('${product.links.demo}')">
+          <div class="product-icon">${product.icon}</div>
+          <div class="product-name">${product.name}</div>
+          <div class="product-name-zh">${product.nameZh}</div>
+          <div class="product-desc">${product.description}</div>
+          <div class="product-tags">
+            ${product.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+          <div class="product-footer">
+            <div class="product-version">v${product.version}</div>
+            <div class="product-status">
+              <span class="status-dot"></span>
+              <span>${product.status}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openProduct(url) {
+      if (url && url !== '#') {
+        window.open(url, '_blank');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => renderProducts(productsData));
+  </script>
+</body>
+</html>

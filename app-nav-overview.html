@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App端功能页面概览 — 猪实验模块</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8ecf1; color: #333; }
+
+    /* ===== 整体容器 ===== */
+    .page-wrap { max-width: 1300px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 12px; margin-bottom: 20px; }
+
+    /* ===== 三栏：手机 + 箭头 + 手机 + 说明 ===== */
+    .flow-section { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 32px; }
+    .phone-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+    .phone-label { font-size: 12px; font-weight: 700; }
+    .phone-label.t1 { color: #667eea; }
+    .phone-label.t2 { color: #1ab394; }
+
+    /* ===== 手机外框 ===== */
+    .phone { width: 375px; background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,0.18); overflow: hidden; flex-shrink: 0; }
+    .phone-status { height: 38px; background: #f8f8f8; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 10px; font-weight: 600; color: #333; }
+    .phone-body { min-height: 520px; background: #f5f6f8; position: relative; }
+    .phone-tabbar { height: 60px; background: #fff; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-around; padding-bottom: 6px; }
+    .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: #999; }
+    .tab.active { color: #1ab394; }
+    .tab .ic { font-size: 22px; }
+
+    /* ===== 通用组件 ===== */
+    .nav-top { display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#fff;border-bottom:1px solid #eee; }
+    .nav-top .t { font-size:15px;font-weight:700;color:#333; }
+    .nav-top .avatar { width:30px;height:30px;border-radius:50%;background:#1ab394;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700; }
+
+    .search-row { display:flex;gap:6px;padding:10px 14px;background:#fff;flex-wrap:wrap;align-items:center;border-bottom:1px solid #f0f0f0; }
+    .search-row input, .search-row select { font-size:10px;padding:5px 8px;border:1px solid #e0e0e0;border-radius:4px;background:#fafafa; }
+    .search-row .btn { font-size:10px;padding:5px 12px;border-radius:4px;border:none;font-weight:600; }
+    .btn-search { background:#1ab394;color:#fff; }
+    .btn-reset { background:#f0f0f0;color:#666; }
+
+    .stat-pills { display:flex;gap:6px;padding:10px 14px;background:#fff;overflow-x:auto; }
+    .stat-pill { flex-shrink:0;padding:5px 10px;border-radius:14px;font-size:10px;background:#f0f0f0;color:#888;white-space:nowrap; }
+    .stat-pill.on { background:#1ab394;color:#fff; }
+    .stat-pill .n { font-weight:700; }
+
+    /* ===== 实验卡片 ===== */
+    .cards-area { padding:8px 14px; }
+    .exp-card { background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.04);position:relative; }
+    .exp-card .row1 { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+    .exp-card .title { font-size:13px;font-weight:700;color:#333; }
+    .exp-card .status-tag { font-size:9px;padding:2px 8px;border-radius:10px;font-weight:600; }
+    .exp-card .status-tag.ing { background:#e3f2fd;color:#1976d2; }
+    .exp-card .status-tag.done { background:#e8f5e9;color:#2e7d32; }
+    .exp-card .status-tag.wait { background:#fff3e0;color:#f57c00; }
+    .exp-card .row2 { font-size:10px;color:#888;margin-bottom:4px;display:flex;gap:10px;flex-wrap:wrap; }
+    .exp-card .row3 { font-size:10px;color:#999;margin-bottom:8px; }
+    .exp-card .row4 { display:flex;justify-content:space-between;align-items:center; }
+    .exp-card .meta-tags { display:flex;gap:4px;flex-wrap:wrap; }
+    .exp-card .meta-tag { font-size:9px;padding:2px 6px;border-radius:4px;background:#f0f0f0;color:#666; }
+    .exp-card .entry-btn { font-size:10px;padding:5px 14px;border-radius:14px;background:#1ab394;color:#fff;font-weight:600;border:none; }
+    .exp-card .left-strip { position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 2px 2px 0; }
+    .left-strip.green { background:#1ab394; }
+    .left-strip.orange { background:#f59e0b; }
+    .left-strip.blue { background:#3b82f6; }
+
+    /* ===== 工作台物种卡片 ===== */
+    .species-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px; }
+    .species-card { background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.03); }
+    .species-card .icon { font-size:28px;margin-bottom:6px; }
+    .species-card .name { font-size:12px;font-weight:700;color:#333; }
+    .species-card .sub { font-size:9px;color:#999;margin-top:2px; }
+
+    /* ===== 猪实验仪表盘 ===== */
+    .dash-section { background:#fff;border-radius:10px;margin:8px 14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.03); }
+    .dash-hd { padding:10px 14px;font-size:13px;font-weight:700;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:6px; }
+    .dash-bd { padding:10px 14px; }
+
+    .stage-scroll { display:flex;gap:8px;overflow-x:auto;padding-bottom:4px; }
+    .stage-pill { flex-shrink:0;padding:8px 14px;border-radius:10px;font-size:10px;text-align:center;min-width:60px;background:#f5f5f5;border:1px solid #e0e0e0; }
+    .stage-pill .n { font-size:16px;font-weight:700; }
+    .stage-pill .l { font-size:9px;color:#888; }
+    .stage-pill.sel { background:#e8f5e9;border-color:#1ab394; }
+    .stage-pill.sel .n, .stage-pill.sel .l { color:#1ab394; }
+
+    .mini-exp { display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f9fa;border-radius:6px;margin-top:6px;font-size:10px; }
+    .mini-exp .code { font-weight:600;color:#1ab394;flex:1;font-size:11px; }
+    .mini-exp .go { font-size:9px;padding:3px 10px;border-radius:10px;background:#1ab394;color:#fff;font-weight:600; }
+
+    .mod-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:6px; }
+    .mod-btn { text-align:center;padding:10px 6px;border-radius:8px;font-size:10px;background:#f8f9fa;border:1px solid #eee; }
+    .mod-btn .em { font-size:20px;display:block;margin-bottom:3px; }
+
+    .alert-mini { display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;font-size:10px;margin-bottom:4px; }
+    .alert-mini.red { background:#fce4ec; }
+    .alert-mini.yel { background:#fff3cd; }
+
+    /* ===== 栏位锚定录入页 ===== */
+    .rec-nav { display:flex;align-items:center;padding:10px 14px;background:#fff;border-bottom:1px solid #eee;gap:8px; }
+    .rec-nav .back { font-size:16px;color:#888; }
+    .rec-nav .t { font-size:14px;font-weight:700;flex:1;text-align:center; }
+    .rec-nav .submit { font-size:11px;color:#1ab394;font-weight:600; }
+
+    .pen-bar { padding:8px 14px;background:#fff;border-bottom:2px solid #1ab394; }
+    .pen-bar .exp-line { font-size:10px;color:#888;margin-bottom:4px; }
+    .pen-bar .exp-line span { color:#1ab394;font-weight:700; }
+    .pen-bar .pen-line { display:flex;align-items:center;gap:8px;font-size:12px; }
+    .pen-bar .pen-val { font-weight:700;border-bottom:2px dashed #1ab394;padding:2px 4px; }
+
+    .mod-tabs-bar { padding:8px 14px;background:#fff;border-bottom:1px solid #eee; }
+    .mod-tabs-bar .hint { font-size:9px;color:#999;margin-bottom:4px; }
+    .mod-tabs-bar .tabs { display:flex;gap:4px;overflow-x:auto; }
+    .mod-tabs-bar .mt { flex-shrink:0;padding:5px 10px;border-radius:14px;font-size:10px;background:#f0f0f0;color:#888;white-space:nowrap; }
+    .mod-tabs-bar .mt.sel { background:#e8f5e9;color:#1ab394;font-weight:600; }
+    .mod-tabs-bar .mt .dot { display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:3px;background:#ccc; }
+    .mod-tabs-bar .mt .dot.filled { background:#1ab394; }
+
+    .rec-form { padding:10px 14px; }
+    .rec-form .submitted { background:#f8f9fa;padding:8px;border-radius:6px;font-size:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center; }
+    .rec-form .submitted .edit { color:#3b82f6; }
+    .rec-form .form-title { font-size:11px;font-weight:700;margin-bottom:8px; }
+    .rec-form .fgrid { display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px; }
+    .rec-form .fgrid .fld { }
+    .rec-form .fgrid .fld .lbl { color:#888;margin-bottom:3px; }
+    .rec-form .fgrid .fld .val { background:#f8f8f8;padding:7px;border-radius:4px; }
+
+    .rec-bottom { display:flex;gap:8px;padding:10px 14px;border-top:1px solid #eee;background:#fff; }
+    .rec-bottom .draft { flex:1;text-align:center;padding:10px;background:#f5f5f5;border-radius:8px;font-size:12px;color:#666; }
+    .rec-bottom .save { flex:1;text-align:center;padding:10px;background:#1ab394;color:#fff;border-radius:8px;font-size:12px;font-weight:600; }
+
+    /* ===== 说明卡片 ===== */
+    .note-card { background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.03);margin-bottom:10px; }
+    .note-card h3 { font-size:14px;margin-bottom:8px; }
+    .note-card ul { font-size:12px;line-height:2;padding-left:16px;color:#555; }
+    .note-card .kv { display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #f5f5f5; }
+    .note-card .kv .k { color:#888; }
+
+    .note-row { display:flex;gap:12px;flex-wrap:wrap; }
+    .note-col { flex:1;min-width:200px; }
+
+    .cmp-table { width:100%;border-collapse:collapse;font-size:11px; }
+    .cmp-table th { background:#f5f5f5;padding:8px 10px;text-align:left;font-weight:600;font-size:11px; }
+    .cmp-table td { padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:top; }
+
+    .section-title { font-size:15px;font-weight:700;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #e8e8e8;display:flex;align-items:center;gap:6px; }
+    .callout { background:#fffde7;border-left:4px solid #ffc107;padding:12px 14px;margin:14px 0;border-radius:0 8px 8px 0;font-size:12px;line-height:1.8; }
+    .callout strong { color:#e65100; }
+
+    .arrow-big { display:flex;align-items:center;justify-content:center;font-size:28px;color:#bbb;flex-shrink:0; }
+    .arrow-col { display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;min-width:30px; }
+    .arrow-col .arr { font-size:24px;color:#bbb; }
+    .arrow-col .txt { font-size:9px;color:#888;text-align:center;margin-top:2px; }
+
+    /* ===== 流动布局：适应小屏 ===== */
+    @media (max-width:800px) { .flow-section { flex-direction:column;align-items:center; } .arrow-big { transform:rotate(90deg); } }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <h1>猪实验数据管理系统 — App端页面概览</h1>
+  <p class="subtitle">原型方案评估用 · 基于已有App底部Tab（实验管理 + 工作台）· 匹配现有视觉风格 · 2026/6/24</p>
+
+  <!-- ==================== 页面1: 实验管理 Tab ==================== -->
+  <div class="section-title"><span>📋</span> Tab 1 — 实验管理（现有App风格 · 猪实验卡片混排其中）</div>
+
+  <div class="flow-section">
+    <!-- 手机 -->
+    <div class="phone-col">
+      <div class="phone-label t1">实验管理 Tab</div>
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="phone-body">
+          <div class="nav-top"><span class="t">实验管理</span><div class="avatar">李</div></div>
+
+          <!-- 搜索区 -->
+          <div class="search-row">
+            <select style="flex:1;"><option>实验编号</option></select>
+            <select style="flex:1;"><option>实验场</option></select>
+            <select style="flex:1;"><option>实验状态</option></select>
+            <span class="btn btn-search">查询</span>
+            <span class="btn btn-reset">重置</span>
+          </div>
+
+          <!-- 统计胶囊 -->
+          <div class="stat-pills">
+            <div class="stat-pill"><span class="n">2</span> 待提交</div>
+            <div class="stat-pill on"><span class="n">2</span> 进行中</div>
+            <div class="stat-pill"><span class="n">8</span> 已完成</div>
+            <div class="stat-pill"><span class="n">2</span> 待开始</div>
+            <div class="stat-pill"><span class="n">12</span> 全部</div>
+          </div>
+
+          <!-- 卡片列表 -->
+          <div class="cards-area">
+            <!-- 猪实验卡片 1 -->
+            <div class="exp-card">
+              <div class="left-strip green"></div>
+              <div class="row1">
+                <span class="title">SWINE-NUR-XY-001-2026</span>
+                <span class="status-tag ing">进行中</span>
+              </div>
+              <div class="row2"><span>🐷 猪</span><span>保育</span><span>襄阳</span><span>栋1-单元1, 栋1-单元2</span></div>
+              <div class="row3">阶段: 01-DRB/02-ZZB &nbsp;|&nbsp; 完整度 85% &nbsp;|&nbsp; 异常: 🟢低</div>
+              <div class="row4">
+                <div class="meta-tags"><span class="meta-tag">待录入数据</span></div>
+                <span class="entry-btn">去录入 →</span>
+              </div>
+            </div>
+
+            <!-- 猪实验卡片 2 -->
+            <div class="exp-card">
+              <div class="left-strip green"></div>
+              <div class="row1">
+                <span class="title">SWINE-FAT-NMG-002-2026</span>
+                <span class="status-tag done">已完成</span>
+              </div>
+              <div class="row2"><span>🐷 猪</span><span>育肥</span><span>内蒙古</span><span>栋1-单元1</span></div>
+              <div class="row3">阶段: 01-DRB &nbsp;|&nbsp; 完整度 92% &nbsp;|&nbsp; 异常: 🟡中</div>
+              <div class="row4">
+                <div class="meta-tags"><span class="meta-tag">待博士审核</span></div>
+                <span class="entry-btn">去录入 →</span>
+              </div>
+            </div>
+
+            <!-- 家禽实验（其他物种示例） -->
+            <div class="exp-card" style="opacity:0.6;">
+              <div class="row1"><span class="title">POULTRY-LAY-HZ-007-2026</span><span class="status-tag ing">进行中</span></div>
+              <div class="row2"><span>🐔 家禽</span><span>蛋鸡</span><span>杭州</span></div>
+              <div class="row4"><div class="meta-tags"><span class="meta-tag">日常巡栏</span></div><span class="entry-btn">去录入 →</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-tabbar">
+          <div class="tab active"><span class="ic">📋</span>实验管理</div>
+          <div class="tab"><span class="ic">🔧</span>工作台</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 说明 -->
+    <div class="note-col" style="min-width:240px;">
+      <div class="note-card">
+        <h3>📋 猪实验卡片</h3>
+        <ul>
+          <li>与其他物种（家禽/反刍...）<strong>共用同一卡片列表</strong></li>
+          <li>卡片左侧色条表示状态（绿=正常，橙=预警）</li>
+          <li>每张卡片展示：编号 + 物种 + 阶段 + 完整度 + 异常等级</li>
+          <li><strong>卡片主体点击</strong> → 实验数据报告（P9）</li>
+          <li><strong>右上角"去录入"</strong> → 根据当前步骤跳转对应阶段录入页</li>
+          <li>顶部统计胶囊快速筛选</li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#fffde7;border:1px solid #ffc107;">
+        <h3>💡 关键交互</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          卡片右上角<strong>"去录入"</strong>是核心入口。<br>
+          点击后自动带入实验编号 + 当前步骤，<br>
+          跳转到对应的流程页面（分组/巡栏/结束/归档）。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 页面2: 工作台 Tab ==================== -->
+  <div class="section-title"><span>🔧</span> Tab 2 — 工作台（现有App风格 · 物种选择 → 猪实验仪表盘）</div>
+
+  <div class="flow-section">
+    <!-- 手机1: 工作台物种列表 -->
+    <div class="phone-col">
+      <div class="phone-label t2">工作台 → 物种选择</div>
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="phone-body">
+          <div class="nav-top"><span class="t">工作台</span><div class="avatar">李</div></div>
+
+          <div style="padding:8px 14px;font-size:12px;color:#888;">选择动物类型进入</div>
+
+          <div class="species-grid">
+            <div class="species-card" style="border:1px solid #e0e0e0;"><div class="icon">🐟</div><div class="name">水产实验数据</div><div class="sub">鱼虾蟹贝 · 营养配方</div></div>
+            <div class="species-card" style="border:1px solid #e0e0e0;"><div class="icon">🐔</div><div class="name">家禽实验数据</div><div class="sub">蛋鸡肉鸡 · 饲料营养</div></div>
+            <div class="species-card" style="border:2px solid #1ab394;background:#e8f5e9;"><div class="icon">🐷</div><div class="name">猪实验数据</div><div class="sub">饲料营养 · 保育/育肥</div></div>
+            <div class="species-card" style="border:1px solid #e0e0e0;"><div class="icon">🐄</div><div class="name">反刍实验数据</div><div class="sub">奶牛肉牛 · 饲草营养</div></div>
+          </div>
+        </div>
+        <div class="phone-tabbar">
+          <div class="tab"><span class="ic">📋</span>实验管理</div>
+          <div class="tab active"><span class="ic">🔧</span>工作台</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 箭头 -->
+    <div class="arrow-col"><div class="arr">→</div><div class="txt">点击<br>工作台Tab</div></div>
+
+    <!-- 手机2: 猪实验仪表盘（工作台直接进入） -->
+    <div class="phone-col">
+      <div class="phone-label t2">工作台 → 猪实验仪表盘（直达）</div>
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="phone-body">
+          <div class="nav-top">
+            <span></span>
+            <span class="t">猪实验数据</span>
+            <span style="font-size:10px;color:#1ab394;">⚙️配置</span>
+          </div>
+
+          <!-- 区域1: 流程概览 -->
+          <div class="dash-section">
+            <div class="dash-hd"><span style="color:#667eea;">📊</span> 实验流程概览</div>
+            <div class="dash-bd">
+              <div class="stage-scroll">
+                <div class="stage-pill"><div class="n">1</div><div class="l">待分组</div></div>
+                <div class="stage-pill sel"><div class="n">2</div><div class="l">日常巡栏</div></div>
+                <div class="stage-pill"><div class="n">1</div><div class="l">阶段结束</div></div>
+                <div class="stage-pill"><div class="n">1</div><div class="l">待归档</div></div>
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:6px;">▼ 日常巡栏 · 2个实验</div>
+              <div class="mini-exp"><span class="code">SWINE-NUR-XY-001</span><span style="color:#888;">01-DRB</span><span class="go">去录入</span></div>
+              <div class="mini-exp"><span class="code">SWINE-NF-DY-003</span><span style="color:#888;">02-RZB</span><span class="go">去录入</span></div>
+            </div>
+          </div>
+
+          <!-- 区域2: 快捷模块 -->
+          <div class="dash-section">
+            <div class="dash-hd"><span style="color:#e65100;">✏️</span> 快捷录入 <span style="font-size:9px;color:#999;font-weight:400;">选模块→选实验</span></div>
+            <div class="dash-bd">
+              <div class="mod-grid">
+                <div class="mod-btn"><span class="em">💀</span>死淘</div>
+                <div class="mod-btn"><span class="em">🍽️</span>采食</div>
+                <div class="mod-btn"><span class="em">💩</span>腹泻</div>
+                <div class="mod-btn"><span class="em">💊</span>药品</div>
+                <div class="mod-btn"><span class="em">💉</span>疫苗</div>
+                <div class="mod-btn"><span class="em">🌡️</span>环控</div>
+                <div class="mod-btn"><span class="em">⚖️</span>称重</div>
+                <div class="mod-btn" style="background:#e8f5e9;border-color:#1ab394;"><span class="em">📋</span>全部</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 区域3: 预警+报告 -->
+          <div class="dash-section">
+            <div class="dash-hd"><span style="color:#c62828;">⚠️</span> 数据异常预警</div>
+            <div class="dash-bd">
+              <div class="alert-mini red"><span>🔴</span><span style="flex:1;font-weight:600;">SWINE-..001</span><span>栋1-单元1-栏1 死淘超阈值</span></div>
+              <div class="alert-mini yel"><span>🟡</span><span style="flex:1;">SWINE-..004</span><span>舍温连续3h超30℃</span></div>
+              <div style="text-align:right;font-size:9px;color:#1ab394;margin-top:4px;">查看全部 →</div>
+            </div>
+          </div>
+          <div style="text-align:center;padding:8px;margin:8px 14px;background:#fff;border-radius:8px;font-size:10px;border:1px solid #eee;">📊 实验数据报告</div>
+        </div>
+        <div class="phone-tabbar">
+          <div class="tab"><span class="ic">📋</span>实验管理</div>
+          <div class="tab active"><span class="ic">🔧</span>工作台</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 栏位锚定录入页 ===== -->
+  <div class="section-title"><span>⭐</span> 核心录入页 — 栏位锚定 + 模块漂移（从快捷模块或"去录入"进入）</div>
+
+  <div class="callout">
+    <strong>实地场景：</strong>巡栏员走到 <strong>栋1-单元1-栏1</strong>，依次录入死淘→采食→药品→疫苗；完成后切换到 <strong>栋1-单元1-栏2</strong>，继续录入。<br>
+    <strong>设计要求：</strong>切换模块Tab时<strong>栏位不变</strong>；切换栏位时<strong>模块Tab不变</strong>。Tab上的绿点表示该栏位今日已有记录。
+  </div>
+
+  <div class="flow-section">
+    <div class="phone-col">
+      <div class="phone-label" style="color:#e65100;">栏位锚定录入页（以药品为例）</div>
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="phone-body">
+          <div class="rec-nav"><span class="back">←</span><span class="t">录入</span><span class="submit">提交记录</span></div>
+
+          <!-- 栏位锚点 -->
+          <div class="pen-bar">
+            <div class="exp-line">实验: <span>SWINE-NUR-XY-001</span></div>
+            <div class="pen-line">
+              <span style="color:#888;">栏位:</span>
+              <span class="pen-val">栋1-单元1-栏1 ▼</span>
+              <span style="color:#888;margin-left:8px;">日期:</span>
+              <span>2026-06-01</span>
+            </div>
+          </div>
+
+          <!-- 模块Tab（可切换，栏位不变） -->
+          <div class="mod-tabs-bar">
+            <div class="hint">记录类型（切换时栏位保持不变）</div>
+            <div class="tabs">
+              <div class="mt"><span class="dot"></span>死淘</div>
+              <div class="mt"><span class="dot"></span>采食</div>
+              <div class="mt"><span class="dot"></span>腹泻</div>
+              <div class="mt sel"><span class="dot filled"></span>药品</div>
+              <div class="mt"><span class="dot"></span>疫苗</div>
+              <div class="mt"><span class="dot filled"></span>环控✓</div>
+              <div class="mt"><span class="dot"></span>称重</div>
+            </div>
+            <div style="font-size:9px;color:#999;margin-top:4px;">✓ = 该栏位今日已有此类型记录</div>
+          </div>
+
+          <!-- 已提交 + 新录入 -->
+          <div class="rec-form">
+            <div class="submitted"><span>6/1 阿莫西林 5g/头 · 张三</span><span class="edit">编辑</span></div>
+            <div class="form-title">+ 新增药品记录</div>
+            <div class="fgrid">
+              <div class="fld"><div class="lbl">产品名称</div><div class="val" style="color:#1ab394;">🔍 搜索药品库...</div></div>
+              <div class="fld"><div class="lbl">药品状态</div><div class="val">正常 ▼</div></div>
+              <div class="fld"><div class="lbl">给药途径</div><div class="val">拌料 ▼</div></div>
+              <div class="fld"><div class="lbl">用量</div><div class="val">___</div></div>
+            </div>
+          </div>
+          <div class="rec-bottom"><span class="draft">保存草稿</span><span class="save">提交记录</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-col" style="min-width:240px;">
+      <div class="note-card">
+        <h3>🎯 栏位锚定 + 模块漂移</h3>
+        <ul>
+          <li><strong>栏位选择器</strong>固定在页面顶部，作为"锚点"</li>
+          <li>切换栏位 → 模块Tab不变，表单刷新</li>
+          <li>切换模块Tab → 栏位不变，表单切换</li>
+          <li><strong>绿点</strong> = 当前栏位当日该模块有记录</li>
+        </ul>
+      </div>
+      <div class="note-card" style="background:#e8f5e9;border:1px solid #1ab394;">
+        <h3>⚡ 操作节奏</h3>
+        <p style="font-size:11px;line-height:1.8;">
+          栏1 → 药品Tab(录入) → 疫苗Tab(录入) →<br>
+          切栏2 → 药品Tab(录入) → 环控Tab(录入) →<br>
+          切栏3 → ...
+        </p>
+      </div>
+      <div class="note-card">
+        <h3>📌 与Web端分工</h3>
+        <ul>
+          <li>App: <strong>纯手动表单录入</strong></li>
+          <li>无批量导入/Excel上传</li>
+          <li>Web端负责：大表格编辑、Excel导入导出</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 三种录入路径 ===== -->
+  <div class="section-title"><span>⚡</span> 三种录入路径对比</div>
+  <div class="note-card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th></th><th>A: 实验管理→卡片"去录入"</th><th>B: 工作台→概览→"去录入"</th><th>C: 工作台→快捷模块</th></tr></thead>
+      <tbody>
+        <tr><td><strong>进入</strong></td><td>串联流程页，带进度条</td><td>同A</td><td><strong>栏位锚定录入页</strong></td></tr>
+        <tr><td><strong>自动带入</strong></td><td>实验编号 + 当前步骤</td><td>实验编号 + 当前步骤</td><td>实验编号 + 预选模块Tab</td></tr>
+        <tr><td><strong>进度感知</strong></td><td>✅ 进度条可跳转</td><td>✅ 进度条可跳转</td><td>⚠️ 无，需回工作台</td></tr>
+        <tr><td><strong>栏位/模块解耦</strong></td><td>✅ 支持</td><td>✅ 支持</td><td>✅ 支持（核心设计）</td></tr>
+        <tr><td><strong>适用</strong></td><td>跟进一个实验全流程</td><td>从阶段分布定位实验</td><td><strong>按栏位实地巡查</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 实验串联流程 ===== -->
+  <div class="section-title"><span>🔄</span> 实验串联流程（路径A/B的页面内容）</div>
+  <div class="note-card" style="text-align:center;overflow-x:auto;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;min-width:max-content;padding:10px 0;">
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #1ab394;background:#e8f5e9;color:#1ab394;min-width:95px;">实验分组<div style="font-size:9px;font-weight:400;color:#888;">查看分组结果<br>（Web端配置）</div></div>
+      <span style="margin:0 6px;color:#1ab394;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #1ab394;background:#e8f5e9;color:#1ab394;min-width:95px;">日常巡栏<div style="font-size:9px;font-weight:400;color:#888;">7个模块Tab<br>纯手动录入</div></div>
+      <span style="margin:0 6px;color:#ccc;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #e0e0e0;background:#fafafa;color:#999;min-width:95px;">阶段结束<div style="font-size:9px;font-weight:400;">汇总卡片<br>结束记录录入</div></div>
+      <span style="margin:0 6px;color:#ccc;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #e0e0e0;background:#fafafa;color:#999;min-width:95px;">阶段归档<div style="font-size:9px;font-weight:400;">博士审核<br>归档→锁定</div></div>
+      <span style="margin:0 6px;color:#ccc;font-weight:700;">→</span>
+      <div style="padding:12px 10px;border-radius:10px;font-size:11px;font-weight:600;border:2px solid #c62828;background:#fce4ec;color:#c62828;min-width:95px;">实验结束<div style="font-size:9px;font-weight:400;">全阶段汇总<br>确认结束</div></div>
+    </div>
+    <div style="font-size:10px;color:#888;margin-top:6px;">每个阶段循环：日常巡栏 → 阶段结束 → 阶段归档 → 下一阶段（阶段数由实验配置决定）</div>
+  </div>
+
+  <!-- ===== Web vs App 分工 ===== -->
+  <div class="section-title"><span>🖥️📱</span> Web端 与 App端 分工</div>
+  <div class="note-card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th style="width:18%;">模块</th><th style="width:41%;">Web端（PC浏览器）</th><th style="width:41%;">App端（手机）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>实验分组</strong></td><td>✅ 可编辑大表格 + Excel导入/导出 + 下载模板 + 完成分组锁定</td><td>📋 <strong>仅展示分组结果</strong>（只读），不提供Excel上传/批量编辑</td></tr>
+        <tr><td><strong>日常巡栏</strong></td><td>✅ 表单录入 + 批量导入Excel + 下载各模块模板</td><td>✏️ <strong>纯手动表单录入</strong>，栏位锚定 + 模块漂移</td></tr>
+        <tr><td><strong>阶段结束/归档/结束</strong></td><td>✅ 全功能（同Web原型）</td><td>✅ 全功能，适配移动端交互</td></tr>
+        <tr><td><strong>数据报告</strong></td><td>✅ 图表 + 明细表</td><td>✅ 图表适配手机 + 明细表横向滑动</td></tr>
+        <tr><td><strong>新建立项</strong></td><td>✅ 全功能</td><td>✅ 分步表单，适配移动端</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 角色权限 ===== -->
+  <div class="section-title"><span>👤</span> 角色与权限</div>
+  <div class="note-card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th>角色</th><th>新建实验</th><th>基础配置</th><th>日常巡栏</th><th>阶段结束</th><th>阶段归档</th><th>实验结束</th><th>数据报告</th></tr></thead>
+      <tbody>
+        <tr><td><strong>记录员</strong></td><td>—</td><td>查看</td><td>✅ 录入</td><td>✅ 提交</td><td>查看</td><td>查看</td><td>查看</td></tr>
+        <tr><td><strong>博士</strong></td><td>✅</td><td>编辑</td><td>录入+修改</td><td>提交+修改</td><td>✅ 审核归档</td><td>✅ 确认</td><td>查看</td></tr>
+        <tr><td><strong>场长</strong></td><td>—</td><td>编辑</td><td>录入+编辑栏位信息</td><td>查看</td><td>查看</td><td>查看</td><td>查看</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 完整跳转关系 ===== -->
+  <div class="section-title"><span>🔗</span> 完整跳转关系图</div>
+  <div class="note-card" style="text-align:center;overflow-x:auto;">
+    <pre style="font-size:10.5px;line-height:2.2;text-align:left;display:inline-block;font-family:SF Mono,Consolas,monospace;color:#333;">
+
+  <span style="color:#999;">══════════════════════════════════════════════════════════════════════</span>
+  <span style="color:#999;">  App 底部 Tab Bar</span>
+  <span style="color:#999;">══════════════════════════════════════════════════════════════════════</span>
+
+  ┌──────────────────┐                    ┌──────────────────────┐
+  │ <span style="color:#667eea;font-weight:700;">📋 实验管理</span>       │                    │ <span style="color:#1ab394;font-weight:700;">🔧 工作台</span>            │
+  └──────┬───────────┘                    └──────┬───────────────┘
+         │                                       │
+    各物种实验卡片混排                         物种选择页
+    (猪/家禽/水产/反刍...)                     (水产/家禽/猪/反刍...)
+         │                                       │
+         │ 猪实验卡片                             │ 点击 🐷 猪实验数据
+         │                                       ▼
+    ┌────┼────────┬──────────┐          ┌──────────────────────┐
+    ▼    ▼        ▼          ▼          │ <span style="color:#1ab394;">⭐ 猪实验工作台</span>      │
+  点击  右上角   新建立项   异常标签      │ ┌──────────────────┐ │
+  卡片  "去录入"   │          │          │ │①流程概览(阶段胶囊)│ │
+  主体    │       ▼          ▼          │ │ 实验A · 去录入 → │ │
+   │     │    <span style="color:#1565c0;">新建表单</span>   <span style="color:#6a1b9a;">预警详情</span>     │ ├──────────────────┤ │
+   ▼     │       │                     │ │②快捷模块网格     │ │
+  <span style="color:#c62828;">报告页</span> │       ▼                     │ │ 点模块→选实验    │ │
+         │    <span style="color:#1565c0;">↓提交后</span>                 │ │ <span style="color:#e65100;">↓进入 P7</span>       │ │
+         │       │                     │ ├──────────────────┤ │
+         │       ▼                     │ │③预警+报告入口    │ │
+         │  ┌──────────────────┐       │ └──────────────────┘ │
+         │  │ <span style="color:#e65100;">串联流程 (P2~P6)</span>  │       └──────┬───────────────┘
+         └─→│                  │              │
+            │ P2分组(只读)     │        ┌─────┼──────────┐
+            │ P3巡栏(手动录入) │        ▼     ▼          ▼
+            │ P4结束 → P5归档  │      <span style="color:#e65100;">P7</span>    <span style="color:#1565c0;">P8</span>       <span style="color:#c62828;">P9</span>
+            │ P6实验结束       │    栏位锚定  基础配置   数据报告
+            └──────────────────┘    录入页
+
+  <span style="color:#999;">══════════════════════════════════════════════════════════════════════</span>
+  <span style="color:#e65100;">  ★ P7核心: 栏位锚点 + 7模块Tab独立切换 + 绿点标记今日记录</span>
+  <span style="color:#999;">══════════════════════════════════════════════════════════════════════</span>
+    </pre>
+  </div>
+
+  <p style="text-align:center;color:#bbb;font-size:11px;margin:40px 0 20px;">
+    猪实验数据管理系统 — App端页面概览 · 基于已有App底部Tab（实验管理 + 工作台）· 2026/6/24
+  </p>
+
+</div>
+</body>
+</html>

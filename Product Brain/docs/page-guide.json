@@ -1,0 +1,837 @@
+{
+  "meta": {
+    "product": "Experiment R&D Platform",
+    "productZh": "实验研发平台",
+    "version": "1.0",
+    "date": "2026-06-22",
+    "platforms": ["web", "app"]
+  },
+  "pages": [
+    {
+      "pageId": "web-experiment-overview",
+      "pageTitle": "Experiment Overview",
+      "pageTitleZh": "实验概览",
+      "platform": "web",
+      "route": "/overview",
+      "isLanding": true,
+      "purpose": "Default landing page for Web platform. Provides management with a bird's-eye view of all experiments — status, progress, anomalies, and data completeness — at a single glance. Serves as the entry point for drill-down into individual experiments.",
+      "purposeZh": "Web 端默认首页。为管理层提供所有实验的一览视图——状态、进度、异常和数据完整度——一目了然。作为下钻至单个实验的入口。",
+      "targetUsers": ["phd", "ceo", "farm-manager"],
+      "targetUsersZh": ["博士", "CEO", "场长"],
+      "businessValue": "Implements Decision-001: overview-first navigation. Eliminates the need to check experiments one by one via phone or Excel. Management sees total experiment asset status on login.",
+      "businessValueZh": "实现 Decision-001：概览优先导航。消除逐个实验电话或 Excel 查询的需要。管理层登录即见实验资产全局状态。",
+      "keyFeatures": [
+        "4 stat cards: total experiments, avg record completeness (%), anomaly data records, today's new records — each with trend indicator",
+        "Experiment list table with columns: code, building/unit, growth stage, location, phases, current progress, status, anomaly level, completeness (progress bar), report access dropdown (8 report types)",
+        "Anomaly alert table: time, experiment, pen, anomaly type, description, drill-down action",
+        "Search/filter bar: experiment code (text), farm location (dropdown), experiment status (dropdown)",
+        "Breadcrumb navigation: 实验研发 › 猪实验数据 › 实验概览",
+        "Sidebar: 知识库, 项目管理, 实验场, 猪实验数据 (概览/报表分析), 家禽实验数据"
+      ],
+      "keyFeaturesZh": [
+        "4 张统计卡片：实验总数、平均记录完整度(%)、异常数据记录、今日新增记录——各附趋势指标",
+        "实验列表表格：实验编号、栋舍-单元、生长阶段、地点、阶段、当前进度、状态、异常等级、完整度(进度条)、报表下拉菜单(8种报表)",
+        "异常预警表格：预警时间、实验编号、栏位、异常类型、异常描述、下钻操作",
+        "搜索筛选栏：实验编号(文本)、实验场(下拉)、实验状态(下拉)",
+        "面包屑导航：实验研发 › 猪实验数据 › 实验概览",
+        "侧边栏：知识库、项目管理、实验场、猪实验数据(概览/报表分析)、家禽实验数据"
+      ],
+      "dataSources": [
+        "Experiment metadata table (code, location, stage, phases, groups)",
+        "Data completeness scoring engine (记录完整度 %)",
+        "Anomaly detection engine (alert type, severity, description)",
+        "Daily record aggregation (today's new records count)"
+      ],
+      "dataSourcesZh": [
+        "实验元数据表（编号、地点、阶段、分组）",
+        "数据完整度评分引擎（记录完整度 %）",
+        "异常检测引擎（预警类型、严重程度、描述）",
+        "日常记录汇总（今日新增记录数）"
+      ],
+      "futureRoadmap": "Phase 2: Add role-based dashboard views (CEO sees all farms aggregated, farm manager sees only assigned farm). Phase 3: Add cross-experiment comparison quick-access from overview.",
+      "futureRoadmapZh": "Phase 2：增加基于角色的仪表盘视图（CEO 看全部场区汇总，场长只看所管场区）。Phase 3：增加从概览页快速进入跨实验对比的入口。"
+    },
+    {
+      "pageId": "web-analysis-report",
+      "pageTitle": "Analysis Report",
+      "pageTitleZh": "报表分析",
+      "platform": "web",
+      "route": "/analysis/report",
+      "isLanding": false,
+      "purpose": "Comprehensive report hub for PhD researchers. Displays summary stat cards, interactive charts, and 8 pre-built report types auto-populated from raw experiment data. Eliminates manual Excel aggregation.",
+      "purposeZh": "面向博士研究人员的综合报表中心。展示汇总统计卡片、交互式图表和 8 种从原始实验数据自动生成的预置报表。消除手工 Excel 汇总。",
+      "targetUsers": ["phd", "ceo"],
+      "targetUsersZh": ["博士", "CEO"],
+      "businessValue": "Reduces report generation time from hours (manual Excel) to minutes (auto-generated). Enables stage comparison, cross-stage merge analysis, and data export for external statistical tools.",
+      "businessValueZh": "将报表生成时间从小时级（手工 Excel）降至分钟级（自动生成）。支持阶段对比、跨阶段合并分析和数据导出供外部统计工具使用。",
+      "keyFeatures": [
+        "Summary stat cards: daily death/cull count, current stock count, daily feed amount (kg), average temperature (°C), diarrhea head count",
+        "Interactive charts: line charts for date-based trends (日龄 vs 头数, 日龄 vs 死淘率), bar charts for group comparisons",
+        "8 pre-built report types: daily, stage, experiment summary, death/cull detail, diarrhea detail, medicine/vaccine detail, environment detail, weight detail",
+        "Stage comparison: compare treatment groups within the same stage",
+        "Stage merge: aggregate data across completed stages",
+        "Cross-experiment comparison: compare results across different experiments",
+        "Export: Excel (further analysis), PDF (sharing/archival)"
+      ],
+      "keyFeaturesZh": [
+        "汇总统计卡片：当日死淘数、当日存栏数、日下料量(kg)、平均温度(℃)、腹泻头数",
+        "交互式图表：日期趋势折线图（日龄 vs 头数、日龄 vs 死淘率）、分组对比柱状图",
+        "8 种预置报表：日报表、阶段报表、实验总结表、死淘明细表、腹泻明细表、药品疫苗明细表、环控明细表、称重明细表",
+        "阶段对比：对比同一阶段内不同处理组",
+        "阶段合并：汇总已完成阶段的数据",
+        "跨实验对比：对比不同实验的结果",
+        "导出：Excel（进一步分析）、PDF（分享/存档）"
+      ],
+      "dataSources": [
+        "Daily death/cull records (per pen, with reason/gender/weight)",
+        "Daily feed intake records (per pen, kg)",
+        "Daily environmental control records (temperature, humidity, ventilation)",
+        "Medicine/vaccine administration records",
+        "Diarrhea tracking records",
+        "Weight measurement records (per stage milestone)",
+        "Experiment metadata (code, groups, stages, location)"
+      ],
+      "dataSourcesZh": [
+        "每日死淘记录（按栏位，含原因/性别/重量）",
+        "每日采食记录（按栏位，kg）",
+        "每日环控记录（温度、湿度、通风）",
+        "药品疫苗给药记录",
+        "腹泻跟踪记录",
+        "称重记录（每阶段节点）",
+        "实验元数据（编号、分组、阶段、地点）"
+      ],
+      "futureRoadmap": "Phase 2: Add custom report builder (user-defined filters and columns). Phase 4: AI-generated experiment summaries and natural-language query for report generation.",
+      "futureRoadmapZh": "Phase 2：增加自定义报表构建器（用户自定义筛选和列）。Phase 4：AI 生成实验总结和自然语言查询生成报表。"
+    },
+    {
+      "pageId": "web-new-experiment",
+      "pageTitle": "New Experiment",
+      "pageTitleZh": "新建实验",
+      "platform": "web",
+      "route": "/experiment/new",
+      "isLanding": false,
+      "purpose": "Experiment creation interface for PhD researchers. Configure experiment metadata: unique experiment code, growth stage selection, farm location assignment, and phase/stage configuration.",
+      "purposeZh": "博士创建实验的界面。配置实验元数据：唯一实验编号、生长阶段选择、实验场分配、阶段配置。",
+      "targetUsers": ["phd"],
+      "targetUsersZh": ["博士"],
+      "businessValue": "Standardizes experiment setup with mandatory fields and unique code validation. Eliminates ad-hoc experiment definitions that make cross-experiment comparison impossible.",
+      "businessValueZh": "通过必填字段和唯一编号校验标准化实验创建。消除临时性实验定义导致跨实验对比不可行的问题。",
+      "keyFeatures": [
+        "Experiment code generation (unique ID, e.g., SWINE-NUR-XY-001-2026)",
+        "Growth stage selection: 保育 (nursery), 育肥 (fattening), 保育到育肥 (nursery to fattening)",
+        "Farm location dropdown (襄阳, 内蒙古, 东营, 成都)",
+        "Phase/stage configuration (number of stages, stage names, stage sequence)",
+        "Code uniqueness validation",
+        "Mandatory field completeness check"
+      ],
+      "keyFeaturesZh": [
+        "实验编号生成（唯一标识，如 SWINE-NUR-XY-001-2026）",
+        "生长阶段选择：保育、育肥、保育到育肥",
+        "实验场下拉选择（襄阳、内蒙古、东营、成都）",
+        "阶段配置（阶段数量、阶段名称、阶段顺序）",
+        "编号唯一性校验",
+        "必填字段完整性检查"
+      ],
+      "dataSources": [
+        "Farm/location master data",
+        "Experiment metadata table (write)",
+        "Experiment code sequence generator"
+      ],
+      "dataSourcesZh": [
+        "实验场/地点主数据",
+        "实验元数据表（写入）",
+        "实验编号序列生成器"
+      ],
+      "futureRoadmap": "Phase 2: Add experiment template library (pre-configured stage templates for common experiment types). Phase 3: Clone/copy existing experiment configuration.",
+      "futureRoadmapZh": "Phase 2：增加实验模板库（常用实验类型的预配置阶段模板）。Phase 3：克隆/复制已有实验配置。"
+    },
+    {
+      "pageId": "web-experiment-grouping",
+      "pageTitle": "Experiment Grouping",
+      "pageTitleZh": "实验分组",
+      "platform": "web",
+      "route": "/experiment/:id/grouping",
+      "isLanding": false,
+      "purpose": "Treatment group assignment interface. PhD configures treatment/control groups; farm manager uploads and confirms pen assignments. Links treatment groups to physical building/unit/pens and sets initial pig counts.",
+      "purposeZh": "处理组分配界面。博士配置处理/对照组；场长上传并确认栏位分配。将处理组关联到物理栋-单元-栏位并设定初始猪只数量。",
+      "targetUsers": ["phd", "farm-manager"],
+      "targetUsersZh": ["博士", "场长"],
+      "businessValue": "Ensures experiment group assignments are correctly mapped to physical farm layout. Provides auditable record of group configuration for later comparison analysis.",
+      "businessValueZh": "确保实验分组正确映射到物理场区布局。为后续对比分析提供可审计的分组配置记录。",
+      "keyFeatures": [
+        "Treatment group creation and naming (处理组1, 处理组2, 对照组...)",
+        "Building/unit/pen assignment per group",
+        "Initial pig count per group",
+        "Group status: 已分配 (assigned), 待分配 (pending)",
+        "Farm manager upload and confirmation workflow",
+        "Pig number uniqueness validation"
+      ],
+      "keyFeaturesZh": [
+        "处理组创建和命名（处理组1、处理组2、对照组...）",
+        "每组栋-单元-栏位分配",
+        "每组初始猪只数量",
+        "分组状态：已分配、待分配",
+        "场长上传和确认流程",
+        "猪只编号唯一性校验"
+      ],
+      "dataSources": [
+        "Farm/building/unit/pen master data",
+        "Experiment metadata (linked experiment code)",
+        "Group assignment table (write)"
+      ],
+      "dataSourcesZh": [
+        "场区/栋/单元/栏位主数据",
+        "实验元数据（关联实验编号）",
+        "分组分配表（写入）"
+      ],
+      "futureRoadmap": "Phase 2: Support randomized group assignment. Phase 3: Visual pen layout selector (drag-and-drop assignment).",
+      "futureRoadmapZh": "Phase 2：支持随机分组分配。Phase 3：可视化栏位布局选择器（拖拽分配）。"
+    },
+    {
+      "pageId": "web-stage-review",
+      "pageTitle": "Stage Data Review",
+      "pageTitleZh": "阶段数据审核",
+      "platform": "web",
+      "route": "/experiment/:id/stage/:stageId/review",
+      "isLanding": false,
+      "purpose": "PhD reviews stage-end data submitted by farm manager. Approves the stage to mark it 已结束 (completed) or rejects it with feedback for data correction. Gate between stage execution and stage analysis.",
+      "purposeZh": "博士审核场长提交的阶段结束数据。批准通过后将阶段标记为「已结束」，或驳回并附反馈意见要求数据修正。阶段执行与阶段分析之间的门控节点。",
+      "targetUsers": ["phd"],
+      "targetUsersZh": ["博士"],
+      "businessValue": "Ensures data quality before analysis. Prevents bad data from propagating into stage comparison and final merge, protecting the integrity of experiment conclusions.",
+      "businessValueZh": "在分析前确保数据质量。防止错误数据进入阶段对比和最终合并，保护实验结论的完整性。",
+      "keyFeatures": [
+        "Stage data completeness validation (are all pens recorded?)",
+        "Stage data summary view across all data domains",
+        "Approve button: transitions stage status 待审核 → 已结束",
+        "Reject button: transitions stage status 待审核 → 进行中, with feedback notes",
+        "Modification history view (who changed what, when)",
+        "Stage state display: 待开始 / 进行中 / 待审核 / 已结束 / 已归档"
+      ],
+      "keyFeaturesZh": [
+        "阶段数据完整性校验（所有栏位是否都已记录？）",
+        "所有数据域的阶段数据汇总视图",
+        "批准按钮：阶段状态 待审核 → 已结束",
+        "驳回按钮：阶段状态 待审核 → 进行中，附反馈意见",
+        "修改历史查看（谁在何时改了什么）",
+        "阶段状态显示：待开始 / 进行中 / 待审核 / 已结束 / 已归档"
+      ],
+      "dataSources": [
+        "All daily records for the stage (death/cull, feed, environment, medicine, diarrhea, weight)",
+        "Data completeness scoring engine",
+        "Audit log (modification history)",
+        "Stage state machine"
+      ],
+      "dataSourcesZh": [
+        "本阶段所有日常记录（死淘、采食、环控、药品、腹泻、称重）",
+        "数据完整度评分引擎",
+        "审计日志（修改历史）",
+        "阶段状态机"
+      ],
+      "futureRoadmap": "Phase 2: Add side-by-side data version comparison. Phase 3: Auto-flag anomalies during review (e.g., sudden data gaps).",
+      "futureRoadmapZh": "Phase 2：增加并列数据版本对比。Phase 3：审核时自动标记异常（如数据突然缺失）。"
+    },
+    {
+      "pageId": "web-experiment-closeout",
+      "pageTitle": "Experiment Close-out Confirmation",
+      "pageTitleZh": "结栏确认",
+      "platform": "web",
+      "route": "/experiment/:id/closeout",
+      "isLanding": false,
+      "purpose": "Final confirmation that all experiment stages are complete. PhD confirms experiment end, triggers final data merge, and transitions experiment status to 已归档 (archived). Last step before final report generation.",
+      "purposeZh": "确认所有实验阶段已完成的最终确认。博士确认实验结束，触发最终数据合并，将实验状态转为「已归档」。生成最终报告前的最后一步。",
+      "targetUsers": ["phd"],
+      "targetUsersZh": ["博士"],
+      "businessValue": "Formal experiment closure with auditable sign-off. Ensures no incomplete or un-reviewed data enters the final experiment archive and report.",
+      "businessValueZh": "正式的实验结栏及可审计签核。确保没有不完整或未审核的数据进入最终实验归档和报告。",
+      "keyFeatures": [
+        "All-stage completion check (all stages must be 已结束)",
+        "Final merge trigger: aggregates all stage data into complete experiment dataset",
+        "Experiment status transition: 已结束 → 已归档",
+        "Pre-closeout validation summary",
+        "Confirmation dialog with sign-off record"
+      ],
+      "keyFeaturesZh": [
+        "全阶段完成检查（所有阶段必须为已结束）",
+        "最终合并触发：将所有阶段数据汇总为完整实验数据集",
+        "实验状态转换：已结束 → 已归档",
+        "结栏前校验摘要",
+        "带签核记录的确认对话框"
+      ],
+      "dataSources": [
+        "All stage data (merged)",
+        "Stage state machine (all stages)",
+        "Experiment metadata",
+        "Audit log"
+      ],
+      "dataSourcesZh": [
+        "所有阶段数据（合并）",
+        "阶段状态机（全部阶段）",
+        "实验元数据",
+        "审计日志"
+      ],
+      "futureRoadmap": "Phase 2: Auto-generate experiment summary report on close-out. Phase 4: AI-generated experiment conclusion draft.",
+      "futureRoadmapZh": "Phase 2：结栏时自动生成实验总结报告。Phase 4：AI 生成实验结论草稿。"
+    },
+    {
+      "pageId": "app-experiment-overview",
+      "pageTitle": "Experiment Overview (App)",
+      "pageTitleZh": "实验概览（移动端）",
+      "platform": "app",
+      "route": "/app/overview",
+      "isLanding": true,
+      "purpose": "Mobile landing page for farm managers and technicians. Shows experiment list with search and status filtering. Provides quick access to experiment detail and daily recording.",
+      "purposeZh": "场长和技术员的移动端首页。展示带搜索和状态筛选的实验列表。提供快速进入实验详情和日常记录的入口。",
+      "targetUsers": ["farm-manager", "technician"],
+      "targetUsersZh": ["场长", "技术员"],
+      "businessValue": "On-site staff can immediately find their assigned experiments and begin recording without navigating complex menus. Mobile-optimized for in-farm use.",
+      "businessValueZh": "现场人员可立即找到所负责的实验并开始记录，无需在复杂菜单中导航。移动端优化，适合场内使用。",
+      "keyFeatures": [
+        "Experiment list with search bar (search by experiment code)",
+        "Status cards: 进行中 (in progress), 已完成 (completed), 待开始 (pending)",
+        "Progress bar per experiment",
+        "Experiment code, location, growth stage, current progress display",
+        "Quick action: + 新建实验 (new experiment) button",
+        "Tap experiment card to navigate to experiment detail"
+      ],
+      "keyFeaturesZh": [
+        "带搜索栏的实验列表（按实验编号搜索）",
+        "状态卡片：进行中、已完成、待开始",
+        "每个实验的进度条",
+        "实验编号、地点、生长阶段、当前进度展示",
+        "快捷操作：+ 新建实验按钮",
+        "点击实验卡片进入实验详情"
+      ],
+      "dataSources": [
+        "Experiment metadata table",
+        "Stage state machine (current progress)",
+        "Data completeness scoring engine (progress bar)"
+      ],
+      "dataSourcesZh": [
+        "实验元数据表",
+        "阶段状态机（当前进度）",
+        "数据完整度评分引擎（进度条）"
+      ],
+      "futureRoadmap": "Phase 2: Add role-filtered view (technician sees only assigned experiments). Phase 3: Offline-cached experiment list for poor connectivity farms.",
+      "futureRoadmapZh": "Phase 2：增加角色筛选视图（技术员只看分配实验）。Phase 3：弱网农场的离线缓存实验列表。"
+    },
+    {
+      "pageId": "app-experiment-detail",
+      "pageTitle": "Experiment Detail (App)",
+      "pageTitleZh": "实验详情（移动端）",
+      "platform": "app",
+      "route": "/app/experiment/:id",
+      "isLanding": false,
+      "purpose": "Detailed view of a single experiment on mobile. Shows basic info, progress statistics, and provides the entry point to begin daily recording. Bridge between overview and data entry.",
+      "purposeZh": "移动端单个实验的详细视图。展示基本信息、进度统计，并提供开始日常记录的入口。概览与数据录入之间的桥梁。",
+      "targetUsers": ["farm-manager", "technician"],
+      "targetUsersZh": ["场长", "技术员"],
+      "businessValue": "Gives on-site staff immediate context about the experiment they're working on before entering data — reducing errors from working on the wrong experiment.",
+      "businessValueZh": "让现场人员在录入数据前立即了解所操作实验的背景——减少因操作错误实验而产生的错误。",
+      "keyFeatures": [
+        "Basic info card: experiment code, growth stage, farm location, building/unit, current stage",
+        "Progress statistics: completion percentage (large), current stage name",
+        "Stage progress timeline",
+        "Primary CTA: 进入日常记录 (enter daily recording) button",
+        "Back navigation to experiment overview"
+      ],
+      "keyFeaturesZh": [
+        "基本信息卡片：实验编号、生长阶段、实验场、栋-单元、当前阶段",
+        "进度统计：完成百分比（大字）、当前阶段名称",
+        "阶段进度时间轴",
+        "主要操作按钮：进入日常记录",
+        "返回实验概览导航"
+      ],
+      "dataSources": [
+        "Experiment metadata (full detail)",
+        "Stage state machine (current stage, stage history)",
+        "Data completeness scoring engine (progress %)"
+      ],
+      "dataSourcesZh": [
+        "实验元数据（完整详情）",
+        "阶段状态机（当前阶段、阶段历史）",
+        "数据完整度评分引擎（进度 %）"
+      ],
+      "futureRoadmap": "Phase 2: Add quick-alert indicator if experiment has active anomalies. Phase 3: Photo gallery of experiment site.",
+      "futureRoadmapZh": "Phase 2：增加活跃异常快速预警指示。Phase 3：实验现场照片库。"
+    },
+    {
+      "pageId": "app-new-experiment",
+      "pageTitle": "New Experiment (App)",
+      "pageTitleZh": "新建实验（移动端）",
+      "platform": "app",
+      "route": "/app/experiment/new",
+      "isLanding": false,
+      "purpose": "Mobile-optimized experiment creation form. Simplified version of the Web new-experiment page, optimized for farm manager use in the field.",
+      "purposeZh": "移动端优化的实验创建表单。Web 端新建实验页面的简化版，针对场长现场使用优化。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Enables experiment initiation directly from the farm without requiring a desktop. Speeds up experiment setup for urgent or ad-hoc experiments.",
+      "businessValueZh": "支持直接从场区发起实验，无需桌面端。加速紧急或临时实验的创建。",
+      "keyFeatures": [
+        "Experiment code (auto-generated, readonly on App)",
+        "Growth stage selector (保育/育肥/保育到育肥)",
+        "Farm location selector (襄阳/内蒙古/东营)",
+        "Basic phase configuration",
+        "Next step CTA: navigate to experiment grouping"
+      ],
+      "keyFeaturesZh": [
+        "实验编号（自动生成，App 端只读）",
+        "生长阶段选择器（保育/育肥/保育到育肥）",
+        "实验场选择器（襄阳/内蒙古/东营）",
+        "基础阶段配置",
+        "下一步操作：进入实验分组"
+      ],
+      "dataSources": [
+        "Farm/location master data",
+        "Experiment code sequence generator",
+        "Experiment metadata table (write)"
+      ],
+      "dataSourcesZh": [
+        "实验场/地点主数据",
+        "实验编号序列生成器",
+        "实验元数据表（写入）"
+      ],
+      "futureRoadmap": "Phase 3: QR code scan to auto-fill farm/location from physical farm signage.",
+      "futureRoadmapZh": "Phase 3：扫码自动填充场区/地点（从物理场区标识牌）。"
+    },
+    {
+      "pageId": "app-experiment-grouping",
+      "pageTitle": "Experiment Grouping (App)",
+      "pageTitleZh": "实验分组（移动端）",
+      "platform": "app",
+      "route": "/app/experiment/:id/grouping",
+      "isLanding": false,
+      "purpose": "Mobile interface for farm manager to upload and confirm treatment group assignments. Complementary to the Web grouping page — Web for configuration, App for on-site confirmation.",
+      "purposeZh": "场长上传和确认处理组分配的移动端界面。与 Web 端分组页面互补——Web 端配置，App 端现场确认。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Farm manager can verify group-to-pen mapping while physically standing in the barn, ensuring accuracy between digital configuration and physical reality.",
+      "businessValueZh": "场长可以在猪舍现场核实分组与栏位映射，确保数字配置与物理实际一致。",
+      "keyFeatures": [
+        "Treatment group list with assignment status (已分配/待分配)",
+        "Building/unit/pen assignment per group",
+        "Pig count per group",
+        "Confirm grouping button (场长确认)",
+        "Upload capability for grouping data"
+      ],
+      "keyFeaturesZh": [
+        "处理组列表及分配状态（已分配/待分配）",
+        "每组栋-单元-栏位分配",
+        "每组猪只数量",
+        "确认分组按钮（场长确认）",
+        "分组数据上传功能"
+      ],
+      "dataSources": [
+        "Farm/building/unit/pen master data",
+        "Group assignment table (read/write)",
+        "Experiment metadata"
+      ],
+      "dataSourcesZh": [
+        "场区/栋/单元/栏位主数据",
+        "分组分配表（读/写）",
+        "实验元数据"
+      ],
+      "futureRoadmap": "Phase 3: Barcode/QR scan per pen to confirm assignment in real-time at the pen.",
+      "futureRoadmapZh": "Phase 3：每栏扫码实时确认分配。"
+    },
+    {
+      "pageId": "app-daily-records",
+      "pageTitle": "Daily Records / Daily Patrol",
+      "pageTitleZh": "日常巡栏记录",
+      "platform": "app",
+      "route": "/app/experiment/:id/records",
+      "isLanding": false,
+      "purpose": "Core daily recording interface for farm managers and technicians. Central hub for all on-site data collection during routine barn patrol. Supports switching between data types (death/cull, feed, environment, medicine, diarrhea, weight) with standardized forms.",
+      "purposeZh": "场长和技术员的核心日常记录界面。日常巡栏期间所有现场数据采集的中心枢纽。支持在数据类型（死淘、采食、环控、药品、腹泻、称重）之间切换并使用标准化表单。",
+      "targetUsers": ["farm-manager", "technician"],
+      "targetUsersZh": ["场长", "技术员"],
+      "businessValue": "Replaces paper notebooks and Excel with standardized, validated forms directly at the point of data generation. Reduces transcription errors and ensures field-level validation at entry.",
+      "businessValueZh": "用标准化、带校验的表单取代纸质记录本和 Excel，在数据产生的现场直接录入。减少转录错误，确保录入时的字段级校验。",
+      "keyFeatures": [
+        "Experiment header card: code, location, growth stage, current stage, progress",
+        "Stage progress indicator (current step title, progress bar)",
+        "Pen initial info summary (栏位初始信息)",
+        "Tab-based record type switching: 死淘, 采食, 环控, 药品疫苗, 腹泻, 称重",
+        "Standardized forms per type with field validation (type, mandatory, range, chronological)",
+        "死亡记录 form: date, pen, death count, weight, gender, reason (multi-select with 'other'), days, cumulative auto-calculation",
+        "淘汰记录 form: date, pen, cull count, weight, gender, days, cumulative auto-calculation",
+        "采食记录 form: date, pen, feed amount (kg)",
+        "环控记录 form: temperature, humidity, ventilation",
+        "药品疫苗记录 form: type, dosage, date, batch",
+        "腹泻记录 form: head count, severity, duration",
+        "称重记录 form: individual/group weight",
+        "Add/delete record rows per data type",
+        "Date display for current recording session",
+        "Edit dialog for modifying existing records"
+      ],
+      "keyFeaturesZh": [
+        "实验头部卡片：编号、地点、生长阶段、当前阶段、进度",
+        "阶段进度指示器（当前步骤标题、进度条）",
+        "栏位初始信息摘要",
+        "基于 Tab 的记录类型切换：死淘、采食、环控、药品疫苗、腹泻、称重",
+        "每种类型的标准化表单及字段校验（类型、必填、范围、时间顺序）",
+        "死亡记录表单：日期、栏位、死亡数量、重量、性别、原因（多选含「其他」）、天数、自动计算累计",
+        "淘汰记录表单：日期、栏位、淘汰数量、重量、性别、天数、自动计算累计",
+        "采食记录表单：日期、栏位、饲喂量(kg)",
+        "环控记录表单：温度、湿度、通风",
+        "药品疫苗记录表单：类型、剂量、日期、批次",
+        "腹泻记录表单：头数、严重程度、持续时间",
+        "称重记录表单：个体/群体重量",
+        "每种数据类型可增加/删除记录行",
+        "当前记录会话的日期显示",
+        "修改已有记录的编辑对话框"
+      ],
+      "dataSources": [
+        "Daily records table per data domain (write)",
+        "Pen master data (pen list with building/unit/pen hierarchy)",
+        "Experiment metadata + stage state (context header)",
+        "Cumulative calculation engine (auto-sum previous records)",
+        "Audit log (operator, timestamp, source per record)"
+      ],
+      "dataSourcesZh": [
+        "每个数据域的日常记录表（写入）",
+        "栏位主数据（栋-单元-栏位层级）",
+        "实验元数据 + 阶段状态（上下文头部）",
+        "累计计算引擎（自动汇总历史记录）",
+        "审计日志（每条记录的操作人、时间戳、来源）"
+      ],
+      "futureRoadmap": "Phase 2: Voice-to-text for reason/notes fields. Phase 3: Offline recording with sync-when-online. Phase 4: AI data quality suggestions during entry (e.g., 'this weight is 30% below average for this stage — confirm?').",
+      "futureRoadmapZh": "Phase 2：原因/备注字段语音转文字。Phase 3：离线记录+联网时同步。Phase 4：录入时 AI 数据质量建议（如「该体重低于本阶段平均值 30%——确认？」）。"
+    },
+    {
+      "pageId": "app-daily-records-auto-sync",
+      "pageTitle": "Daily Records — Auto Sync",
+      "pageTitleZh": "日常数据 — 自动同步",
+      "platform": "app",
+      "route": "/app/experiment/:id/records/auto-sync",
+      "isLanding": false,
+      "purpose": "Review interface for data automatically ingested from external farm systems (feeders, environmental sensors, etc.). Farm manager validates synced data and corrects anomalies before committing to experiment records.",
+      "purposeZh": "从外部场区系统（饲喂器、环控传感器等）自动接入数据的审核界面。场长在提交至实验记录前校验同步数据并修正异常。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Reduces manual data entry for farms with automated feeding/environmental systems. Human-in-the-loop validation ensures auto-synced data quality before it enters experiment analysis.",
+      "businessValueZh": "减少配备自动化饲喂/环控系统场区的手工数据录入。人机协同校验确保自动同步数据在进入实验分析前的质量。",
+      "keyFeatures": [
+        "Synced data preview grouped by data type and pen",
+        "Anomaly highlighting (values flagged by range rules)",
+        "Inline edit capability for flagged records",
+        "Batch accept/reject for synced records",
+        "Sync source and timestamp display per record"
+      ],
+      "keyFeaturesZh": [
+        "按数据类型和栏位分组的同步数据预览",
+        "异常高亮（被范围规则标记的值）",
+        "被标记记录的内联编辑功能",
+        "同步记录的批量接受/拒绝",
+        "每条记录的同步来源和时间戳显示"
+      ],
+      "dataSources": [
+        "External farm system data feeds (feeders, environmental sensors)",
+        "Data validation rules engine (range checks)",
+        "Daily records table (write, after review)"
+      ],
+      "dataSourcesZh": [
+        "外部场区系统数据源（饲喂器、环控传感器）",
+        "数据校验规则引擎（范围检查）",
+        "日常记录表（审核后写入）"
+      ],
+      "futureRoadmap": "Phase 3: Auto-accept records within normal range (reduce review burden). Phase 4: ML-based anomaly detection replacing static threshold rules.",
+      "futureRoadmapZh": "Phase 3：正常范围内记录自动接受（减少审核负担）。Phase 4：基于机器学习的异常检测替代静态阈值规则。"
+    },
+    {
+      "pageId": "app-daily-records-batch-import",
+      "pageTitle": "Daily Records — Batch Import",
+      "pageTitleZh": "日常数据 — 批量导入",
+      "platform": "app",
+      "route": "/app/experiment/:id/records/batch-import",
+      "isLanding": false,
+      "purpose": "Mobile interface for batch Excel data import. Farm manager downloads experiment-specific template, fills data offline in Excel, uploads with validation. Bridges the Excel-to-platform transition for farms with existing Excel workflows.",
+      "purposeZh": "批量 Excel 数据导入的移动端界面。场长下载实验专用模板，在 Excel 中离线填写数据，带校验上传。为已有 Excel 工作流的场区搭建过渡桥梁。",
+      "targetUsers": ["farm-manager", "phd"],
+      "targetUsersZh": ["场长", "博士"],
+      "businessValue": "Provides a migration path for farms that have existing Excel data or prefer batch entry for certain data types. Reduces friction during platform adoption.",
+      "businessValueZh": "为已有 Excel 数据或偏好批量录入的场区提供迁移路径。降低平台采纳过程中的阻力。",
+      "keyFeatures": [
+        "Template download button (experiment-specific, pre-filled with pen list and date range)",
+        "File upload with drag-and-drop or file picker",
+        "Upload validation: field type check, range check, mandatory field check",
+        "Validation error summary with row-level error details",
+        "Import preview before commit",
+        "Import history log"
+      ],
+      "keyFeaturesZh": [
+        "模板下载按钮（实验专用，预填栏位列表和日期范围）",
+        "文件上传（拖拽或文件选择器）",
+        "上传校验：字段类型检查、范围检查、必填项检查",
+        "带行级错误详情的校验错误摘要",
+        "提交前导入预览",
+        "导入历史日志"
+      ],
+      "dataSources": [
+        "Excel template generator (experiment metadata → template)",
+        "Upload validation engine",
+        "Daily records table (write, after validation)",
+        "Import log table"
+      ],
+      "dataSourcesZh": [
+        "Excel 模板生成器（实验元数据 → 模板）",
+        "上传校验引擎",
+        "日常记录表（校验后写入）",
+        "导入日志表"
+      ],
+      "futureRoadmap": "Phase 2: Web-based batch import with larger file support. Phase 3: Auto-detect and map column headers from legacy Excel formats.",
+      "futureRoadmapZh": "Phase 2：Web 端批量导入，支持更大文件。Phase 3：自动检测并映射历史 Excel 格式的列头。"
+    },
+    {
+      "pageId": "app-stage-end-submit",
+      "pageTitle": "Stage End Submit",
+      "pageTitleZh": "阶段结束提交",
+      "platform": "app",
+      "route": "/app/experiment/:id/stage/:stageId/submit",
+      "isLanding": false,
+      "purpose": "Farm manager submits a completed stage for PhD review. Triggers stage data completeness validation, packages all stage records, and transitions stage status from 进行中 to 待审核.",
+      "purposeZh": "场长提交已完成阶段供博士审核。触发阶段数据完整性校验，打包所有阶段记录，将阶段状态从「进行中」转为「待审核」。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Formalizes the handoff between farm execution and PhD analysis. Ensures no stage proceeds to analysis without explicit farm manager sign-off and completeness check.",
+      "businessValueZh": "正式化现场执行与博士分析之间的交接。确保没有阶段在未经场长明确签核和完整性检查的情况下进入分析。",
+      "keyFeatures": [
+        "Stage data summary across all record types",
+        "Data completeness check (all pens, all days, all required fields)",
+        "Missing data warnings with specific gaps highlighted",
+        "Submit confirmation with notes field",
+        "Status transition: 进行中 → 待审核",
+        "Submission timestamp and submitter identity recorded"
+      ],
+      "keyFeaturesZh": [
+        "所有记录类型的阶段数据汇总",
+        "数据完整性检查（所有栏位、所有天数、所有必填字段）",
+        "缺失数据警告，高亮具体缺口",
+        "带备注字段的提交确认",
+        "状态转换：进行中 → 待审核",
+        "提交时间戳和提交人身份记录"
+      ],
+      "dataSources": [
+        "All daily records for the stage (aggregated)",
+        "Data completeness scoring engine",
+        "Stage state machine",
+        "Audit log"
+      ],
+      "dataSourcesZh": [
+        "本阶段所有日常记录（汇总）",
+        "数据完整度评分引擎",
+        "阶段状态机",
+        "审计日志"
+      ],
+      "futureRoadmap": "Phase 2: Auto-prevent submission if completeness below threshold. Phase 3: Batch stage-end submit for multiple experiments.",
+      "futureRoadmapZh": "Phase 2：完整度低于阈值时自动阻止提交。Phase 3：多个实验批量阶段结束提交。"
+    },
+    {
+      "pageId": "app-stage-confirm",
+      "pageTitle": "Stage Confirm",
+      "pageTitleZh": "阶段确认",
+      "platform": "app",
+      "route": "/app/experiment/:id/stage/:stageId/confirm",
+      "isLanding": false,
+      "purpose": "Farm manager views PhD review result for a submitted stage. If approved, the stage is confirmed as 已结束. If rejected, farmer sees rejection reason and enters data correction workflow.",
+      "purposeZh": "场长查看博士对已提交阶段的审核结果。若通过，阶段确认「已结束」。若驳回，场长查看驳回原因并进入数据修正流程。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Closes the feedback loop between PhD review and farm correction. Provides clear accountability: who approved/rejected, when, and why.",
+      "businessValueZh": "闭合博士审核与现场修正之间的反馈循环。提供清晰的问责：谁批准/驳回、何时、为什么。",
+      "keyFeatures": [
+        "Review result display: 通过 (approved) or 驳回 (rejected)",
+        "Rejection reason and feedback notes from PhD",
+        "If approved: stage status 待审核 → 已结束, next stage initiation prompt",
+        "If rejected: direct link to data correction (navigate to daily records for the stage)",
+        "Review timestamp and reviewer identity"
+      ],
+      "keyFeaturesZh": [
+        "审核结果显示：通过或驳回",
+        "博士的驳回原因和反馈备注",
+        "若通过：阶段状态 待审核 → 已结束，提示启动下一阶段",
+        "若驳回：直接链接到数据修正（导航至该阶段的日常记录）",
+        "审核时间戳和审核人身份"
+      ],
+      "dataSources": [
+        "Stage review decision (from PhD/Web)",
+        "Stage state machine",
+        "Audit log"
+      ],
+      "dataSourcesZh": [
+        "阶段审核决定（来自博士/Web端）",
+        "阶段状态机",
+        "审计日志"
+      ],
+      "futureRoadmap": "Phase 2: Push notification when PhD completes review. Phase 3: Inline data correction without leaving the confirm screen.",
+      "futureRoadmapZh": "Phase 2：博士完成审核时推送通知。Phase 3：无需离开确认界面即可内联修正数据。"
+    },
+    {
+      "pageId": "app-experiment-end",
+      "pageTitle": "Experiment End",
+      "pageTitleZh": "实验结束",
+      "platform": "app",
+      "route": "/app/experiment/:id/end",
+      "isLanding": false,
+      "purpose": "Farm manager views final experiment close-out status on mobile. Confirms that all stages are complete and the experiment has been archived by the PhD. Read-only summary view.",
+      "purposeZh": "场长在移动端查看最终实验结栏状态。确认所有阶段已完成、实验已被博士归档。只读汇总视图。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Gives farm manager visibility into experiment completion status. Marks the formal end of on-site responsibilities for the experiment.",
+      "businessValueZh": "让场长了解实验完成状态。标志着该实验现场职责的正式结束。",
+      "keyFeatures": [
+        "Experiment summary: code, location, growth stage, total duration",
+        "All stages summary with status per stage",
+        "Final merge data summary (key totals across all stages)",
+        "Experiment status: 已归档",
+        "Link to final report (redirect to Web or view on App)"
+      ],
+      "keyFeaturesZh": [
+        "实验摘要：编号、地点、生长阶段、总周期",
+        "所有阶段汇总及各阶段状态",
+        "最终合并数据摘要（跨所有阶段的关键汇总）",
+        "实验状态：已归档",
+        "最终报告链接（跳转 Web 端或在 App 端查看）"
+      ],
+      "dataSources": [
+        "Experiment metadata",
+        "Stage state machine (all stages — must be 已结束)",
+        "Final merge dataset",
+        "Experiment archive status"
+      ],
+      "dataSourcesZh": [
+        "实验元数据",
+        "阶段状态机（所有阶段——必须为已结束）",
+        "最终合并数据集",
+        "实验归档状态"
+      ],
+      "futureRoadmap": "Phase 2: App-side final report preview. Phase 3: Share experiment summary via WeChat to stakeholders.",
+      "futureRoadmapZh": "Phase 2：App 端最终报告预览。Phase 3：通过微信向利益相关方分享实验摘要。"
+    },
+    {
+      "pageId": "app-data-alerts",
+      "pageTitle": "Data Alerts",
+      "pageTitleZh": "数据预警",
+      "platform": "app",
+      "route": "/app/alerts",
+      "isLanding": false,
+      "purpose": "Mobile alert inbox for anomaly notifications. Farm managers and technicians receive push notifications for detected anomalies, review relevant reports, optionally add improvement notes, and track improvement outcomes.",
+      "purposeZh": "异常通知的移动端预警收件箱。场长和技术员接收检测到的异常推送通知，查看相关报表，可选备注改善建议，并跟踪改善结果。",
+      "targetUsers": ["farm-manager", "technician"],
+      "targetUsersZh": ["场长", "技术员"],
+      "businessValue": "Proactive anomaly detection with closed-loop tracking. Moves from reactive 'discover problem during report review' to proactive 'alerted when anomaly occurs' with documented resolution.",
+      "businessValueZh": "主动异常检测及闭环跟踪。从被动的「报表审查时发现问题」转变为主动的「异常发生时即预警」，并记录解决过程。",
+      "keyFeatures": [
+        "Alert list: time, experiment, pen, anomaly type, severity, description",
+        "Severity classification badges (high/medium/low)",
+        "Push notification on new anomaly detection",
+        "Drill-down from alert to relevant report/chart",
+        "Improvement note annotation (text field per alert)",
+        "Improvement tracking status: 待处理/处理中/已解决",
+        "Alert history filterable by experiment, type, status"
+      ],
+      "keyFeaturesZh": [
+        "预警列表：时间、实验、栏位、异常类型、严重程度、描述",
+        "严重程度分类标签（高/中/低）",
+        "新异常检测时的推送通知",
+        "从预警下钻至相关报表/图表",
+        "改善建议备注（每条预警的文本字段）",
+        "改善跟踪状态：待处理/处理中/已解决",
+        "可按实验、类型、状态筛选的预警历史"
+      ],
+      "dataSources": [
+        "Anomaly detection engine (rule-based, all data domains)",
+        "Alert table (read/write status and notes)",
+        "Push notification service",
+        "Relevant report data (for drill-down context)"
+      ],
+      "dataSourcesZh": [
+        "异常检测引擎（规则驱动，所有数据域）",
+        "预警表（读/写状态和备注）",
+        "推送通知服务",
+        "相关报表数据（用于下钻上下文）"
+      ],
+      "futureRoadmap": "Phase 2: Alert severity auto-escalation if not addressed within time window. Phase 3: ML-based anomaly detection replacing static rules. Phase 4: Predictive alerts (forecast anomaly before it occurs).",
+      "futureRoadmapZh": "Phase 2：超时未处理预警自动升级。Phase 3：基于机器学习的异常检测替代静态规则。Phase 4：预测性预警（异常发生前预测）。"
+    },
+    {
+      "pageId": "app-data-analysis",
+      "pageTitle": "Data Analysis (App)",
+      "pageTitleZh": "数据分析（移动端）",
+      "platform": "app",
+      "route": "/app/experiment/:id/analysis",
+      "isLanding": false,
+      "purpose": "Mobile-optimized data analysis view for quick in-field reference. Provides stage-level and experiment-level summaries with basic charts. Not intended to replace the full Web analysis experience.",
+      "purposeZh": "移动端优化的数据分析视图，供现场快速参考。提供阶段级和实验级汇总及基础图表。不旨在替代 Web 端的完整分析体验。",
+      "targetUsers": ["farm-manager"],
+      "targetUsersZh": ["场长"],
+      "businessValue": "Farm manager can check trends and verify data quality while still in the barn — enabling immediate follow-up rather than discovering issues later at a desktop.",
+      "businessValueZh": "场长可在猪舍内即查看趋势并验证数据质量——支持立即跟进，而非事后在桌面端发现问题。",
+      "keyFeatures": [
+        "Experiment-level key metric summary",
+        "Stage-level data summaries",
+        "Basic trend charts (mobile-optimized, simplified)",
+        "Data completeness dashboard per stage",
+        "Quick comparison: current stage vs previous stage"
+      ],
+      "keyFeaturesZh": [
+        "实验级关键指标汇总",
+        "阶段级数据汇总",
+        "基础趋势图表（移动端优化，简化版）",
+        "每阶段数据完整度仪表盘",
+        "快速对比：当前阶段 vs 上一阶段"
+      ],
+      "dataSources": [
+        "Daily records (aggregated per stage and experiment)",
+        "Data completeness scoring engine",
+        "Stage state machine (stage context)"
+      ],
+      "dataSourcesZh": [
+        "日常记录（按阶段和实验汇总）",
+        "数据完整度评分引擎",
+        "阶段状态机（阶段上下文）"
+      ],
+      "futureRoadmap": "Phase 3: Interactive drill-down charts on mobile. Phase 4: Voice query ('show me mortality trend for this week').",
+      "futureRoadmapZh": "Phase 3：移动端交互式下钻图表。Phase 4：语音查询（「显示本周死淘趋势」）。"
+    },
+    {
+      "pageId": "app-analysis-report",
+      "pageTitle": "Analysis Report (App)",
+      "pageTitleZh": "报表分析（移动端）",
+      "platform": "app",
+      "route": "/app/experiment/:id/report",
+      "isLanding": false,
+      "purpose": "Mobile access to pre-built experiment reports. Allows farm managers and PhDs to view reports on-the-go. Optimized for reading and sharing, not heavy analysis.",
+      "purposeZh": "移动端访问预置实验报表。允许场长和博士随时随地查看报表。优化阅读和分享体验，非重度分析。",
+      "targetUsers": ["farm-manager", "phd"],
+      "targetUsersZh": ["场长", "博士"],
+      "businessValue": "Enables report consumption outside the office — during farm visits, meetings, or while traveling. Extends the reach of experiment insights.",
+      "businessValueZh": "支持在办公室外消费报表——场区走访、会议或出差途中。扩展实验洞察的触达范围。",
+      "keyFeatures": [
+        "8 report types accessible (same as Web but mobile-optimized)",
+        "PDF share/export",
+        "Report view with pinch-to-zoom charts",
+        "Quick navigation between report types",
+        "Offline-cached last-viewed report"
+      ],
+      "keyFeaturesZh": [
+        "8 种报表可访问（同 Web 端，移动端优化）",
+        "PDF 分享/导出",
+        "报表查看支持捏合缩放图表",
+        "报表类型间快速切换",
+        "最近查看报表离线缓存"
+      ],
+      "dataSources": [
+        "Report generation engine (same as Web)",
+        "All experiment data (daily records, metadata, analysis results)"
+      ],
+      "dataSourcesZh": [
+        "报表生成引擎（同 Web 端）",
+        "所有实验数据（日常记录、元数据、分析结果）"
+      ],
+      "futureRoadmap": "Phase 3: WeChat mini-program report sharing. Phase 4: Voice-narrated report summary.",
+      "futureRoadmapZh": "Phase 3：微信小程序报表分享。Phase 4：语音播报报表摘要。"
+    }
+  ]
+}

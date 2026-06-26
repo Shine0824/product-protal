@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>猪实验管理系统 - App原型</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #222; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+    .app-wrap { width: 390px; height: 844px; background: #f5f6f8; border-radius: 32px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: relative; display: flex; flex-direction: column; }
+
+    /* Status Bar */
+    .status-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 12px; font-weight: 600; color: #333; flex-shrink: 0; }
+
+    /* Page area - scrollable */
+    .page-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #f5f6f8; }
+
+    /* Bottom Tab Bar */
+    .tab-bar { height: 64px; background: #fff; border-top: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-around; padding-bottom: 8px; flex-shrink: 0; }
+    .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; color: #999; cursor: pointer; padding: 6px 16px; user-select: none; transition: color 0.2s; }
+    .tab-item.active { color: #1ab394; }
+    .tab-item .ic { font-size: 22px; }
+
+    /* ===== Shared Components ===== */
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; }
+    .nav-bar .back { font-size: 16px; color: #888; cursor: pointer; }
+    .nav-bar .title { font-size: 16px; font-weight: 700; color: #333; }
+    .nav-bar .right { font-size: 12px; color: #1ab394; font-weight: 600; cursor: pointer; }
+    .nav-bar .avatar { width: 30px; height: 30px; border-radius: 50%; background: #1ab394; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+    .search-row { display: flex; gap: 6px; padding: 10px 16px; background: #fff; flex-wrap: wrap; align-items: center; border-bottom: 1px solid #f0f0f0; }
+    .search-row select, .search-row input { font-size: 10px; padding: 6px 8px; border: 1px solid #e0e0e0; border-radius: 6px; background: #fafafa; color: #333; flex: 1; min-width: 0; }
+    .search-row .btn { font-size: 10px; padding: 6px 12px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-search { background: #1ab394; color: #fff; }
+    .btn-reset { background: #f0f0f0; color: #666; }
+
+    .stat-pills { display: flex; gap: 6px; padding: 10px 16px; background: #fff; overflow-x: auto; }
+    .stat-pill { flex-shrink: 0; padding: 6px 12px; border-radius: 16px; font-size: 10px; background: #f0f0f0; color: #888; white-space: nowrap; cursor: pointer; border: none; transition: all 0.2s; }
+    .stat-pill.on { background: #1ab394; color: #fff; }
+    .stat-pill .n { font-weight: 700; }
+
+    /* Experiment card */
+    .cards-area { padding: 10px 16px; }
+    .exp-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); cursor: pointer; position: relative; overflow: hidden; transition: transform 0.15s; }
+    .exp-card:active { transform: scale(0.98); }
+    .exp-card .left-strip { position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 0 2px 2px 0; }
+    .left-strip.green { background: #1ab394; }
+    .left-strip.orange { background: #f59e0b; }
+    .left-strip.red { background: #f56c6c; }
+    .exp-card .r1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .exp-card .r1 .code { font-size: 13px; font-weight: 700; color: #333; }
+    .exp-card .r2 { font-size: 10px; color: #888; margin-bottom: 4px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .exp-card .r3 { font-size: 10px; color: #999; margin-bottom: 8px; }
+    .exp-card .r4 { display: flex; justify-content: space-between; align-items: center; }
+    .stag { font-size: 9px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .stag.ing { background: #e3f2fd; color: #1976d2; }
+    .stag.done { background: #e8f5e9; color: #2e7d32; }
+    .stag.wait { background: #fff3e0; color: #f57c00; }
+    .mtag { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #f0f0f0; color: #666; }
+    .entry-btn { font-size: 10px; padding: 6px 16px; border-radius: 16px; background: #1ab394; color: #fff; font-weight: 600; border: none; cursor: pointer; }
+    .entry-btn:active { background: #17a689; }
+
+    /* Species grid */
+    .species-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; }
+    .species-card { background: #fff; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #e8e8e8; cursor: pointer; transition: all 0.15s; }
+    .species-card:active { transform: scale(0.97); }
+    .species-card .ic { font-size: 30px; margin-bottom: 6px; }
+    .species-card .nm { font-size: 12px; font-weight: 700; color: #333; }
+    .species-card .sub { font-size: 9px; color: #999; margin-top: 2px; }
+    .species-card.pig { border: 2px solid #1ab394; background: #e8f5e9; }
+
+    /* Dashboard sections */
+    .dash-sec { background: #fff; border-radius: 12px; margin: 8px 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .dash-hd { padding: 12px 14px; font-size: 13px; font-weight: 700; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
+    .dash-bd { padding: 10px 14px; }
+
+    .stage-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .stage-pill { flex-shrink: 0; padding: 8px 14px; border-radius: 10px; font-size: 10px; text-align: center; min-width: 60px; background: #f5f5f5; border: 1px solid #e0e0e0; cursor: pointer; transition: all 0.15s; }
+    .stage-pill:active { transform: scale(0.95); }
+    .stage-pill .nn { font-size: 16px; font-weight: 700; }
+    .stage-pill .ll { font-size: 9px; color: #888; }
+    .stage-pill.sel { background: #e8f5e9; border-color: #1ab394; }
+    .stage-pill.sel .nn, .stage-pill.sel .ll { color: #1ab394; }
+
+    .mini-exp { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #f8f9fa; border-radius: 8px; margin-top: 6px; font-size: 10px; cursor: pointer; transition: background 0.15s; }
+    .mini-exp:active { background: #e8f5e9; }
+    .mini-exp .code { font-weight: 600; color: #1ab394; flex: 1; font-size: 11px; }
+    .mini-exp .go { font-size: 9px; padding: 3px 10px; border-radius: 10px; background: #1ab394; color: #fff; font-weight: 600; }
+
+    .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .mod-btn { text-align: center; padding: 10px 6px; border-radius: 8px; font-size: 10px; background: #f8f9fa; border: 1px solid #eee; cursor: pointer; transition: all 0.15s; }
+    .mod-btn:active { background: #e8f5e9; border-color: #1ab394; }
+    .mod-btn .em { font-size: 20px; display: block; margin-bottom: 3px; }
+
+    .alert-row { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 6px; font-size: 10px; margin-bottom: 4px; cursor: pointer; transition: opacity 0.15s; }
+    .alert-row:active { opacity: 0.7; }
+    .alert-row.red { background: #fce4ec; }
+    .alert-row.yel { background: #fff3cd; }
+
+    /* Recording page */
+    .rec-bar { padding: 10px 16px; background: #fff; border-bottom: 2px solid #1ab394; }
+    .rec-bar .el { font-size: 10px; color: #888; margin-bottom: 4px; }
+    .rec-bar .el span { color: #1ab394; font-weight: 700; }
+    .rec-bar .pl { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .rec-bar .pl .pv { font-weight: 700; border-bottom: 2px dashed #1ab394; padding: 2px 4px; cursor: pointer; }
+
+    .mod-tabs-wrap { padding: 8px 16px; background: #fff; border-bottom: 1px solid #eee; }
+    .mod-tabs-wrap .hint { font-size: 9px; color: #999; margin-bottom: 6px; }
+    .mod-tabs-wrap .tabs-row { display: flex; gap: 4px; overflow-x: auto; }
+    .mod-tabs-wrap .mtab { flex-shrink: 0; padding: 6px 10px; border-radius: 14px; font-size: 10px; background: #f0f0f0; color: #888; white-space: nowrap; cursor: pointer; transition: all 0.15s; }
+    .mod-tabs-wrap .mtab.sel { background: #e8f5e9; color: #1ab394; font-weight: 600; }
+    .mod-tabs-wrap .mtab .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 3px; background: #ccc; }
+    .mod-tabs-wrap .mtab .dot.filled { background: #1ab394; }
+    .mod-tabs-wrap .mtab .ck { font-size: 9px; color: #1ab394; }
+
+    .rec-content { padding: 10px 16px; min-height: 200px; }
+    .rec-submitted { background: #f8f9fa; padding: 8px 10px; border-radius: 6px; font-size: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .rec-submitted:active { background: #e8f5e9; }
+    .rec-submitted .edit { color: #3b82f6; font-weight: 600; }
+    .rec-fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px; margin-top: 8px; }
+    .rec-fgrid .fld {}
+    .rec-fgrid .fld .lbl { color: #888; margin-bottom: 4px; }
+    .rec-fgrid .fld .val { background: #f8f8f8; padding: 8px; border-radius: 6px; cursor: pointer; }
+    .rec-fgrid .fld .val.input { background: #fff; border: 1px solid #e0e0e0; }
+    .rec-fgrid .fld .val.search { color: #1ab394; }
+    .rec-fgrid .fld .val input, .rec-fgrid .fld .val select { outline: none; }
+    .rec-fgrid .fld .val input:focus { border-color: #1ab394; }
+
+    .rec-footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #eee; background: #fff; position: sticky; bottom: 0; }
+    .rec-footer .draft { flex: 1; text-align: center; padding: 12px; background: #f5f5f5; border-radius: 8px; font-size: 13px; color: #666; cursor: pointer; border: none; }
+    .rec-footer .save { flex: 1; text-align: center; padding: 12px; background: #1ab394; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .rec-footer .draft:active { background: #e0e0e0; }
+    .rec-footer .save:active { background: #17a689; }
+
+    /* Stage flow bar */
+    .flow-bar { display: flex; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; overflow-x: auto; gap: 0; position: sticky; top: 0; z-index: 5; }
+    .flow-node { flex-shrink: 0; min-width: 80px; padding: 8px 6px; text-align: center; border-radius: 8px; font-size: 10px; font-weight: 600; border: 2px solid #e0e0e0; background: #fafafa; cursor: pointer; transition: all 0.15s; }
+    .flow-node.done { border-color: #1ab394; background: #e8f5e9; color: #1ab394; }
+    .flow-node.current { border-color: #1ab394; background: #1ab394; color: #fff; }
+    .flow-node.locked { border-color: #e0e0e0; background: #f5f5f5; color: #ccc; }
+    .flow-arr { margin: 0 4px; color: #ccc; font-size: 12px; flex-shrink: 0; }
+    .flow-arr.done { color: #1ab394; }
+
+    /* Stage summary cards */
+    .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 0; }
+    .sum-card { padding: 12px; border-radius: 8px; text-align: center; color: #fff; font-size: 10px; }
+    .sum-card .sv { font-size: 22px; font-weight: 700; }
+    .sum-card .sl { font-size: 9px; opacity: 0.9; margin-top: 2px; }
+    .sum-card.g1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .sum-card.g2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .sum-card.g3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .sum-card.g4 { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; }
+
+    .form-section { background: #fff; border-radius: 12px; margin: 8px 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .form-section h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 10px; margin-bottom: 8px; }
+    .form-row .fl { }
+    .form-row .fl .ll { color: #888; margin-bottom: 3px; }
+    .form-row .fl input, .form-row .fl select { width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 10px; background: #fafafa; }
+
+    .report-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; }
+    .report-tab { flex-shrink: 0; padding: 6px 12px; border-radius: 14px; font-size: 10px; background: #f0f0f0; color: #888; cursor: pointer; border: none; white-space: nowrap; }
+    .report-tab.on { background: #1ab394; color: #fff; font-weight: 600; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+    .data-table th { background: #f5f5f5; padding: 6px 4px; font-weight: 600; border: 1px solid #e8e8e8; white-space: nowrap; }
+    .data-table td { padding: 6px 4px; border: 1px solid #e8e8e8; text-align: center; }
+
+    .empty-state { text-align: center; padding: 40px; color: #ccc; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+
+    .toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 100; pointer-events: none; animation: toastIn 0.3s, toastOut 0.3s 1.2s; }
+    @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(-10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+    .modal-sheet { width: 100%; background: #fff; border-radius: 16px 16px 0 0; padding: 20px 16px 30px; max-height: 60%; overflow-y: auto; animation: slideUp 0.25s; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-sheet h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+    .modal-opt { padding: 12px; font-size: 13px; border-bottom: 1px solid #f0f0f0; cursor: pointer; text-align: center; transition: background 0.15s; }
+    .modal-opt:active { background: #f5f5f5; }
+    .modal-opt.cancel { color: #999; margin-top: 8px; font-weight: 600; }
+    .modal-opt.sel { color: #1ab394; font-weight: 700; }
+
+    .confirm-dlg { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: flex; align-items: center; justify-content: center; }
+    .confirm-box { background: #fff; border-radius: 14px; padding: 24px 20px; width: 300px; text-align: center; }
+    .confirm-box h3 { font-size: 16px; margin-bottom: 8px; }
+    .confirm-box p { font-size: 12px; color: #888; margin-bottom: 18px; line-height: 1.6; }
+    .confirm-box textarea { width: 100%; min-height: 80px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 12px; margin-bottom: 14px; resize: vertical; }
+    .confirm-btns { display: flex; gap: 10px; }
+    .confirm-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .confirm-btns .btn-c { background: #f0f0f0; color: #666; }
+    .confirm-btns .btn-o { background: #1ab394; color: #fff; }
+    .confirm-btns button:active { opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+<div id="app" class="app-wrap">
+  <!-- Toast -->
+  <div v-if="toast" class="toast">{{ toast }}</div>
+
+  <!-- Status Bar -->
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <!-- ==================== VIEW: 实验管理 Tab ==================== -->
+  <div v-if="tab === 'exp'" class="page-area">
+    <div class="nav-bar">
+      <span></span>
+      <span class="title">实验管理</span>
+      <div class="avatar" @click="toastMsg('用户: 李永霞')">李</div>
+    </div>
+
+    <div class="search-row">
+      <select v-model="expFilter.search"><option value="">实验编号</option></select>
+      <select v-model="expFilter.location"><option value="">实验场</option><option>襄阳</option><option>内蒙古</option><option>东营</option></select>
+      <select v-model="expFilter.status"><option value="">状态</option><option>进行中</option><option>已完成</option><option>待开始</option></select>
+      <span class="btn btn-search" @click="toastMsg('搜索完成')">查询</span>
+      <span class="btn btn-reset" @click="expFilter={search:'',location:'',status:''};expStat='全部'">重置</span>
+    </div>
+
+    <div class="stat-pills">
+      <div v-for="s in expStats" :class="['stat-pill', {on: expStat === s}]" @click="expStat = s">
+        <span class="n">{{ s === '待提交' ? 1 : s === '进行中' ? 2 : s === '已完成' ? 1 : s === '待开始' ? 0 : 4 }}</span> {{ s }}
+      </div>
+    </div>
+
+    <div class="cards-area">
+      <div v-for="(exp, i) in filteredExperiments" :key="i" class="exp-card">
+        <div :class="['left-strip', exp.anomaly === 'high' ? 'red' : exp.anomaly === 'medium' ? 'orange' : 'green']"></div>
+        <div @click="goReport(exp)" style="cursor:pointer;">
+          <div class="r1"><span class="code">{{ exp.code }}</span></div>
+          <div class="r2">
+            <span>{{ exp.animalType }}</span><span>·</span>
+            <span>{{ exp.expType }}</span><span>·</span>
+            <span>{{ exp.location }}</span><span>·</span>
+            <span>COO: {{ exp.cooArea }}</span>
+          </div>
+          <div class="r2"><span>负责人: {{ exp.manager }}</span><span>项目成员: {{ exp.members }}</span></div>
+          <div class="r2"><span>实验周期: {{ exp.dateRange }}</span></div>
+          <div class="r2"><span>完整度 {{ exp.completeness }}%</span></div>
+        </div>
+        <div class="r4">
+          <div><span class="mtag">{{ exp.currentAction }}</span></div>
+          <span class="entry-btn" @click.stop="enterFlow(exp)">去录入 →</span>
+        </div>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+
+  <!-- ==================== VIEW: 工作台 Tab ==================== -->
+  <div v-if="tab === 'workbench'" class="page-area">
+    <template v-if="wbView === 'species'">
+      <div class="nav-bar"><span></span><span class="title">工作台</span><div class="avatar" @click="toastMsg('用户: 李永霞')">李</div></div>
+      <div style="padding:8px 16px;font-size:12px;color:#888;">选择动物类型进入</div>
+      <div class="species-grid">
+        <div class="species-card" @click="toastMsg('水产模块开发中')"><div class="ic">🐟</div><div class="nm">水产实验数据</div><div class="sub">鱼虾蟹贝 · 营养配方</div></div>
+        <div class="species-card" @click="toastMsg('家禽模块开发中')"><div class="ic">🐔</div><div class="nm">家禽实验数据</div><div class="sub">蛋鸡肉鸡 · 饲料营养</div></div>
+        <div class="species-card pig" @click="wbView = 'pig-dash'"><div class="ic">🐷</div><div class="nm">猪实验数据</div><div class="sub">饲料营养 · 保育/育肥</div></div>
+        <div class="species-card" @click="toastMsg('反刍模块开发中')"><div class="ic">🐄</div><div class="nm">反刍实验数据</div><div class="sub">奶牛肉牛 · 饲草营养</div></div>
+      </div>
+    </template>
+
+    <!-- 猪实验仪表盘 -->
+    <template v-if="wbView === 'pig-dash'">
+      <div class="nav-bar">
+        <span></span>
+        <span class="title">猪实验数据</span>
+        <span class="right" @click="toastMsg('进入实验基础配置')">⚙️配置</span>
+      </div>
+
+      <div class="dash-sec">
+        <div class="dash-hd"><span style="color:#667eea;">📊</span> 实验流程概览</div>
+        <div class="dash-bd">
+          <div class="stage-scroll">
+            <div v-for="sg in stageGroups" :class="['stage-pill', {sel: sg.key === selStage}]" @click="selStage = sg.key">
+              <div class="nn">{{ sg.count }}</div><div class="ll">{{ sg.label }}</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#888;margin-top:8px;">▼ {{ selStageLabel }} · {{ stageFilteredExps.length }}个实验</div>
+          <div v-for="exp in stageFilteredExps" :key="exp.code" class="mini-exp" @click="enterFlow(exp)">
+            <span class="code">{{ exp.code }}</span><span style="color:#888;">{{ exp.stageProgress.split('/')[0] }}</span><span class="go">去录入</span>
+          </div>
+          <div v-if="stageFilteredExps.length === 0" style="font-size:10px;color:#ccc;text-align:center;padding:10px;">暂无实验</div>
+        </div>
+      </div>
+
+      <div class="dash-sec">
+        <div class="dash-hd"><span style="color:#e65100;">✏️</span> 快捷录入 <span style="font-size:9px;color:#999;font-weight:400;">选模块 → 选实验</span></div>
+        <div class="dash-bd">
+          <div class="mod-grid">
+            <div v-for="m in quickModules" :key="m.id" class="mod-btn" @click="openQuickEntry(m)">
+              <span class="em">{{ m.emoji }}</span>{{ m.name }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-sec">
+        <div class="dash-hd"><span style="color:#c62828;">⚠️</span> 数据异常预警</div>
+        <div class="dash-bd">
+          <div class="alert-row red" @click="toastMsg('死淘数量超预警阈值')"><span>🔴</span><span style="flex:1;font-weight:600;">SWINE-NUR-XY-001</span><span>栋1-单元1-栏1 死淘超阈值</span><span style="color:#c62828;font-weight:600;">高</span></div>
+          <div class="alert-row yel" @click="toastMsg('舍内温度连续3小时超30℃')"><span>🟡</span><span style="flex:1;">SWINE-NUR-CD-004</span><span>舍温连续3h超30℃</span><span style="color:#856404;font-weight:600;">中</span></div>
+          <div style="text-align:right;font-size:9px;color:#1ab394;cursor:pointer;margin-top:4px;" @click="toastMsg('查看全部预警列表')">查看全部 →</div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:12px;margin:8px 16px;background:#fff;border-radius:10px;font-size:11px;border:1px solid #eee;cursor:pointer;" @click="tab='exp';toastMsg('可在实验管理卡片点击进入报告')">📊 数据报表</div>
+    </template>
+  </div>
+
+  <!-- ==================== VIEW: 实验流程 (分组/巡栏/结束/归档/结束) ==================== -->
+  <div v-if="tab === 'flow'" class="page-area">
+    <div class="nav-bar">
+      <span class="back" @click="backFromFlow">← {{ flowExp.code }}</span>
+      <span class="title">{{ flowStepLabel }}</span>
+      <span class="right" @click="goReport(flowExp)">📊报告</span>
+    </div>
+
+    <!-- 进度条 -->
+    <div class="flow-bar">
+      <template v-for="(step, idx) in flowSteps" :key="step.id">
+        <div :class="['flow-node', step.status]" @click="flowNodeClick(step)">
+          {{ step.name }}
+        </div>
+        <span v-if="idx < flowSteps.length - 1" :class="['flow-arr', step.status === 'done' ? 'done' : '']">→</span>
+      </template>
+    </div>
+
+    <!-- === 实验分组（只读展示） === -->
+    <div v-if="flowStep === 'group'" style="padding:16px;">
+      <div class="form-section">
+        <h3>实验信息</h3>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+          <div class="fl"><div class="ll">动物方向</div><div style="font-size:11px;font-weight:600;">猪</div></div>
+          <div class="fl"><div class="ll">实验类型</div><div style="font-size:11px;font-weight:600;">饲料营养实验</div></div>
+          <div class="fl"><div class="ll">生长阶段</div><div style="font-size:11px;font-weight:600;">保育</div></div>
+          <div class="fl"><div class="ll">实验场</div><div style="font-size:11px;font-weight:600;">DY</div></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>分组结果 <span style="font-size:9px;color:#999;font-weight:400;">（来自Web端配置）</span></h3>
+        <div class="summary-cards">
+          <div class="sum-card g1"><div class="sv">2</div><div class="sl">栋数</div></div>
+          <div class="sum-card g2"><div class="sv">4</div><div class="sl">单元数</div></div>
+          <div class="sum-card g3"><div class="sv">60</div><div class="sl">栏位数</div></div>
+          <div class="sum-card g4"><div class="sv">5</div><div class="sl">处理组</div></div>
+        </div>
+        <div style="overflow-x:auto;margin-top:10px;">
+          <table class="data-table">
+            <thead><tr><th>处理</th><th>区组</th><th>栋</th><th>单元</th><th>栏位</th><th>品系</th><th>性别</th><th>初始头数</th><th>初始均重</th></tr></thead>
+            <tbody>
+              <tr v-for="r in groupData" :key="r.pen"><td>{{ r.treatment }}</td><td>{{ r.block }}</td><td>{{ r.building }}</td><td>{{ r.unit }}</td><td>{{ r.pen }}</td><td>{{ r.strain }}</td><td>{{ r.gender }}</td><td>{{ r.headCount }}</td><td>{{ r.avgWeight }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="text-align:center;margin-top:12px;font-size:10px;color:#999;">分组数据由Web端配置同步，App端仅查看</div>
+      </div>
+    </div>
+
+    <!-- === 日常巡栏 === -->
+    <div v-if="flowStep === 'daily'">
+      <!-- 栏位锚定录入 -->
+      <div class="rec-bar">
+        <div class="el">实验: <span>{{ flowExp.code }}</span></div>
+        <div class="pl">
+          <span style="color:#888;">栏位:</span>
+          <span class="pv" @click="showPenPicker = true">{{ currentPenLabel }} ▼</span>
+          <span style="color:#888;margin-left:8px;">日期:</span>
+          <span>2026-06-01</span>
+        </div>
+      </div>
+
+      <div class="mod-tabs-wrap">
+        <div class="hint">记录类型（切换时栏位保持不变）</div>
+        <div class="tabs-row">
+          <div v-for="m in recordingModules" :class="['mtab', {sel: activeRecModule === m.id}]" @click="activeRecModule = m.id">
+            <span :class="['dot', {filled: penHasRecord(m.id)}]"></span>{{ m.name }}<span v-if="penHasRecord(m.id)" class="ck">✓</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rec-content">
+        <!-- 已提交记录列表 -->
+        <div v-for="(rec, idx) in penSubmittedRecords" :key="'sub'+idx" class="rec-submitted">
+          <span @click="editSubmittedRecord(idx)">{{ rec.summary }}</span>
+          <div style="display:flex;gap:8px;">
+            <span class="edit" @click.stop="editSubmittedRecord(idx)">编辑</span>
+            <span style="color:#f56c6c;font-weight:600;font-size:10px;cursor:pointer;" @click.stop="deleteSubmittedRecord(idx)">删除</span>
+          </div>
+        </div>
+
+        <!-- 草稿记录卡片（每条一条） -->
+        <div v-for="(row, ri) in moduleDraftRecords" :key="ri" style="background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #e0e0e0;position:relative;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:700;color:#333;">#{{ ri + 1 }} {{ activeRecModuleName }}记录</span>
+            <span style="font-size:10px;color:#f56c6c;cursor:pointer;" @click="removeDraftRecord(ri)">删除</span>
+          </div>
+
+          <!-- 死淘 -->
+          <div v-if="activeRecModule === 'death'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录日期 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div class="fld"><div class="lbl">当日死亡数量 *</div><div class="val input"><input placeholder="整数" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">当日死亡重量(Kg)</div><div class="val input"><input placeholder="两位小数" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">死亡性别</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>公</option><option>母</option></select></div></div>
+            <div class="fld"><div class="lbl">死亡原因</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;" multiple><option>疾病</option><option>外伤</option><option>营养不良</option><option>其他</option></select></div></div>
+            <div class="fld"><div class="lbl">当日淘汰数量</div><div class="val input"><input placeholder="整数" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">当日淘汰重量(Kg)</div><div class="val input"><input placeholder="两位小数" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">淘汰性别</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>公</option><option>母</option></select></div></div>
+            <div style="grid-column:1/-1;border-top:1px dashed #e0e0e0;margin:4px 0;padding-top:4px;font-size:9px;color:#999;">▸ 以下字段提交后自动计算</div>
+            <div class="fld"><div class="lbl">死亡猪只天数</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动计算</div></div>
+            <div class="fld"><div class="lbl">累计死亡数量</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动汇总</div></div>
+            <div class="fld"><div class="lbl">累计死亡重量(Kg)</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动汇总</div></div>
+            <div class="fld"><div class="lbl">淘汰猪只天数</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动计算</div></div>
+            <div class="fld"><div class="lbl">累计淘汰数量</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动汇总</div></div>
+            <div class="fld"><div class="lbl">累计淘汰重量(Kg)</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动汇总</div></div>
+            <div class="fld"><div class="lbl">当日存栏数量</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动计算</div></div>
+          </div>
+
+          <!-- 采食 -->
+          <div v-if="activeRecModule === 'feed'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录时间 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div class="fld" style="grid-column:1/-1;"><div class="lbl">饲喂量(Kg) *</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+          </div>
+
+          <!-- 腹泻 -->
+          <div v-if="activeRecModule === 'diarrhea'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录日期 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div class="fld"><div class="lbl">腹泻评分 *</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>0 — 正常</option><option>1 — 软粪</option><option>2 — 稀粪</option><option>3 — 水样粪便</option></select></div></div>
+            <div class="fld"><div class="lbl">腹泻头数</div><div class="val input"><input placeholder="整数" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">腹泻性别</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>公</option><option>母</option></select></div></div>
+            <div style="grid-column:1/-1;border-top:1px dashed #e0e0e0;margin:4px 0;padding-top:4px;font-size:9px;color:#999;">▸ 自动计算字段</div>
+            <div class="fld"><div class="lbl">腹泻日龄</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动计算</div></div>
+          </div>
+
+          <!-- 药品 -->
+          <div v-if="activeRecModule === 'medicine'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录时间 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div class="fld" style="grid-column:1/-1;"><div class="lbl">产品名称 *</div><div class="val search" @click="openProductSearch('medicine')" style="cursor:pointer;">{{ selectedMedicine ? selectedMedicine.name : '🔍 点击搜索药品库...' }}</div></div>
+            <div class="fld"><div class="lbl">药品状态</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>正常</option><option>使用中</option><option>已用完</option></select></div></div>
+            <div class="fld"><div class="lbl">猪只健康状况</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>健康</option><option>异常</option><option>需观察</option></select></div></div>
+            <div class="fld"><div class="lbl">治疗范围</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">给药途径</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>口服</option><option>注射</option><option>外用</option><option>其他</option></select></div></div>
+            <div class="fld" style="grid-column:1/-1;"><div class="lbl">用量 *</div><div class="val input"><input placeholder="请输入用量" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div style="grid-column:1/-1;border-top:1px dashed #e0e0e0;margin:4px 0;padding-top:4px;font-size:9px;color:#999;">▸ 选择产品后自动填充</div>
+            <div class="fld"><div class="lbl">产品代码</div><div class="val" :style="selectedMedicine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedMedicine ? selectedMedicine.code : '自动填充' }}</div></div>
+            <div class="fld"><div class="lbl">产品类别</div><div class="val" :style="selectedMedicine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedMedicine ? selectedMedicine.type : '自动填充' }}</div></div>
+            <div class="fld"><div class="lbl">产品规格</div><div class="val" :style="selectedMedicine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedMedicine ? selectedMedicine.spec : '自动填充' }}</div></div>
+            <div class="fld"><div class="lbl">规格单位</div><div class="val" :style="selectedMedicine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedMedicine ? selectedMedicine.specUnit : '自动填充' }}</div></div>
+            <div class="fld"><div class="lbl">供应商名称</div><div class="val" :style="selectedMedicine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedMedicine ? selectedMedicine.supplierName : '自动填充' }}</div></div>
+            <div class="fld"><div class="lbl">供应商代码</div><div class="val" :style="selectedMedicine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedMedicine ? selectedMedicine.supplierCode : '自动填充' }}</div></div>
+          </div>
+
+          <!-- 疫苗 -->
+          <div v-if="activeRecModule === 'vaccine'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录日期 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div class="fld" style="grid-column:1/-1;"><div class="lbl">产品名称 *</div><div class="val search" @click="openProductSearch('vaccine')" style="cursor:pointer;">{{ selectedVaccine ? selectedVaccine.name : '🔍 点击搜索疫苗库...' }}</div></div>
+            <div class="fld"><div class="lbl">疫苗状态</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>液体</option><option>固体</option></select></div></div>
+            <div class="fld"><div class="lbl">免疫范围</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">免疫途径</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option value="">请选择</option><option>肌肉注射</option><option>皮下注射</option><option>滴鼻</option><option>口服</option></select></div></div>
+            <div class="fld" style="grid-column:1/-1;"><div class="lbl">用量 *</div><div class="val input"><input placeholder="请输入用量" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div style="grid-column:1/-1;border-top:1px dashed #e0e0e0;margin:4px 0;padding-top:4px;font-size:9px;color:#999;">▸ 选择产品后自动填充</div>
+            <div class="fld"><div class="lbl">产品代码</div><div class="val" :style="selectedVaccine ? 'color:#333;font-weight:600;' : 'background:#f8f8f8;color:#bbb;'">{{ selectedVaccine ? selectedVaccine.code : '自动填充' }}</div></div>
+          </div>
+
+          <!-- 环控 -->
+          <div v-if="activeRecModule === 'environment'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录日期 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div style="grid-column:1/-1;font-size:10px;font-weight:700;color:#666;margin-top:4px;">💧 用水</div>
+            <div class="fld"><div class="lbl">日用水量(L/单元)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">预估猪只饮水量(L/只)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div style="grid-column:1/-1;font-size:10px;font-weight:700;color:#666;margin-top:4px;">🌡️ 温度</div>
+            <div class="fld"><div class="lbl">舍内最高温度(℃)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">舍内平均温度(℃)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">舍内最低温度(℃)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div style="grid-column:1/-1;font-size:10px;font-weight:700;color:#666;margin-top:4px;">💦 湿度</div>
+            <div class="fld"><div class="lbl">舍内最高湿度(%)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">舍内平均湿度(%)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">舍内最低湿度(%)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div style="grid-column:1/-1;font-size:10px;font-weight:700;color:#666;margin-top:4px;">📐 压力</div>
+            <div class="fld"><div class="lbl">最高压力(Pa)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">平均压力(Pa)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">最低压力(Pa)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+          </div>
+
+          <!-- 称重 -->
+          <div v-if="activeRecModule === 'weight'" class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+            <div class="fld"><div class="lbl">记录时间 *</div><div class="val input">2026-06-01</div></div>
+            <div class="fld"><div class="lbl">栋-单元-栏位</div><div class="val" style="color:#888;">{{ currentPenLabel }}</div></div>
+            <div class="fld"><div class="lbl">称重重量(Kg) *</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div class="fld"><div class="lbl">栏位余料(Kg)</div><div class="val input"><input placeholder="请输入" style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+            <div style="grid-column:1/-1;border-top:1px dashed #e0e0e0;margin:4px 0;padding-top:4px;font-size:9px;color:#999;">▸ 自动计算字段</div>
+            <div class="fld"><div class="lbl">当日存栏只均重(Kg)</div><div class="val" style="background:#f8f8f8;color:#bbb;">自动计算</div></div>
+          </div>
+        </div>
+
+        <!-- 添加行按钮 -->
+        <div style="text-align:center;padding:8px;margin-bottom:8px;border:1px dashed #1ab394;border-radius:8px;color:#1ab394;font-size:12px;font-weight:600;cursor:pointer;" @click="addDraftRecord">+ 添加行</div>
+      </div>
+
+      <div class="rec-footer">
+        <button class="draft" @click="toastMsg('草稿已保存')">保存草稿</button>
+        <button class="save" @click="submitDraftRecords">提交记录</button>
+      </div>
+    </div>
+
+    <!-- === 阶段结束 === -->
+    <div v-if="flowStep === 'stageEnd'" style="padding:16px;">
+      <div class="form-section">
+        <h3>阶段汇总 — {{ currentStageName }}</h3>
+        <div class="summary-cards">
+          <div class="sum-card g1"><div class="sv">33</div><div class="sl">阶段天数</div></div>
+          <div class="sum-card g2"><div class="sv">618</div><div class="sl">阶段增重(Kg)</div></div>
+          <div class="sum-card g3"><div class="sv">0.386</div><div class="sl">ADG(Kg)</div></div>
+          <div class="sum-card g4"><div class="sv">1.62</div><div class="sl">FCR</div></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>处理组结束记录</h3>
+        <div class="form-row">
+          <div class="fl"><div class="ll">结束日期</div><select style="width:100%;padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-size:10px;"><option>2026-06-28</option></select></div>
+          <div class="fl"><div class="ll">料号</div><input placeholder="FEED-001"></div>
+          <div class="fl"><div class="ll">饲料价格(元/Kg)</div><input placeholder="3.5"></div>
+          <div class="fl"><div class="ll">猪价(元/Kg)</div><input placeholder="18"></div>
+        </div>
+        <button class="save" style="width:100%;margin-top:10px;padding:12px;" @click="finishStageEnd">提交阶段结束 → 进入归档</button>
+      </div>
+    </div>
+
+    <!-- === 阶段归档 === -->
+    <div v-if="flowStep === 'stageArchive'" style="padding:16px;">
+      <div class="form-section">
+        <h3>阶段归档确认 — {{ currentStageName }}</h3>
+        <div class="summary-cards">
+          <div class="sum-card g1"><div class="sv">33</div><div class="sl">阶段天数</div></div>
+          <div class="sum-card g2"><div class="sv">618</div><div class="sl">增重(Kg)</div></div>
+          <div class="sum-card g3"><div class="sv">2.5</div><div class="sl">死亡率%</div></div>
+          <div class="sum-card g4"><div class="sv">1.62</div><div class="sl">FCR</div></div>
+        </div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="fl"><div class="ll">饲料成本</div><div style="font-weight:700;">2,163元</div></div>
+          <div class="fl"><div class="ll">利润</div><div style="font-weight:700;">8,961元</div></div>
+          <div class="fl"><div class="ll">ROF</div><div style="font-weight:700;">414%</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin:0 16px;">
+        <button style="flex:1;padding:12px;border-radius:8px;background:#f0f0f0;border:none;font-size:13px;color:#666;font-weight:600;cursor:pointer;" @click="archiveBack">← 阶段回退</button>
+        <button style="flex:1;padding:12px;border-radius:8px;background:#1ab394;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;" @click="showArchiveConfirm = true">确认阶段归档</button>
+      </div>
+      <div v-if="showArchiveConfirm" class="confirm-dlg">
+        <div class="confirm-box">
+          <h3>确认阶段归档</h3>
+          <p>归档后数据锁定不可修改。可在报表分析页面查看。</p>
+          <textarea placeholder="实验总结（选填）..."></textarea>
+          <div class="confirm-btns">
+            <button class="btn-c" @click="showArchiveConfirm = false">取消</button>
+            <button class="btn-o" @click="confirmArchive">确认归档</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === 实验结束 === -->
+    <div v-if="flowStep === 'expEnd'" style="padding:16px;">
+      <div class="form-section">
+        <h3>实验总汇总 — {{ flowExp.code }}</h3>
+        <div class="summary-cards">
+          <div class="sum-card g1"><div class="sv">1,236</div><div class="sl">总增重(Kg)</div></div>
+          <div class="sum-card g2"><div class="sv">66</div><div class="sl">总天数</div></div>
+          <div class="sum-card g3"><div class="sv">5.2</div><div class="sl">总死亡率%</div></div>
+          <div class="sum-card g4"><div class="sv">8,961</div><div class="sl">总利润(元)</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin:0 16px;">
+        <button style="flex:1;padding:12px;border-radius:8px;background:#f0f0f0;border:none;font-size:13px;color:#666;font-weight:600;cursor:pointer;" @click="toastMsg('回退到上一阶段')">← 实验回退</button>
+        <button style="flex:1;padding:12px;border-radius:8px;background:#1ab394;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;" @click="confirmExpEnd">确认实验结束</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW: 数据报告 ==================== -->
+  <div v-if="tab === 'report'" class="page-area">
+    <div class="nav-bar">
+      <span class="back" @click="backFromReport">← 返回</span>
+      <span class="title">数据报表</span>
+      <span class="right" @click="toastMsg('导出PDF报告')">📤导出</span>
+    </div>
+
+    <!-- 实验选择器 -->
+    <div style="padding:8px 16px;background:#fff;border-bottom:1px solid #eee;">
+      <div style="font-size:10px;color:#888;margin-bottom:4px;">当前实验</div>
+      <select @change="switchReportExp($event.target.value)" style="width:100%;padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-size:12px;font-weight:600;color:#1ab394;">
+        <option v-for="exp in experiments" :key="exp.code" :value="exp.code" :selected="reportExp && reportExp.code === exp.code">{{ exp.code }} — {{ exp.animalType }} · {{ exp.location }}</option>
+      </select>
+    </div>
+
+    <div class="report-tabs">
+      <button v-for="rt in reportTabs" :class="['report-tab', {on: activeReport === rt.id}]" @click="activeReport = rt.id">{{ rt.emoji }} {{ rt.name }}</button>
+    </div>
+
+    <div style="padding:16px;">
+      <!-- 日报表示例 -->
+      <div v-if="activeReport === 'daily'" style="overflow-x:auto;">
+        <div class="summary-cards" style="margin-bottom:12px;">
+          <div class="sum-card g1"><div class="sv">3</div><div class="sl">当日死淘</div></div>
+          <div class="sum-card g2"><div class="sv">97</div><div class="sl">存栏数</div></div>
+          <div class="sum-card g3"><div class="sv">1,400</div><div class="sl">下料量(kg)</div></div>
+          <div class="sum-card g4"><div class="sv">26.0</div><div class="sl">平均温度℃</div></div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>日期</th><th>处理组</th><th>栏位</th><th>死亡</th><th>淘汰</th><th>存栏</th><th>下料(kg)</th><th>腹泻</th><th>温度℃</th></tr></thead>
+          <tbody>
+            <tr><td>6/1</td><td>处理1</td><td>栋1-单1-栏1</td><td>1</td><td>0</td><td>24</td><td>340</td><td>2</td><td>25.8</td></tr>
+            <tr><td>6/1</td><td>处理1</td><td>栋1-单1-栏2</td><td>0</td><td>0</td><td>25</td><td>360</td><td>1</td><td>26.1</td></tr>
+            <tr><td>6/1</td><td>处理2</td><td>栋1-单2-栏1</td><td>1</td><td>0</td><td>24</td><td>350</td><td>3</td><td>26.5</td></tr>
+            <tr><td>5/31</td><td>处理1</td><td>栋1-单1-栏1</td><td>0</td><td>0</td><td>25</td><td>345</td><td>1</td><td>25.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-if="activeReport !== 'daily'" class="empty-state">
+        <div class="icon">{{ activeReport === 'stage' ? '📊' : activeReport === 'summary' ? '📋' : activeReport === 'death' ? '💀' : activeReport === 'diarrhea' ? '💩' : activeReport === 'medicine' ? '💊' : activeReport === 'environment' ? '🌡️' : '⚖️' }}</div>
+        <div>{{ reportTabLabel }} — 报表数据展示区</div>
+        <div style="font-size:10px;margin-top:6px;">切换Tab查看不同类型报表</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW: 我的 ==================== -->
+  <div v-if="tab === 'me'" class="page-area">
+    <div class="nav-bar"><span></span><span class="title">我的</span><span></span></div>
+    <div style="text-align:center;padding:30px 16px;">
+      <div class="avatar" style="width:60px;height:60px;font-size:22px;margin:0 auto;">李</div>
+      <div style="font-size:16px;font-weight:700;margin-top:10px;">李永霞</div>
+      <div style="font-size:11px;color:#888;margin-top:4px;">猪实验 · 襄阳实验场</div>
+    </div>
+    <div style="margin:0 16px;">
+      <div class="dash-sec" style="margin:0 0 10px;">
+        <div class="dash-bd">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;" @click="toastMsg('角色: 记录员')">
+            <span>👤</span><span style="flex:1;font-size:13px;">角色权限</span><span style="color:#1ab394;font-weight:600;">记录员</span><span style="color:#ccc;">›</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;" @click="toastMsg('语言: 中文')">
+            <span>🌐</span><span style="flex:1;font-size:13px;">语言切换</span><span>中文</span><span style="color:#ccc;">›</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;" @click="toastMsg('已是最新版本')">
+            <span>ℹ️</span><span style="flex:1;font-size:13px;">关于</span><span>v1.0.0</span><span style="color:#ccc;">›</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;" @click="toastMsg('已退出登录')">
+            <span>🚪</span><span style="flex:1;font-size:13px;color:#f56c6c;">退出登录</span><span style="color:#ccc;">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+  <!-- 实验选择器 -->
+  <div v-if="showExpPicker" class="modal-overlay" @click.self="showExpPicker = false">
+    <div class="modal-sheet">
+      <h3>选择实验</h3>
+      <div v-for="exp in experiments" :key="exp.code" class="modal-opt" @click="pickExpForQuickEntry(exp)">{{ exp.code }}<span style="font-size:9px;color:#888;margin-left:8px;">{{ exp.stage }} · {{ exp.location }}</span></div>
+      <div class="modal-opt cancel" @click="showExpPicker = false">取消</div>
+    </div>
+  </div>
+
+  <!-- 栏位选择器 -->
+  <div v-if="showPenPicker" class="modal-overlay" @click.self="showPenPicker = false">
+    <div class="modal-sheet">
+      <h3>切换栏位</h3>
+      <div v-for="pen in penList" :key="pen.id" :class="['modal-opt', {sel: currentPen === pen.id}]" @click="currentPen = pen.id; showPenPicker = false;">
+        {{ pen.label }} <span v-if="currentPen === pen.id" style="color:#1ab394;">✓</span>
+      </div>
+      <div class="modal-opt cancel" @click="showPenPicker = false">取消</div>
+    </div>
+  </div>
+
+  <!-- ===== 编辑已提交记录弹窗 ===== -->
+  <div v-if="showEditDialog" class="confirm-dlg">
+    <div class="confirm-box" style="width:340px;text-align:left;">
+      <h3 style="text-align:center;">修改{{ activeRecModuleName }}记录</h3>
+      <div style="font-size:10px;color:#888;margin-bottom:10px;">栏位: {{ currentPenLabel }} | 日期: 2026-06-01</div>
+      <div class="rec-fgrid" style="grid-template-columns:1fr 1fr;">
+        <template v-if="activeRecModule === 'death'">
+          <div class="fld"><div class="lbl">当日死亡数量</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;" placeholder="整数"></div></div>
+          <div class="fld"><div class="lbl">当日死亡重量(Kg)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;" placeholder="小数"></div></div>
+        </template>
+        <template v-if="activeRecModule === 'feed'">
+          <div class="fld" style="grid-column:1/-1;"><div class="lbl">饲喂量(Kg)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;" placeholder="请输入"></div></div>
+        </template>
+        <template v-if="activeRecModule === 'diarrhea'">
+          <div class="fld"><div class="lbl">腹泻评分</div><div class="val"><select style="width:100%;border:none;background:transparent;font-size:11px;"><option>0</option><option>1</option><option>2</option><option>3</option></select></div></div>
+          <div class="fld"><div class="lbl">腹泻头数</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;" placeholder="整数"></div></div>
+        </template>
+        <template v-if="activeRecModule === 'environment'">
+          <div class="fld"><div class="lbl">最高温度(℃)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+          <div class="fld"><div class="lbl">最低温度(℃)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+          <div class="fld"><div class="lbl">平均温度(℃)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+          <div class="fld"><div class="lbl">最高湿度(%)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+        </template>
+        <template v-if="activeRecModule === 'weight'">
+          <div class="fld"><div class="lbl">称重重量(Kg)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+          <div class="fld"><div class="lbl">栏位余料(Kg)</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+        </template>
+        <template v-if="activeRecModule === 'medicine' || activeRecModule === 'vaccine'">
+          <div class="fld" style="grid-column:1/-1;"><div class="lbl">产品名称</div><div style="padding:8px;background:#f8f8f8;border-radius:4px;font-size:11px;color:#888;">（不变）</div></div>
+          <div class="fld"><div class="lbl">用量</div><div class="val input"><input style="width:100%;border:none;background:transparent;font-size:11px;"></div></div>
+        </template>
+      </div>
+      <div class="confirm-btns" style="margin-top:14px;">
+        <button class="btn-c" @click="showEditDialog = false">取消</button>
+        <button class="btn-o" @click="confirmEditRecord">确认修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 产品查询弹窗（药品/疫苗） ===== -->
+  <div v-if="showProductSearch" class="modal-overlay" @click.self="showProductSearch = false">
+    <div class="modal-sheet" style="max-height:85%;padding:0;">
+      <div style="padding:16px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:16px;font-weight:700;">{{ productSearchType === 'medicine' ? '药品查询' : '疫苗查询' }}</span>
+        <span style="font-size:20px;color:#999;cursor:pointer;" @click="showProductSearch = false">×</span>
+      </div>
+      <!-- 搜索栏 -->
+      <div style="padding:12px 16px;background:#fafafa;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;"><div style="font-size:9px;color:#888;margin-bottom:2px;">产品名称</div>
+            <input v-model="prodSearch.name" placeholder="请输入" style="width:100%;padding:7px;border:1px solid #e0e0e0;border-radius:6px;font-size:11px;"></div>
+          <div style="flex:1;"><div style="font-size:9px;color:#888;margin-bottom:2px;">产品代码</div>
+            <input v-model="prodSearch.code" placeholder="请输入" style="width:100%;padding:7px;border:1px solid #e0e0e0;border-radius:6px;font-size:11px;"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div style="flex:1;"><div style="font-size:9px;color:#888;margin-bottom:2px;">产品类别</div>
+            <select v-model="prodSearch.type" style="width:100%;padding:7px;border:1px solid #e0e0e0;border-radius:6px;font-size:11px;">
+              <option value="">全部</option>
+              <option v-if="productSearchType === 'medicine'" value="抗生素">抗生素</option>
+              <option v-if="productSearchType === 'medicine'" value="维生素">维生素</option>
+              <option v-if="productSearchType === 'medicine'" value="其他">其他</option>
+              <option v-if="productSearchType === 'vaccine'" value="灭活疫苗">灭活疫苗</option>
+              <option v-if="productSearchType === 'vaccine'" value="减毒活疫苗">减毒活疫苗</option>
+              <option v-if="productSearchType === 'vaccine'" value="亚单位疫苗">亚单位疫苗</option>
+            </select></div>
+          <button style="padding:7px 16px;background:#1ab394;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;" @click="doProdSearch">查询</button>
+          <button style="padding:7px 12px;background:#f0f0f0;color:#666;border:none;border-radius:6px;font-size:11px;cursor:pointer;" @click="prodSearch = {name:'',code:'',type:''}">重置</button>
+        </div>
+      </div>
+      <!-- 结果列表 -->
+      <div style="padding:8px 16px;max-height:300px;overflow-y:auto;">
+        <div v-if="filteredProducts.length === 0" style="text-align:center;padding:30px;color:#ccc;font-size:12px;">未找到匹配产品</div>
+        <div v-for="prod in filteredProducts" :key="prod.code" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:11px;" @click="selectProduct(prod)">
+          <div>
+            <div style="font-weight:600;color:#333;">{{ prod.name }} <span style="font-size:9px;color:#999;margin-left:6px;">{{ prod.code }}</span></div>
+            <div style="color:#888;font-size:10px;margin-top:2px;">{{ prod.type }} | {{ prod.spec }} {{ prod.specUnit }} | 供应商: {{ prod.supplierName }}</div>
+          </div>
+          <span style="color:#1ab394;font-weight:600;">选择 →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar (always visible) -->
+  <div class="tab-bar">
+    <div :class="['tab-item', {active: tab === 'exp'}]" @click="switchTab('exp')">
+      <span class="ic">📋</span>实验管理
+    </div>
+    <div :class="['tab-item', {active: tab === 'workbench'}]" @click="switchTab('workbench')">
+      <span class="ic">🔧</span>工作台
+    </div>
+    <div :class="['tab-item', {active: tab === 'me'}]" @click="switchTab('me')">
+      <span class="ic">👤</span>我的
+    </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive, computed, watch, nextTick } = Vue
+
+createApp({
+  setup() {
+    // Tab state
+    const tab = ref('exp')
+    const toast = ref('')
+    const wbView = ref('species')
+
+    // Experiment data
+    const experiments = ref([
+      { code: 'SWINE-NUR-XY-001-2026', animalType: '猪-保育', expType: '饲料对比实验', location: '襄阳', cooArea: 'COO 1',
+        completeness: 85, anomaly: 'low', currentFlowStep: 'daily', currentFlowStage: 1, currentAction: '待录入数据',
+        manager: '虞泽鹏，刘嘉辉', members: '刘冠辰', dateRange: '2026/04/01 - 2026/06/30',
+        stageProgress: '01-DRB/02-ZZB' },
+      { code: 'SWINE-FAT-NMG-002-2026', animalType: '猪-育肥', expType: '饲料对比实验', location: '内蒙古', cooArea: 'COO 2',
+        completeness: 92, anomaly: 'medium', currentFlowStep: 'stageArchive', currentFlowStage: 1, currentAction: '待博士审核',
+        manager: '虞泽鹏，刘嘉辉', members: '刘冠辰', dateRange: '2026/04/01 - 2026/07/31',
+        stageProgress: '01-DRB' },
+      { code: 'SWINE-NF-DY-003-2026', animalType: '猪-保育到育肥', expType: '饲料营养实验', location: '东营', cooArea: '其他',
+        completeness: 60, anomaly: 'low', currentFlowStep: 'group', currentFlowStage: 0, currentAction: '待配置分组',
+        manager: '李一一', members: '张三、李四', dateRange: '2026/03/01 - 2026/07/01',
+        stageProgress: '01-DRB/02-RZB/03-ZZB' },
+      { code: 'SWINE-NUR-CD-004-2026', animalType: '猪-保育', expType: '饲料对比实验', location: '成都', cooArea: '其他',
+        completeness: 100, anomaly: 'high', currentFlowStep: 'expEnd', currentFlowStage: 1, currentAction: '已完成归档',
+        manager: '虞泽鹏，刘嘉辉', members: '刘冠辰', dateRange: '2026/04/01 - 2026/08/15',
+        stageProgress: '01-DRB' },
+    ])
+
+    // Filter
+    const expFilter = ref({ search: '', location: '', status: '' })
+    const expStat = ref('全部')
+    const filteredExperiments = computed(() => {
+      let list = experiments.value
+      if (expFilter.value.location) list = list.filter(e => e.location === expFilter.value.location)
+      if (expFilter.value.status === '进行中') list = list.filter(e => ['daily','stageEnd','stageArchive'].includes(e.currentFlowStep))
+      if (expFilter.value.status === '已完成') list = list.filter(e => e.currentFlowStep === 'expEnd')
+      if (expFilter.value.status === '待开始') list = list.filter(e => e.currentFlowStep === 'group')
+      if (expStat.value === '待提交') list = list.filter(e => e.currentFlowStep === 'group')
+      if (expStat.value === '进行中') list = list.filter(e => ['daily','stageEnd','stageArchive'].includes(e.currentFlowStep))
+      if (expStat.value === '已完成') list = list.filter(e => e.currentFlowStep === 'expEnd')
+      if (expStat.value === '待开始') list = list.filter(e => e.currentFlowStep === 'group')
+      return list
+    })
+    const expStats = ['待提交', '进行中', '已完成', '待开始', '全部']
+
+    // Flow state
+    const flowExp = ref(null)
+    const flowStep = ref('daily') // group | daily | stageEnd | stageArchive | expEnd
+    const currentStageName = computed(() => {
+      if (!flowExp.value) return ''
+      const stages = flowExp.value.stageProgress.split('/')
+      const idx = (flowExp.value.currentFlowStage || 1) - 1
+      if (idx >= 0 && idx < stages.length) return stages[idx]
+      return ''
+    })
+    const flowStepLabel = computed(() => {
+      const m = { group: '实验分组（查看结果）', daily: '日常巡栏 — ' + currentStageName.value, stageEnd: '阶段结束 — ' + currentStageName.value, stageArchive: '阶段归档 — ' + currentStageName.value, expEnd: '实验结束' }
+      return m[flowStep.value] || ''
+    })
+    const flowSteps = computed(() => {
+      if (!flowExp.value) return []
+      const stages = flowExp.value.stageProgress.split('/')
+      const stepMap = { group: 0, daily: 1, stageEnd: 2, stageArchive: 3, expEnd: 4 }
+      const curTypeIdx = stepMap[flowStep.value] || 0
+      const curStage = flowExp.value.currentFlowStage || 1
+      // Current position in the full flow sequence
+      const curGlobal = flowStep.value === 'group' ? 0 : flowStep.value === 'expEnd' ? 999 : (curStage - 1) * 3 + (curTypeIdx - 1) + 1
+
+      const steps = []
+      // 实验分组
+      steps.push({ id: 'group', name: '实验\n分组', status: curGlobal > 0 ? 'done' : curGlobal === 0 ? 'current' : 'locked' })
+
+      stages.forEach((s, i) => {
+        const sNum = String(i + 1).padStart(2, '0')
+        const stageStart = i * 3 + 1
+        const dailyId = `daily_${i+1}`
+        const endId = `stageEnd_${i+1}`
+        const archId = `stageArchive_${i+1}`
+
+        // 日常巡栏
+        const dStatus = curGlobal > stageStart ? 'done' : curGlobal === stageStart ? 'current' : 'locked'
+        steps.push({ id: dailyId, name: `日常巡栏\n${sNum}-${s.replace(/^\d+-/, '')}`, status: dStatus })
+        // 阶段结束
+        const eStatus = curGlobal > stageStart + 1 ? 'done' : curGlobal === stageStart + 1 ? 'current' : 'locked'
+        steps.push({ id: endId, name: '阶段结束', status: eStatus })
+        // 阶段归档
+        const aStatus = curGlobal > stageStart + 2 ? 'done' : curGlobal === stageStart + 2 ? 'current' : 'locked'
+        steps.push({ id: archId, name: '阶段归档', status: aStatus })
+      })
+
+      // 实验结束
+      const totalNodes = stages.length * 3 + 1
+      const expEndGlobal = totalNodes
+      const expStatus = curGlobal >= totalNodes ? 'current' : 'locked'
+      steps.push({ id: 'expEnd', name: '实验\n结束', status: expStatus })
+      return steps
+    })
+
+    function enterFlow(exp) {
+      flowExp.value = exp
+      flowStep.value = exp.currentFlowStep
+      tab.value = 'flow'
+    }
+    function backFromFlow() {
+      tab.value = 'exp'
+      flowExp.value = null
+    }
+    function flowNodeClick(step) {
+      if (step.status === 'locked') { toastMsg('该步骤尚未解锁'); return }
+      if (step.id === 'group') { flowStep.value = 'group'; flowExp.value.currentFlowStage = 0 }
+      else if (step.id.startsWith('daily_')) { flowStep.value = 'daily'; flowExp.value.currentFlowStage = parseInt(step.id.split('_')[1]) }
+      else if (step.id.startsWith('stageEnd_')) { flowStep.value = 'stageEnd'; flowExp.value.currentFlowStage = parseInt(step.id.split('_')[1]) }
+      else if (step.id.startsWith('stageArchive_')) { flowStep.value = 'stageArchive'; flowExp.value.currentFlowStage = parseInt(step.id.split('_')[1]) }
+      else if (step.id === 'expEnd') { flowStep.value = 'expEnd' }
+    }
+
+    // Group data (read-only)
+    const groupData = [
+      { treatment: 1, block: 1, building: 1, unit: 1, pen: 1, strain: '杜长大', gender: '公', headCount: 10, avgWeight: '7.5' },
+      { treatment: 1, block: 1, building: 1, unit: 1, pen: 2, strain: '杜长大', gender: '母', headCount: 10, avgWeight: '7.2' },
+      { treatment: 2, block: 1, building: 1, unit: 2, pen: 3, strain: '杜长大', gender: '公', headCount: 10, avgWeight: '7.8' },
+      { treatment: 2, block: 2, building: 1, unit: 2, pen: 4, strain: '杜长大', gender: '母', headCount: 10, avgWeight: '7.3' },
+      { treatment: 3, block: 2, building: 2, unit: 1, pen: 5, strain: '三元', gender: '公', headCount: 10, avgWeight: '7.0' },
+      { treatment: 3, block: 2, building: 2, unit: 1, pen: 6, strain: '三元', gender: '母', headCount: 10, avgWeight: '6.8' },
+    ]
+
+    // Recording
+    const recordingModules = [
+      { id: 'death', name: '死淘', emoji: '💀' },
+      { id: 'feed', name: '采食', emoji: '🍽️' },
+      { id: 'diarrhea', name: '腹泻', emoji: '💩' },
+      { id: 'medicine', name: '药品', emoji: '💊' },
+      { id: 'vaccine', name: '疫苗', emoji: '💉' },
+      { id: 'environment', name: '环控', emoji: '🌡️' },
+      { id: 'weight', name: '称重', emoji: '⚖️' },
+    ]
+    const activeRecModule = ref('death')
+    const activeRecModuleName = computed(() => recordingModules.find(m => m.id === activeRecModule.value)?.name || '')
+    watch(activeRecModule, () => { draftRecords.value[activeRecModule.value] = []; addDraftRecord() })
+
+    const penList = [
+      { id: 'p1', label: '栋1-单元1-栏1' },
+      { id: 'p2', label: '栋1-单元1-栏2' },
+      { id: 'p3', label: '栋1-单元2-栏3' },
+      { id: 'p4', label: '栋1-单元2-栏4' },
+      { id: 'p5', label: '栋2-单元1-栏5' },
+      { id: 'p6', label: '栋2-单元1-栏6' },
+    ]
+    const currentPen = ref('p1')
+    const currentPenLabel = computed(() => penList.find(p => p.id === currentPen.value)?.label || '')
+    const showPenPicker = ref(false)
+
+    // Simulated submitted records per pen per module
+    const penRecords = ref({
+      p1: { death: [{ summary: '6/1 死亡1只 15.5Kg 疾病' }], feed: [], diarrhea: [], medicine: [{ summary: '6/1 阿莫西林 5g/头' }], vaccine: [], environment: [], weight: [] },
+      p2: { death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: [] },
+      p3: { death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: [] },
+      p4: { death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: [] },
+      p5: { death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: [] },
+      p6: { death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: [] },
+    })
+
+    const penSubmittedRecords = computed(() => penRecords.value[currentPen.value]?.[activeRecModule.value] || [])
+    function penHasRecord(modId) {
+      return (penRecords.value[currentPen.value]?.[modId] || []).length > 0
+    }
+    // Draft records - dynamic add/delete
+    const draftRecords = ref({ death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: [] })
+    const moduleDraftRecords = computed(() => draftRecords.value[activeRecModule.value] || [])
+
+    function addDraftRecord() {
+      draftRecords.value[activeRecModule.value].push({})
+      nextTick(() => {
+        const el = document.querySelector('.page-area')
+        if (el) el.scrollTop = el.scrollHeight
+      })
+    }
+    function removeDraftRecord(idx) {
+      draftRecords.value[activeRecModule.value].splice(idx, 1)
+    }
+    function submitDraftRecords() {
+      const records = draftRecords.value[activeRecModule.value]
+      if (records.length === 0) { toastMsg('请先添加至少一条记录'); return }
+      records.forEach(() => {
+        penRecords.value[currentPen.value][activeRecModule.value].push({
+          summary: `6/1 ${activeRecModuleName.value}记录 · 当前用户`
+        })
+      })
+      const count = records.length
+      draftRecords.value[activeRecModule.value] = []
+      toastMsg(`成功提交 ${count} 条${activeRecModuleName.value}记录！`)
+    }
+    // Edit / Delete submitted records
+    const showEditDialog = ref(false)
+    const editingSubmittedIdx = ref(-1)
+    function editSubmittedRecord(idx) {
+      editingSubmittedIdx.value = idx
+      showEditDialog.value = true
+    }
+    function confirmEditRecord() {
+      showEditDialog.value = false
+      if (editingSubmittedIdx.value >= 0) {
+        penRecords.value[currentPen.value][activeRecModule.value][editingSubmittedIdx.value].summary += ' (已修改)'
+      }
+      editingSubmittedIdx.value = -1
+      toastMsg('记录已修改！')
+    }
+    function deleteSubmittedRecord(idx) {
+      const modName = activeRecModuleName.value
+      if (confirm('确定删除该条' + modName + '记录吗？删除后无法恢复。')) {
+        penRecords.value[currentPen.value][activeRecModule.value].splice(idx, 1)
+        toastMsg(modName + '记录已删除')
+      }
+    }
+
+    // Stage end
+    function finishStageEnd() {
+      flowStep.value = 'stageArchive'
+      toastMsg('阶段结束记录已提交 → 进入' + currentStageName.value + ' 归档')
+    }
+    const showArchiveConfirm = ref(false)
+    function confirmArchive() {
+      showArchiveConfirm.value = false
+      const stages = flowExp.value.stageProgress.split('/')
+      const curStage = flowExp.value.currentFlowStage || 1
+      if (curStage < stages.length) {
+        flowExp.value.currentFlowStage = curStage + 1
+        flowStep.value = 'daily'
+        toastMsg('已归档！自动进入阶段' + (curStage + 1) + ' 日常巡栏')
+      } else {
+        flowStep.value = 'expEnd'
+        toastMsg('全部阶段已完成！进入实验结束')
+      }
+    }
+    function archiveBack() {
+      flowStep.value = 'stageEnd'
+      toastMsg('已回退到阶段结束')
+    }
+    function confirmExpEnd() {
+      toastMsg('实验已确认结束！数据已归档')
+    }
+
+    // Report
+    const reportExp = ref(null)
+    const activeReport = ref('daily')
+    const reportTabs = [
+      { id: 'daily', name: '日报', emoji: '📅' },
+      { id: 'stage', name: '阶段', emoji: '📊' },
+      { id: 'summary', name: '总结', emoji: '📋' },
+      { id: 'death', name: '死淘', emoji: '💀' },
+      { id: 'diarrhea', name: '腹泻', emoji: '💩' },
+      { id: 'medicine', name: '药品疫苗', emoji: '💊' },
+      { id: 'environment', name: '环控', emoji: '🌡️' },
+      { id: 'weight', name: '称重', emoji: '⚖️' },
+    ]
+    const reportTabLabel = computed(() => reportTabs.find(t => t.id === activeReport.value)?.name || '')
+    function goReport(exp) {
+      reportExp.value = exp
+      tab.value = 'report'
+    }
+    function backFromReport() {
+      tab.value = 'exp'
+      reportExp.value = null
+    }
+    function switchReportExp(code) {
+      const exp = experiments.value.find(e => e.code === code)
+      if (exp) reportExp.value = exp
+    }
+
+    // Workbench stage groups
+    const selStage = ref('daily')
+    const stageGroups = [
+      { key: 'group', label: '待分组', count: 1 },
+      { key: 'daily', label: '日常巡栏', count: 2 },
+      { key: 'stageEnd', label: '阶段结束', count: 1 },
+      { key: 'stageArchive', label: '待归档', count: 1 },
+    ]
+    const selStageLabel = computed(() => stageGroups.find(s => s.key === selStage.value)?.label || '')
+    const stageFilteredExps = computed(() => {
+      const map = { group: 'group', daily: 'daily', stageEnd: 'stageEnd', stageArchive: 'stageArchive' }
+      return experiments.value.filter(e => e.currentFlowStep === map[selStage.value])
+    })
+
+    // Quick entry from workbench
+    const pendingQuickModule = ref(null)
+    const showExpPicker = ref(false)
+    const quickModules = recordingModules
+
+    // ===== 药品/疫苗查询 =====
+    const medicineProducts = [
+      { name: '阿莫西林', code: 'AMX-001', type: '抗生素', spec: '500mg', specUnit: '片', supplierName: '华北制药', supplierCode: 'HB-001' },
+      { name: '头孢噻呋', code: 'CEF-002', type: '抗生素', spec: '1g', specUnit: '支', supplierName: '齐鲁制药', supplierCode: 'QL-002' },
+      { name: '维生素C', code: 'VTC-003', type: '维生素', spec: '100mg', specUnit: '片', supplierName: '养生堂', supplierCode: 'YS-003' },
+      { name: '氟苯尼考', code: 'FLB-004', type: '抗生素', spec: '50g', specUnit: '瓶', supplierName: 'YY药业', supplierCode: 'YY-001' },
+      { name: '泰乐菌素', code: 'TLS-005', type: '抗生素', spec: '80g', specUnit: '袋', supplierName: 'ZZ药业', supplierCode: 'ZZ-002' },
+      { name: '维生素E', code: 'VTE-006', type: '维生素', spec: '200mg', specUnit: '粒', supplierName: '养生堂', supplierCode: 'YS-004' },
+    ]
+    const vaccineProducts = [
+      { name: '猪瘟疫苗', code: 'VSV-001', type: '灭活疫苗', spec: '2ml', specUnit: '支', supplierName: '中牧股份', supplierCode: 'ZM-001' },
+      { name: '蓝耳病疫苗', code: 'PRRS-002', type: '减毒活疫苗', spec: '1ml', specUnit: '支', supplierName: '海利生物', supplierCode: 'HL-002' },
+      { name: '伪狂犬疫苗', code: 'PRV-003', type: '灭活疫苗', spec: '2ml', specUnit: '支', supplierName: '科前生物', supplierCode: 'KQ-003' },
+      { name: '圆环疫苗', code: 'PCV-004', type: '亚单位疫苗', spec: '1ml', specUnit: '支', supplierName: '海利生物', supplierCode: 'HL-005' },
+    ]
+
+    const showProductSearch = ref(false)
+    const productSearchType = ref('medicine')
+    const prodSearch = ref({ name: '', code: '', type: '' })
+    const filteredProducts = computed(() => {
+      const list = productSearchType.value === 'medicine' ? medicineProducts : vaccineProducts
+      return list.filter(p => {
+        return (!prodSearch.value.name || p.name.includes(prodSearch.value.name)) &&
+               (!prodSearch.value.code || p.code.toLowerCase().includes(prodSearch.value.code.toLowerCase())) &&
+               (!prodSearch.value.type || p.type === prodSearch.value.type)
+      })
+    })
+
+    function openProductSearch(type) {
+      productSearchType.value = type
+      prodSearch.value = { name: '', code: '', type: '' }
+      showProductSearch.value = true
+    }
+    function doProdSearch() { }
+    function selectProduct(prod) {
+      showProductSearch.value = false
+      if (productSearchType.value === 'medicine') {
+        selectedMedicine.value = prod
+      } else {
+        selectedVaccine.value = prod
+      }
+      toastMsg('已选择: ' + prod.name + ' (' + prod.code + ')')
+    }
+    const selectedMedicine = ref(null)
+    const selectedVaccine = ref(null)
+    watch(activeRecModule, () => {
+      if (activeRecModule.value !== 'medicine') selectedMedicine.value = null
+      if (activeRecModule.value !== 'vaccine') selectedVaccine.value = null
+    })
+
+    function openQuickEntry(mod) {
+      pendingQuickModule.value = mod
+      showExpPicker.value = true
+    }
+    function pickExpForQuickEntry(exp) {
+      showExpPicker.value = false
+      flowExp.value = exp
+      if (pendingQuickModule.value && pendingQuickModule.value.id !== 'all') {
+        activeRecModule.value = pendingQuickModule.value.id
+      }
+      flowStep.value = 'daily'
+      tab.value = 'flow'
+      toastMsg('进入栏位锚定录入 · ' + (pendingQuickModule.value?.name || '全部模块'))
+    }
+
+    // Tab switching
+    function switchTab(t) {
+      tab.value = t
+      if (t === 'workbench') wbView.value = 'pig-dash'
+    }
+    function toastMsg(msg) {
+      toast.value = msg
+      setTimeout(() => { toast.value = '' }, 1500)
+    }
+
+    return {
+      tab, toast, wbView,
+      experiments, expFilter, expStat, expStats, filteredExperiments,
+      flowExp, flowStep, flowStepLabel, flowSteps, currentStageName,
+      enterFlow, backFromFlow, flowNodeClick,
+      groupData,
+      recordingModules, activeRecModule, activeRecModuleName,
+      penList, currentPen, currentPenLabel, showPenPicker,
+      penRecords, penSubmittedRecords, penHasRecord, submitDraftRecords, addDraftRecord, removeDraftRecord, moduleDraftRecords,
+      showEditDialog, editSubmittedRecord, confirmEditRecord, deleteSubmittedRecord,
+      finishStageEnd, showArchiveConfirm, confirmArchive, archiveBack, confirmExpEnd,
+      reportExp, activeReport, reportTabs, reportTabLabel, goReport, backFromReport, switchReportExp,
+      stageGroups, selStage, selStageLabel, stageFilteredExps,
+      quickModules, showExpPicker, pendingQuickModule, openQuickEntry, pickExpForQuickEntry,
+      showProductSearch, productSearchType, prodSearch, filteredProducts, openProductSearch, doProdSearch, selectProduct, selectedMedicine, selectedVaccine,
+      switchTab, toastMsg,
+    }
+  }
+}).mount('#app')
+</script>
+</body>
+</html>

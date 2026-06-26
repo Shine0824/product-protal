@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猪实验数据 - 阶段确认</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus/dist/index.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; }
+    .sidebar { width: 220px; height: 100vh; background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%); position: fixed; left: 0; top: 0; z-index: 100; color: #fff; }
+    .sidebar-logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-logo-title { font-size: 16px; font-weight: bold; color: #fff; }
+    .sidebar-menu { padding: 10px 0; }
+    .sidebar-menu-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: all 0.3s; font-size: 14px; }
+    .sidebar-menu-item:hover { background-color: rgba(255,255,255,0.1); }
+    .sidebar-menu-item.active { background-color: #1ab394; }
+    .sidebar-menu-item .icon { font-size: 18px; margin-right: 12px; width: 20px; text-align: center; }
+    .sidebar-menu-item .sub-icon { font-size: 10px; margin-left: auto; }
+    .top-nav { height: 60px; background-color: #fff; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; position: fixed; top: 0; right: 0; left: 220px; z-index: 99; }
+    .top-nav-container { max-width: 1600px; width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .top-nav-left { display: flex; align-items: center; }
+    .top-nav-title { font-size: 16px; font-weight: bold; color: #333; }
+    .top-nav-breadcrumb { font-size: 13px; color: #999; margin-left: 15px; display: flex; align-items: center; }
+    .top-nav-breadcrumb span { margin-right: 5px; }
+    .top-nav-right { display: flex; align-items: center; gap: 20px; }
+    .lang-switch { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; cursor: pointer; font-size: 13px; }
+    .lang-switch:hover { background-color: #f5f5f5; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background-color: #1ab394; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
+    .user-name { font-size: 14px; color: #333; }
+    .main-content { margin-left: 220px; margin-top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
+    .container { padding: 20px; max-width: 1600px; margin: 0 auto; }
+    .experiment-header { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); transition: all 0.3s; }
+    .experiment-header.collapsed { padding: 12px 20px; }
+    .exp-code { font-size: 18px; font-weight: bold; color: #1ab394; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+    .exp-code .collapse-toggle { font-size: 12px; color: #999; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .exp-code .collapse-toggle:hover { color: #1ab394; }
+    .experiment-header.collapsed .info-grid, .experiment-header.collapsed .stages-row { display: none; }
+    .experiment-header.collapsed .exp-code { margin-bottom: 0; }
+    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .info-item { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; }
+    .info-label { color: #999; font-size: 14px; }
+    .info-value { color: #333; font-weight: 500; }
+    .stages-row { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; margin-top: 15px; }
+    .status-flow { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+    .status-title { font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #333; }
+    .flow-container { display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 0; }
+    .flow-item { display: flex; align-items: center; }
+    .flow-node { min-width: 110px; max-width: 130px; padding: 12px 8px; text-align: center; border-radius: 6px; font-size: 12px; background-color: #f5f7fa; border: 1px solid #e6e6e6; cursor: pointer; transition: all 0.3s; word-break: break-all; line-height: 1.4; }
+    .flow-node:hover:not(.locked) { background-color: #e8f5e9; border-color: #a5d6a7; }
+    .flow-node.completed { background-color: #e8f5e9; border-color: #1ab394; color: #1ab394; font-weight: bold; }
+    .flow-node.active { background-color: #1ab394; border-color: #1ab394; color: #fff; font-weight: bold; box-shadow: 0 2px 8px rgba(26,179,148,0.3); }
+    .flow-node.locked { opacity: 0.5; cursor: not-allowed; }
+    .flow-arrow { margin: 0 6px; color: #ccc; font-size: 14px; }
+    .flow-arrow.active { color: #1ab394; }
+    .content-container { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; }
+    .content-header { padding: 15px 20px; border-bottom: 1px solid #e6e6e6; background-color: #fafafa; }
+    .content-title { font-size: 16px; font-weight: bold; color: #333; }
+    .content-body { padding: 20px; }
+    .section-box { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+    .section-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    .report-summary { display: flex; flex-wrap: wrap; gap: 15px; }
+    .summary-card { flex: 1; min-width: 180px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: #fff; text-align: center; }
+    .summary-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .summary-card.green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .summary-card.teal { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .summary-value { font-size: 28px; font-weight: bold; }
+    .summary-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+    .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .form-item { display: flex; flex-direction: column; }
+    .form-item label { font-size: 13px; color: #666; margin-bottom: 5px; }
+    .form-item label.required::after { content: '*'; color: #f5576c; margin-left: 4px; }
+    .record-table { margin-top: 15px; }
+    .treatment-tab { display: flex; gap: 10px; margin-bottom: 15px; }
+    .treatment-tab button { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .treatment-tab button.active { background: #1ab394; color: #fff; border-color: #1ab394; }
+    .table-wrapper { overflow-x: auto; }
+    .confirm-buttons { display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; }
+    .confirm-btn { padding: 10px 24px; font-size: 14px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
+    .confirm-btn.confirm { background: #1ab394; color: #fff; }
+    .confirm-btn.confirm:hover { background: #17a689; }
+    .confirm-btn.confirm:disabled { background: #ccc; cursor: not-allowed; }
+    .confirm-btn.back { background: #fff; color: #666; border: 1px solid #ddd; }
+    .confirm-btn.back:hover { background: #f5f5f5; }
+    .disabled-btn { background: #ccc !important; cursor: not-allowed !important; color: #999 !important; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; }
+    .confirm-dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 2001; width: 90%; max-width: 600px; max-height: 80vh; overflow: hidden; }
+    .confirm-dialog-header { padding: 20px; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; }
+    .confirm-dialog-title { font-size: 18px; font-weight: bold; color: #333; }
+    .confirm-dialog-close { cursor: pointer; color: #999; font-size: 24px; line-height: 1; }
+    .confirm-dialog-close:hover { color: #333; }
+    .confirm-dialog-body { padding: 20px; overflow-y: auto; max-height: 60vh; }
+    .confirm-dialog-footer { padding: 15px 20px; border-top: 1px solid #e6e6e6; display: flex; justify-content: flex-end; gap: 10px; }
+    .confirm-dialog-footer .confirm-btn { min-width: 100px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div style="font-size: 32px; margin-bottom: 8px;">🔬</div>
+        <div class="sidebar-logo-title">实验研发</div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="sidebar-menu-item"><span class="icon">📚</span><span>知识库</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item"><span class="icon">📋</span><span>项目管理</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item"><span class="icon">🏭</span><span>实验场</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item"><span class="icon">🐷</span><span>猪实验数据</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item active" style="padding-left: 50px;" @click="goToOverview"><span class="icon">📊</span><span>实验概览</span></div>
+        <div class="sidebar-menu-item" style="padding-left: 50px;"><span class="icon">📈</span><span>报表分析</span></div>
+        <div class="sidebar-menu-item"><span class="icon">🐔</span><span>家禽实验数据</span><span class="sub-icon">▶</span></div>
+      </div>
+    </div>
+
+    <div class="top-nav">
+      <div class="top-nav-container">
+        <div class="top-nav-left">
+          <div class="top-nav-breadcrumb">
+            <span>猪实验数据</span><span>›</span><span>猪实验数据</span><span>›</span><span style="color: #1ab394;">{{ experimentCode }}</span>
+          </div>
+        </div>
+        <div class="top-nav-right">
+          <button class="lang-switch">中文</button>
+          <div class="user-info"><div class="user-avatar">李</div><div class="user-name">李永霞</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="container">
+        <div :class="['experiment-header', { collapsed: isHeaderCollapsed }]">
+          <div class="exp-code">
+            <span>{{ experimentCode }}</span>
+            <span class="collapse-toggle" @click="toggleHeader">
+              <span>{{ isHeaderCollapsed ? '▶' : '▼' }}</span>
+              <span>{{ isHeaderCollapsed ? '展开详情' : '收起' }}</span>
+            </span>
+          </div>
+          <div class="info-grid">
+          <div class="info-item"><span class="info-label">动物方向</span><span class="info-value">{{ experimentInfo.animalType }}</span></div>
+          <div class="info-item"><span class="info-label">实验类型</span><span class="info-value">{{ experimentInfo.experimentType }}</span></div>
+          <div class="info-item"><span class="info-label">生长阶段</span><span class="info-value">{{ experimentInfo.growthStage }}</span></div>
+          <div class="info-item"><span class="info-label">实验场</span><span class="info-value">{{ experimentInfo.farm }}</span></div>
+          <div class="info-item"><span class="info-label">项目负责人</span><span class="info-value">{{ experimentInfo.projectManager }}</span></div>
+          <div class="info-item"><span class="info-label">项目成员</span><span class="info-value">{{ experimentInfo.projectMembers }}</span></div>
+          <div class="info-item"><span class="info-label">实验周期</span><span class="info-value">{{ experimentInfo.startDate }} 至 {{ experimentInfo.endDate }}</span></div>
+          <div class="info-item"><span class="info-label">实验名称</span><span class="info-value">{{ experimentInfo.name }}</span></div>
+        </div>
+        <div class="stages-row">
+          <span class="info-label">试验阶段</span>
+          <span class="info-value stages-value">{{ experimentInfo.stages.map((s, i) => `${String(i + 1).padStart(2, '0')}-${s}`).join('/') }}</span>
+        </div>
+      </div>
+
+      <div class="status-flow">
+        <div class="status-title">实验进度</div>
+        <div class="flow-container">
+          <div v-for="(step, index) in flowSteps" :key="step.id" class="flow-item">
+            <div :class="['flow-node', { completed: completedSteps.includes(step.id), active: currentStep === step.id, locked: !canAccessStep(step.id) }]" @click="selectStep(step.id)">
+              {{ step.name }}
+            </div>
+            <span v-if="index < flowSteps.length - 1" :class="['flow-arrow', { active: completedSteps.includes(step.id) }]">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirm-buttons">
+        <button class="confirm-btn back" @click="goBackToStageDone" :disabled="isConfirmed">阶段回退</button>
+        <button class="confirm-btn confirm" :disabled="isConfirmed" @click="confirmStage">
+          {{ isConfirmed ? '已归档' : '确认阶段归档' }}
+        </button>
+        <div v-if="isConfirmed" style="padding: 8px 16px; background: #d4edda; color: #155724; border-radius: 4px; font-size: 13px;">
+          ✅ 阶段状态：已结束 → 已归档，数据已锁定不可修改
+        </div>
+        <div v-else style="padding: 8px 16px; background: #fff3cd; color: #856404; border-radius: 4px; font-size: 13px;">
+          📋 阶段状态：{{ archiveStatus }}
+        </div>
+      </div>
+
+      <div v-if="currentStep.startsWith('stageEnd_') || currentStep.startsWith('stageArchive_')" class="content-container">
+        <div class="content-header"><div class="content-title">{{ currentStepTitle }} - 博士确认</div></div>
+        <div class="content-body">
+          <div v-if="stageEndRecords.length > 0" class="section-box">
+            <div class="section-title">阶段汇总 - {{ getCurrentStageName() }}</div>
+            <div class="table-wrapper">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #d4edda; border: 1px solid #1ab394; color: #0f7a65;" colspan="2">日期范围：{{ stageStartDate }} ~ {{ stageEndDate }}</th>
+                    <th style="padding: 8px; text-align: center; background: #d4edda; border: 1px solid #1ab394; color: #0f7a65;" colspan="14">阶段天数：{{ stageReport.stageDays }} 天</th>
+                  </tr>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">处理组</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段增重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">死亡率(%)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日均增重ADG(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日头均采食ADFI(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">料肉比FCR</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">Duration(天)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料成本(元)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">造肉成本FCG</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">利润(元)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料回报ROF(%)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束重量(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束头数(头)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始头数(头)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始只均重(Kg)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="background: #d4edda;">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #0f7a65;">阶段合计</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.stageWeightGain }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.mortalityRate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.ADG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.ADFI }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.FCR }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.stageDays }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.feedCost }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.FCG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.revenue }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.ROF }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.endWeight), 0) }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.endHeadCount), 0) }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ (treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.endWeight), 0) / treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.endHeadCount), 0)).toFixed(2) }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.initialHeadCount), 0) }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ (treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.initialWeight), 0) / treatmentGroupSummary.reduce((sum, tg) => sum + parseFloat(tg.initialHeadCount), 0)).toFixed(2) }}</td>
+                  </tr>
+                  <tr v-for="tg in treatmentGroupSummary" :key="tg.treatment">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">处理组{{ tg.treatment }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ (parseFloat(tg.endWeight) - parseFloat(tg.initialWeight)).toFixed(2) }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.mortalityRate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.ADG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.ADFI }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.FCR }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stageReport.stageDays }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.feedCost }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.FCG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.revenue }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.ROF }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.endWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.endHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.avgWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.initialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ (parseFloat(tg.initialWeight) / parseFloat(tg.initialHeadCount)).toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-title">阶段结束记录 - {{ getCurrentStageName() }}</div>
+            
+            <div v-if="stageEndRecords.length > 0" class="record-table">
+              <div class="treatment-tab">
+                <button :class="{ active: activeTreatment === 'all' }" @click="activeTreatment = 'all'">全部处理组</button>
+                <button v-for="tg in treatmentGroups" :key="tg.treatment" :class="{ active: activeTreatment === tg.treatment }" @click="activeTreatment = tg.treatment">
+                  处理组{{ tg.treatment }}
+                </button>
+              </div>
+              <div class="table-wrapper">
+                <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">处理组</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">栋-单元-栏位</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">开始日期</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始日龄</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始称重(Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始头数</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始只均重(Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始余料(Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束日期</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束日龄</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束称重(Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束头数</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束只均重(Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束余料(Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">料号</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料价格(元/Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">猪价(元/Kg)</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">备注</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">提交人</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">提交时间</th>
+                      <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="record in filteredPenRecords" :key="record.penId">
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">处理组{{ record.treatment }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">栋{{ record.building }}-单元{{ record.unit }}-栏{{ record.pen }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.startTime }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialAge }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialHeadCount }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialAvgWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialRemainingFeed }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endDate }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endAge }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endHeadCount }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endAvgWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endRemainingFeed }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ penEndForms[record.penId]?.feedNo || '-' }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ penEndForms[record.penId]?.feedPrice || '-' }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ penEndForms[record.penId]?.pigPrice || '-' }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ penEndForms[record.penId]?.remark || '-' }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.submitter }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.submitTime }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                        <button :class="[
+                          'edit-btn',
+                          { 'disabled-btn': isConfirmed }
+                        ]" :disabled="isConfirmed" @click="editPenRecord(record)">编辑</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div v-else style="text-align: center; padding: 30px; color: #999;">
+              <div style="font-size: 32px; margin-bottom: 10px;">📝</div>
+              <div>暂无阶段结束记录</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="font-weight: bold; color: #333;">录入表单 - 按处理组</div>
+                <button v-if="stageEndRecords.length > 0 && !isConfirmed" style="padding: 6px 12px; font-size: 12px; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;" @click="toggleForm">
+                  {{ showForm ? '折叠表单' : '展开表单' }}
+                </button>
+              </div>
+              
+              <div v-if="(!stageEndRecords.length > 0 || showForm) && !isConfirmed">
+                <div v-for="tg in treatmentGroups" :key="tg.treatment" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="font-weight: bold; color: #1ab394;">{{ getCurrentStageName() }}：处理组{{ tg.treatment }}</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <label style="font-size: 12px; color: #666;">阶段结束日期</label>
+                      <select v-model="treatmentEndDates[tg.treatment]" @change="onTreatmentDateChange(tg.treatment)" style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">请选择日期</option>
+                        <option value="2026-04-10">2026-04-10</option>
+                        <option value="2026-04-15">2026-04-15</option>
+                        <option value="2026-04-20">2026-04-20</option>
+                        <option value="2026-04-25">2026-04-25</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-grid-3">
+                    <div v-for="penId in tg.pens" :key="penId" style="padding: 10px; background: #fff; border-radius: 4px;">
+                      <div style="font-size: 12px; color: #999; margin-bottom: 8px;">栏位{{ penInitialInfo[penId].pen }} <span v-if="tg.pens.indexOf(penId) === 0" style="color: #1ab394; font-size: 11px;">(修改此栏位可批量填充其他栏位)</span></div>
+                      <div class="form-grid-2" style="gap: 10px;">
+                        <div>
+                          <label style="font-size: 12px;">结束称重(Kg)</label>
+                          <input type="number" step="0.01" v-model="penEndForms[penId].endWeight" disabled style="width: 100%; padding: 5px; font-size: 12px; background: #f5f5f5;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">结束头数</label>
+                          <input type="number" v-model="penEndForms[penId].endHeadCount" disabled style="width: 100%; padding: 5px; font-size: 12px; background: #f5f5f5;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">结束只均重(Kg)</label>
+                          <input type="number" step="0.01" v-model="penEndForms[penId].endAvgWeight" disabled style="width: 100%; padding: 5px; font-size: 12px; background: #f5f5f5;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">结束余料(Kg)</label>
+                          <input type="number" step="0.01" v-model="penEndForms[penId].endRemainingFeed" disabled style="width: 100%; padding: 5px; font-size: 12px; background: #f5f5f5;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">料号</label>
+                          <input type="text" v-model="penEndForms[penId].feedNo" @input="tg.pens.indexOf(penId) === 0 && syncFieldToAll('feedNo', penEndForms[penId].feedNo)" style="width: 100%; padding: 5px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">饲料价格(元/Kg)</label>
+                          <input type="number" step="0.01" v-model="penEndForms[penId].feedPrice" @input="tg.pens.indexOf(penId) === 0 && syncFieldToAll('feedPrice', penEndForms[penId].feedPrice)" style="width: 100%; padding: 5px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">猪价(元/Kg)</label>
+                          <input type="number" step="0.01" v-model="penEndForms[penId].pigPrice" @input="tg.pens.indexOf(penId) === 0 && syncFieldToAll('pigPrice', penEndForms[penId].pigPrice)" style="width: 100%; padding: 5px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div>
+                          <label style="font-size: 12px;">备注</label>
+                          <input type="text" v-model="penEndForms[penId].remark" style="width: 100%; padding: 5px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                  <button v-if="editingPenRecord || !stageEndRecords.length > 0" style="padding: 8px 16px; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;" @click="cancelPenEdit">取消</button>
+                  <button style="padding: 8px 16px; background: #1ab394; color: #fff; border: none; border-radius: 4px; cursor: pointer;" @click="submitPenRecords">
+                    {{ stageEndRecords.length > 0 ? '保存修改' : '提交阶段结束记录' }}
+                  </button>
+                </div>
+              </div>
+              <div v-if="isConfirmed" style="padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666;">
+                ⚠️ 阶段归档已确认，表单已锁定，无法修改
+              </div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-title">阶段报表 - {{ getCurrentStageName() }}</div>
+            <div class="table-wrapper">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">处理组</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">栋-单元-栏位</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段天数(天)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始头数(头)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束头数(头)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">死亡率(%)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日增重ADG(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料消耗(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日头均采食ADFI(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">料肉比FCR</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段实验天数(Duration)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">总饲料成本(Total feed cost)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">造肉成本(FCG)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">利润(Revenue)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料回报(ROF)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="tg in treatmentGroups" :key="tg.treatment">
+                    <tr v-for="report in stageReportDetails.filter(r => r.treatment === tg.treatment)" :key="report.penId">
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">处理组{{ report.treatment }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">栋{{ report.building }}-单元{{ report.unit }}-栏{{ report.pen }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.stageDays }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.initialHeadCount }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.endHeadCount }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.mortalityRate }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.initialAvgWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.endAvgWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.ADG }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.feedConsumed }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.ADFI }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.FCR }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.duration }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.totalFeedCost }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.FCG }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.revenue }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.ROF }}</td>
+                    </tr>
+                    <tr style="background: #fff3cd; font-weight: bold;">
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;" colspan="2"><strong>处理组{{ tg.treatment }} 汇总</strong></td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).stageDays }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).initialHeadCount }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).endHeadCount }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).mortalityRate }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).initialAvgWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).endAvgWeight }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).ADG }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).feedConsumed }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).ADFI }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).FCR }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).duration }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).totalFeedCost }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).FCG }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).revenue }}</td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ getTreatmentSummary(tg.treatment).ROF }}</td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="currentStep === 'group'" class="content-container">
+        <div class="content-header"><div class="content-title">返回实验分组</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
+          <div>请点击下方按钮返回实验分组页面</div>
+          <button style="margin-top: 20px; padding: 10px 24px; background: #1ab394; color: #fff; border: none; border-radius: 4px; cursor: pointer;" @click="goToGrouping">返回实验分组</button>
+        </div>
+      </div>
+
+      <div v-if="currentStep.startsWith('daily_')" class="content-container">
+        <div class="content-header"><div class="content-title">日常巡栏 - 数据录入</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
+          <div>请通过实验进度切换到日常巡栏模块</div>
+        </div>
+      </div>
+
+      <div v-if="currentStep === 'completed'" class="content-container">
+        <div class="content-header"><div class="content-title">实验完成</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px;">
+          <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+          <div style="font-size: 18px; font-weight: bold; color: #333;">实验已完成</div>
+        </div>
+      </div>
+
+      <!-- 确认归档对话框 -->
+      <div v-if="showConfirmDialog" class="modal-overlay" @click="cancelConfirm"></div>
+      <div v-if="showConfirmDialog" class="confirm-dialog">
+        <div class="confirm-dialog-header">
+          <div class="confirm-dialog-title">确认阶段归档</div>
+          <div class="confirm-dialog-close" @click="cancelConfirm">×</div>
+        </div>
+        <div class="confirm-dialog-body">
+          <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+            <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">⚠️ 重要提示</div>
+            <div style="color: #856404; font-size: 14px;">确认后将归档实验数据，不可再修改。归档后可在报表分析页面查看该实验的报告。</div>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px;">
+              实验总结
+            </label>
+            <textarea
+              v-model="stageSummary"
+              placeholder="请输入该阶段的实验总结、主要发现或备注信息（选填）..."
+              style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 14px; font-family: inherit; resize: vertical;"
+            ></textarea>
+            <div style="font-size: 12px; color: #999; margin-top: 5px;">选填项，归档后不可修改</div>
+          </div>
+          <div style="padding: 12px; background: #f8f9fa; border-radius: 4px;">
+            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">阶段信息：</div>
+            <div style="font-size: 14px; color: #333;">
+              <strong>阶段：</strong>{{ getCurrentStageName() }}<br>
+              <strong>结束日期：</strong>{{ treatmentEndDates['1'] }}<br>
+              <strong>状态转换：</strong>已结束 → 已归档
+            </div>
+          </div>
+        </div>
+        <div class="confirm-dialog-footer">
+          <button class="confirm-btn back" @click="cancelConfirm">取消</button>
+          <button class="confirm-btn confirm" @click="confirmArchive">确认归档</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus/dist/index.full.js"></script>
+
+  <script>
+    const { createApp, ref, computed } = Vue
+    createApp({
+      setup() {
+        const experimentCode = ref('SWINE-NUR-DY-0126')
+        const experimentInfo = ref({
+          animalType: '猪', experimentType: '饲料营养实验 - 营养实验', growthStage: '保育', farm: 'DY',
+          projectManager: '李一一', projectMembers: '张三、李四、王五',
+          startDate: '2026-01-26', endDate: '2026-04-26', name: '保育阶段营养试验', stages: ['DRB', 'ZZB']
+        })
+        const isHeaderCollapsed = ref(false)
+        const scrollTarget = ref(null)
+        const currentStep = ref('stageArchive_2')
+        const completedSteps = ref(['group', 'daily_1', 'stageEnd_1', 'stageArchive_1', 'daily_2', 'stageEnd_2'])
+        const currentStageName = ref('02-ZZB')
+        const activeTreatment = ref('all')
+        const reportActiveTreatment = ref('all')
+        const editingPenRecord = ref(false)
+        const showForm = ref(false)
+        const treatmentEndDates = ref({ '1': '2026-04-15', '2': '2026-04-15', '3': '2026-04-15' })
+        const isConfirmed = ref(false)
+        const showConfirmDialog = ref(false)
+        const stageSummary = ref('')
+        const archiveStatus = ref('已结束')
+
+        const penInitialInfo = ref({
+          p1: { treatment: '1', block: '1', building: '1', unit: '1', pen: '1', strain: '杜长大', earTagColor: '红色', earTagNumber: 'DLY-001', gender: '公', startTime: '2026-02-28', initialAge: '60', initialWeight: '135', initialHeadCount: '10', initialAvgWeight: '13.5', initialRemainingFeed: '20' },
+          p2: { treatment: '1', block: '1', building: '1', unit: '1', pen: '2', strain: '杜长大', earTagColor: '红色', earTagNumber: 'DLY-002', gender: '母', startTime: '2026-02-28', initialAge: '60', initialWeight: '130', initialHeadCount: '10', initialAvgWeight: '13.0', initialRemainingFeed: '20' },
+          p3: { treatment: '2', block: '1', building: '1', unit: '2', pen: '3', strain: '杜长大', earTagColor: '蓝色', earTagNumber: 'DLY-003', gender: '公', startTime: '2026-02-28', initialAge: '60', initialWeight: '138', initialHeadCount: '8', initialAvgWeight: '17.25', initialRemainingFeed: '25' },
+          p4: { treatment: '2', block: '1', building: '1', unit: '2', pen: '4', strain: '杜长大', earTagColor: '蓝色', earTagNumber: 'DLY-004', gender: '母', startTime: '2026-02-28', initialAge: '60', initialWeight: '133', initialHeadCount: '8', initialAvgWeight: '16.62', initialRemainingFeed: '25' },
+          p5: { treatment: '3', block: '2', building: '1', unit: '2', pen: '5', strain: '三元', earTagColor: '绿色', earTagNumber: 'SY-001', gender: '公', startTime: '2026-02-28', initialAge: '60', initialWeight: '125', initialHeadCount: '10', initialAvgWeight: '12.5', initialRemainingFeed: '15' },
+          p6: { treatment: '3', block: '2', building: '1', unit: '2', pen: '6', strain: '三元', earTagColor: '绿色', earTagNumber: 'SY-002', gender: '母', startTime: '2026-02-28', initialAge: '60', initialWeight: '125', initialHeadCount: '10', initialAvgWeight: '12.5', initialRemainingFeed: '15' }
+        })
+
+        const treatmentGroups = ref([
+          { treatment: '1', name: '处理组1', pens: ['p1', 'p2'] },
+          { treatment: '2', name: '处理组2', pens: ['p3', 'p4'] },
+          { treatment: '3', name: '处理组3', pens: ['p5', 'p6'] }
+        ])
+
+        const penEndRecords = ref({
+          p1: { endDate: '2026-04-15', endAge: '107', endWeight: '285', endHeadCount: '9', endAvgWeight: '31.67', endRemainingFeed: '8', submitter: '李一一', submitTime: '2026/4/15 17:30:00' },
+          p2: { endDate: '2026-04-15', endAge: '107', endWeight: '280', endHeadCount: '9', endAvgWeight: '31.11', endRemainingFeed: '8', submitter: '李一一', submitTime: '2026/4/15 17:30:00' },
+          p3: { endDate: '2026-04-15', endAge: '107', endWeight: '292', endHeadCount: '7', endAvgWeight: '41.71', endRemainingFeed: '10', submitter: '李一一', submitTime: '2026/4/15 17:30:00' },
+          p4: { endDate: '2026-04-15', endAge: '107', endWeight: '285', endHeadCount: '7', endAvgWeight: '40.71', endRemainingFeed: '10', submitter: '李一一', submitTime: '2026/4/15 17:30:00' },
+          p5: { endDate: '2026-04-15', endAge: '107', endWeight: '275', endHeadCount: '9', endAvgWeight: '30.56', endRemainingFeed: '6', submitter: '李一一', submitTime: '2026/4/15 17:30:00' },
+          p6: { endDate: '2026-04-15', endAge: '107', endWeight: '275', endHeadCount: '9', endAvgWeight: '30.56', endRemainingFeed: '6', submitter: '李一一', submitTime: '2026/4/15 17:30:00' }
+        })
+
+        const penEndForms = ref({
+          p1: { endWeight: '285', endHeadCount: '9', endAvgWeight: '31.67', endRemainingFeed: '8', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' },
+          p2: { endWeight: '280', endHeadCount: '9', endAvgWeight: '31.11', endRemainingFeed: '8', feedNo: '', feedPrice: '', pigPrice: '', remark: '' },
+          p3: { endWeight: '292', endHeadCount: '7', endAvgWeight: '41.71', endRemainingFeed: '10', feedNo: '', feedPrice: '', pigPrice: '', remark: '' },
+          p4: { endWeight: '285', endHeadCount: '7', endAvgWeight: '40.71', endRemainingFeed: '10', feedNo: '', feedPrice: '', pigPrice: '', remark: '' },
+          p5: { endWeight: '275', endHeadCount: '9', endAvgWeight: '30.56', endRemainingFeed: '6', feedNo: '', feedPrice: '', pigPrice: '', remark: '' },
+          p6: { endWeight: '275', endHeadCount: '9', endAvgWeight: '30.56', endRemainingFeed: '6', feedNo: '', feedPrice: '', pigPrice: '', remark: '' }
+        })
+        
+        const syncFieldToAll = (fieldName, value) => {
+          if (value) {
+            Object.keys(penEndForms.value).forEach(penId => {
+              penEndForms.value[penId][fieldName] = value
+            })
+          }
+        }
+
+        const stageEndRecords = ref([
+          { stageName: '01-DRB', startDate: '2026-01-26', endDate: '2026-02-28', submitter: '李一一', submitTime: '2026/2/28 17:30:00' },
+          { stageName: '02-ZZB', startDate: '2026-02-28', endDate: '2026-04-15', submitter: '李一一', submitTime: '2026/4/15 17:30:00' }
+        ])
+
+        const flowSteps = computed(() => {
+          const steps = [{ id: 'group', name: '实验分组' }]
+          experimentInfo.value.stages.forEach((stage, index) => {
+            const stageNum = String(index + 1).padStart(2, '0')
+            steps.push({ id: `daily_${index + 1}`, name: `日常巡栏\n${stageNum}-${stage}` })
+            steps.push({ id: `stageEnd_${index + 1}`, name: '阶段结束' })
+            steps.push({ id: `stageArchive_${index + 1}`, name: '阶段归档' })
+          })
+          steps.push({ id: 'completed', name: '实验结束' })
+          return steps
+        })
+
+        const currentStepTitle = computed(() => {
+          const step = flowSteps.value.find(s => s.id === currentStep.value)
+          if (!step) return ''
+          if (currentStep.value.startsWith('stageEnd_') || currentStep.value.startsWith('stageArchive_')) {
+            return `${step.name} - ${getCurrentStageName()}`
+          }
+          return step.name
+        })
+
+        const getCurrentStageName = () => {
+          return currentStageName.value
+        }
+
+        const canAccessStep = (stepId) => {
+          const stepIndex = flowSteps.value.findIndex(s => s.id === stepId)
+          const currentIndex = flowSteps.value.findIndex(s => s.id === currentStep.value)
+          return stepIndex <= currentIndex
+        }
+
+        const stageReport = computed(() => {
+          const startDate = new Date('2026-02-28')
+          const endDate = new Date('2026-04-15')
+          const days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
+          const totalInitialWeight = Object.values(penInitialInfo.value).reduce((sum, p) => sum + parseFloat(p.initialWeight), 0)
+          const totalEndWeight = Object.values(penEndRecords.value).reduce((sum, p) => sum + parseFloat(p.endWeight), 0)
+          const totalInitialHC = Object.values(penInitialInfo.value).reduce((sum, p) => sum + parseInt(p.initialHeadCount), 0)
+          const totalEndHC = Object.values(penEndRecords.value).reduce((sum, p) => sum + parseInt(p.endHeadCount), 0)
+          const mortality = ((totalInitialHC - totalEndHC) / totalInitialHC * 100).toFixed(2)
+          const totalWeightGain = totalEndWeight - totalInitialWeight
+          const totalFeedConsumed = Object.values(penInitialInfo.value).reduce((sum, p) => sum + parseFloat(p.initialRemainingFeed), 0) - Object.values(penEndRecords.value).reduce((sum, p) => sum + parseFloat(p.endRemainingFeed), 0)
+          const avgInitialWeight = totalInitialHC > 0 ? totalInitialWeight / totalInitialHC : 0
+          const avgEndWeight = totalEndHC > 0 ? totalEndWeight / totalEndHC : 0
+          const ADG = days > 0 ? ((avgEndWeight - avgInitialWeight) / days).toFixed(3) : '0'
+          const ADFI = days > 0 && totalEndHC > 0 ? (totalFeedConsumed / days / totalEndHC).toFixed(3) : '0'
+          const FCR = totalWeightGain > 0 ? (totalFeedConsumed / totalWeightGain).toFixed(2) : '0'
+          const feedCostPerKg = 3.5
+          const feedCost = (totalFeedConsumed * feedCostPerKg).toFixed(2)
+          const FCG = totalWeightGain > 0 ? (parseFloat(feedCost) / totalWeightGain).toFixed(2) : '0'
+          const pigPricePerKg = 18
+          const revenue = ((totalEndWeight - totalInitialWeight) * pigPricePerKg - parseFloat(feedCost)).toFixed(2)
+          const ROF = parseFloat(feedCost) > 0 ? (parseFloat(revenue) / parseFloat(feedCost) * 100).toFixed(2) : '0'
+          
+          return {
+            stageWeight: totalEndWeight.toFixed(1),
+            stageHeadCount: totalEndHC,
+            stageDays: days,
+            mortalityRate: mortality,
+            stageWeightGain: totalWeightGain.toFixed(1),
+            ADG: ADG,
+            ADFI: ADFI,
+            FCR: FCR,
+            feedCost: feedCost,
+            FCG: FCG,
+            revenue: revenue,
+            ROF: ROF
+          }
+        })
+
+        const stageStartDate = computed(() => '2026-02-28')
+        const stageEndDate = computed(() => '2026-04-15')
+
+        const treatmentGroupSummary = computed(() => {
+          return treatmentGroups.value.map(tg => {
+            const pens = tg.pens.map(pId => ({ ...penInitialInfo.value[pId], ...penEndRecords.value[pId] }))
+            const initialWeight = pens.reduce((sum, p) => sum + parseFloat(p.initialWeight), 0)
+            const endWeight = pens.reduce((sum, p) => sum + parseFloat(p.endWeight), 0)
+            const initialHeadCount = pens.reduce((sum, p) => sum + parseInt(p.initialHeadCount), 0)
+            const endHeadCount = pens.reduce((sum, p) => sum + parseInt(p.endHeadCount), 0)
+            const avgWeight = (endWeight / endHeadCount).toFixed(2)
+            const mortalityRate = initialHeadCount > 0 ? ((initialHeadCount - endHeadCount) / initialHeadCount * 100).toFixed(2) : '0'
+            const feedConsumed = pens.reduce((sum, p) => sum + (parseFloat(p.initialRemainingFeed) - parseFloat(p.endRemainingFeed)), 0).toFixed(2)
+            const startDate = new Date(pens[0].startTime)
+            const endDate = new Date(pens[0].endDate)
+            const stageDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
+            const avgInitialWeight = initialHeadCount > 0 ? (initialWeight / initialHeadCount) : 0
+            const ADG = stageDays > 0 ? ((parseFloat(avgWeight) - avgInitialWeight) / stageDays).toFixed(3) : '0'
+            const ADFI = stageDays > 0 && endHeadCount > 0 ? (parseFloat(feedConsumed) / stageDays / endHeadCount).toFixed(3) : '0'
+            const weightGain = endWeight - initialWeight
+            const FCR = weightGain > 0 ? (parseFloat(feedConsumed) / weightGain).toFixed(2) : '0'
+            const feedCostPerKg = 3.5
+            const feedCost = (parseFloat(feedConsumed) * feedCostPerKg).toFixed(2)
+            const pigPricePerKg = 18
+            const revenue = (weightGain * pigPricePerKg - parseFloat(feedCost)).toFixed(2)
+            const ROF = parseFloat(feedCost) > 0 ? (parseFloat(revenue) / parseFloat(feedCost) * 100).toFixed(2) : '0'
+            return {
+              treatment: tg.treatment,
+              name: tg.name,
+              endWeight: endWeight.toFixed(1),
+              endHeadCount: endHeadCount,
+              avgWeight: avgWeight,
+              feedConsumed: feedConsumed,
+              mortalityRate: mortalityRate,
+              ADG: ADG,
+              ADFI: ADFI,
+              FCR: FCR,
+              feedCost: feedCost,
+              revenue: revenue,
+              ROF: ROF
+            }
+          })
+        })
+
+        const penRecords = computed(() => {
+          return Object.keys(penInitialInfo.value).map(pId => ({
+            penId: pId,
+            ...penInitialInfo.value[pId],
+            ...penEndRecords.value[pId]
+          }))
+        })
+
+        const filteredPenRecords = computed(() => {
+          if (activeTreatment.value === 'all') return penRecords.value
+          return penRecords.value.filter(r => r.treatment === activeTreatment.value)
+        })
+
+        const stageReportDetails = computed(() => {
+          return Object.keys(penInitialInfo.value).map(pId => {
+            const pen = penInitialInfo.value[pId]
+            const end = penEndRecords.value[pId]
+            const startDate = new Date(pen.startTime)
+            const endDate = new Date(end.endDate)
+            const stageDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
+            const initialHC = parseInt(pen.initialHeadCount)
+            const endHC = parseInt(end.endHeadCount)
+            const mortalityRate = initialHC > 0 ? ((initialHC - endHC) / initialHC * 100).toFixed(2) : '0'
+            const feedConsumed = (parseFloat(pen.initialRemainingFeed) - parseFloat(end.endRemainingFeed)).toFixed(2)
+            const ADG = stageDays > 0 ? ((parseFloat(end.endAvgWeight) - parseFloat(pen.initialAvgWeight)) / stageDays).toFixed(3) : '0'
+            const ADFI = stageDays > 0 && endHC > 0 ? (parseFloat(feedConsumed) / stageDays / endHC).toFixed(3) : '0'
+            const FCR = parseFloat(end.endWeight) - parseFloat(pen.initialWeight) > 0 ? (parseFloat(feedConsumed) / (parseFloat(end.endWeight) - parseFloat(pen.initialWeight))).toFixed(2) : '0'
+            const duration = stageDays
+            const feedCostPerKg = 3.5
+            const totalFeedCost = (parseFloat(feedConsumed) * feedCostPerKg).toFixed(2)
+            const FCG = parseFloat(totalFeedCost) / (parseFloat(end.endWeight) - parseFloat(pen.initialWeight)) > 0 ? (parseFloat(totalFeedCost) / (parseFloat(end.endWeight) - parseFloat(pen.initialWeight))).toFixed(2) : '0'
+            const pigPricePerKg = 18
+            const revenue = ((parseFloat(end.endWeight) - parseFloat(pen.initialWeight)) * pigPricePerKg - parseFloat(totalFeedCost)).toFixed(2)
+            const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+            
+            return {
+              penId: pId,
+              treatment: pen.treatment,
+              building: pen.building,
+              unit: pen.unit,
+              pen: pen.pen,
+              stageDays: stageDays,
+              initialHeadCount: initialHC,
+              endHeadCount: endHC,
+              mortalityRate: mortalityRate,
+              initialAvgWeight: pen.initialAvgWeight,
+              endAvgWeight: end.endAvgWeight,
+              ADG: ADG,
+              feedConsumed: feedConsumed,
+              ADFI: ADFI,
+              FCR: FCR,
+              duration: duration,
+              totalFeedCost: totalFeedCost,
+              FCG: FCG,
+              revenue: revenue,
+              ROF: ROF
+            }
+          })
+        })
+
+        const filteredStageReport = computed(() => {
+          if (reportActiveTreatment.value === 'all') return stageReportDetails.value
+          return stageReportDetails.value.filter(r => r.treatment === reportActiveTreatment.value)
+        })
+
+        const reportSummary = computed(() => {
+          const filtered = filteredStageReport.value
+          const stageDays = filtered.length > 0 ? filtered[0].stageDays : 0
+          const totalInitialHeadCount = filtered.reduce((sum, r) => sum + r.initialHeadCount, 0)
+          const totalEndHeadCount = filtered.reduce((sum, r) => sum + r.endHeadCount, 0)
+          const totalMortalityRate = totalInitialHeadCount > 0 ? ((totalInitialHeadCount - totalEndHeadCount) / totalInitialHeadCount * 100).toFixed(2) : '0'
+          const avgInitialWeight = totalInitialHeadCount > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.initialAvgWeight) * r.initialHeadCount, 0) / totalInitialHeadCount).toFixed(2) : '0'
+          const avgEndWeight = totalEndHeadCount > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.endAvgWeight) * r.endHeadCount, 0) / totalEndHeadCount).toFixed(2) : '0'
+          const avgADG = filtered.length > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.ADG), 0) / filtered.length).toFixed(3) : '0'
+          const totalFeedConsumed = filtered.reduce((sum, r) => sum + parseFloat(r.feedConsumed), 0).toFixed(2)
+          const avgADFI = filtered.length > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.ADFI), 0) / filtered.length).toFixed(3) : '0'
+          const avgFCR = filtered.length > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.FCR), 0) / filtered.length).toFixed(2) : '0'
+          const duration = stageDays
+          const totalFeedCost = filtered.reduce((sum, r) => sum + parseFloat(r.totalFeedCost), 0).toFixed(2)
+          const totalWeightGain = filtered.reduce((sum, r) => sum + (parseFloat(r.endAvgWeight) - parseFloat(r.initialAvgWeight)) * r.endHeadCount, 0)
+          const FCG = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedCost) / totalWeightGain).toFixed(2) : '0'
+          const revenue = filtered.reduce((sum, r) => sum + parseFloat(r.revenue), 0).toFixed(2)
+          const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+          
+          return {
+            stageDays: stageDays,
+            totalInitialHeadCount: totalInitialHeadCount,
+            totalEndHeadCount: totalEndHeadCount,
+            totalMortalityRate: totalMortalityRate,
+            avgInitialWeight: avgInitialWeight,
+            avgEndWeight: avgEndWeight,
+            avgADG: avgADG,
+            totalFeedConsumed: totalFeedConsumed,
+            avgADFI: avgADFI,
+            avgFCR: avgFCR,
+            duration: duration,
+            totalFeedCost: totalFeedCost,
+            FCG: FCG,
+            revenue: revenue,
+            ROF: ROF
+          }
+        })
+
+        const getTreatmentSummary = (treatment) => {
+          const filtered = stageReportDetails.value.filter(r => r.treatment === treatment)
+          const stageDays = filtered.length > 0 ? filtered[0].stageDays : 0
+          const totalInitialHeadCount = filtered.reduce((sum, r) => sum + r.initialHeadCount, 0)
+          const totalEndHeadCount = filtered.reduce((sum, r) => sum + r.endHeadCount, 0)
+          const mortalityRate = totalInitialHeadCount > 0 ? ((totalInitialHeadCount - totalEndHeadCount) / totalInitialHeadCount * 100).toFixed(2) : '0'
+          const avgInitialWeight = totalInitialHeadCount > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.initialAvgWeight) * r.initialHeadCount, 0) / totalInitialHeadCount).toFixed(2) : '0'
+          const avgEndWeight = totalEndHeadCount > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.endAvgWeight) * r.endHeadCount, 0) / totalEndHeadCount).toFixed(2) : '0'
+          const avgADG = filtered.length > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.ADG), 0) / filtered.length).toFixed(3) : '0'
+          const totalFeedConsumed = filtered.reduce((sum, r) => sum + parseFloat(r.feedConsumed), 0).toFixed(2)
+          const avgADFI = filtered.length > 0 ? (filtered.reduce((sum, r) => sum + parseFloat(r.ADFI), 0) / filtered.length).toFixed(3) : '0'
+          const totalWeightGain = filtered.reduce((sum, r) => sum + (parseFloat(r.endAvgWeight) - parseFloat(r.initialAvgWeight)) * r.endHeadCount, 0)
+          const totalFeedCost = filtered.reduce((sum, r) => sum + parseFloat(r.totalFeedCost), 0).toFixed(2)
+          const FCR = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedConsumed) / totalWeightGain).toFixed(2) : '0'
+          const FCG = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedCost) / totalWeightGain).toFixed(2) : '0'
+          const revenue = filtered.reduce((sum, r) => sum + parseFloat(r.revenue), 0).toFixed(2)
+          const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+          
+          return {
+            stageDays: stageDays,
+            initialHeadCount: totalInitialHeadCount,
+            endHeadCount: totalEndHeadCount,
+            mortalityRate: mortalityRate,
+            initialAvgWeight: avgInitialWeight,
+            endAvgWeight: avgEndWeight,
+            ADG: avgADG,
+            feedConsumed: totalFeedConsumed,
+            ADFI: avgADFI,
+            FCR: FCR,
+            duration: stageDays,
+            totalFeedCost: totalFeedCost,
+            FCG: FCG,
+            revenue: revenue,
+            ROF: ROF
+          }
+        }
+
+        const selectStep = (stepId) => {
+          if (canAccessStep(stepId)) {
+            currentStep.value = stepId
+            const match = stepId.match(/stageEnd_(\d+)|stageArchive_(\d+)|daily_(\d+)/)
+            if (match) {
+              const stageIndex = parseInt(match[1] || match[2] || match[3]) - 1
+              currentStageName.value = `${String(stageIndex + 1).padStart(2, '0')}-${experimentInfo.value.stages[stageIndex]}`
+            }
+          }
+        }
+
+        const goToGrouping = () => { window.location.href = '02-Grouping.html' }
+        const goToOverview = () => { window.location.href = '00-Experiment_overview.html' }
+        const toggleHeader = () => { isHeaderCollapsed.value = !isHeaderCollapsed.value }
+        const handleScroll = (e) => {
+          const target = e.target || scrollTarget.value || window
+          const scrollTop = target.scrollTop || window.scrollY || document.documentElement.scrollTop || document.body.scrollTop
+          isHeaderCollapsed.value = scrollTop > 50
+        }
+
+        const goBackToStageDone = () => {
+          currentStep.value = 'stageEnd_2'
+        }
+
+        const toggleForm = () => {
+          showForm.value = !showForm.value
+        }
+
+        const onTreatmentDateChange = (treatment) => {
+          const date = treatmentEndDates.value[treatment]
+          if (!date) return
+
+          const dateData = {
+            '2026-04-10': { weightFactor: 0.9, headCountFactor: 1.0, remainingFeedFactor: 0.45 },
+            '2026-04-15': { weightFactor: 1.0, headCountFactor: 0.95, remainingFeedFactor: 0.4 },
+            '2026-04-20': { weightFactor: 1.05, headCountFactor: 0.95, remainingFeedFactor: 0.35 },
+            '2026-04-25': { weightFactor: 1.1, headCountFactor: 0.9, remainingFeedFactor: 0.3 }
+          }
+
+          const factor = dateData[date] || dateData['2026-04-15']
+          
+          treatmentGroups.value.forEach(tg => {
+            treatmentEndDates.value[tg.treatment] = date
+            tg.pens.forEach(penId => {
+              const initial = penInitialInfo.value[penId]
+              const startDate = new Date(initial.startTime)
+              const endDateObj = new Date(date)
+              const endAge = Math.floor((endDateObj - startDate) / (1000 * 60 * 60 * 24)) + parseInt(initial.initialAge)
+              const endWeight = (parseFloat(initial.initialWeight) * factor.weightFactor * 1.8).toFixed(1)
+              const endHeadCount = Math.round(parseInt(initial.initialHeadCount) * factor.headCountFactor)
+              const endAvgWeight = (parseFloat(endWeight) / endHeadCount).toFixed(2)
+              const endRemainingFeed = (parseFloat(initial.initialRemainingFeed) * factor.remainingFeedFactor).toFixed(1)
+              
+              penEndForms.value[penId] = {
+                endWeight: endWeight,
+                endHeadCount: endHeadCount.toString(),
+                endAvgWeight: endAvgWeight,
+                endRemainingFeed: endRemainingFeed
+              }
+              
+              penEndRecords.value[penId] = {
+                ...penEndRecords.value[penId],
+                endDate: date,
+                endAge: endAge.toString(),
+                endWeight: endWeight,
+                endHeadCount: endHeadCount.toString(),
+                endAvgWeight: endAvgWeight,
+                endRemainingFeed: endRemainingFeed
+              }
+            })
+          })
+        }
+
+        const editPenRecord = (record) => {
+          editingPenRecord.value = true
+          showForm.value = true
+        }
+
+        const cancelPenEdit = () => {
+          editingPenRecord.value = false
+          showForm.value = false
+        }
+
+        const submitPenRecords = () => {
+          Object.keys(penEndForms.value).forEach(penId => {
+            penEndRecords.value[penId] = {
+              ...penEndRecords.value[penId],
+              ...penEndForms.value[penId],
+              submitter: '李一一',
+              submitTime: new Date().toLocaleString('zh-CN')
+            }
+          })
+          if (!stageEndRecords.value.find(r => r.stageName === getCurrentStageName())) {
+            stageEndRecords.value.push({
+              stageName: getCurrentStageName(),
+              startDate: '2026-02-28',
+              endDate: treatmentEndDates.value['1'],
+              submitter: '李一一',
+              submitTime: new Date().toLocaleString('zh-CN')
+            })
+          }
+          editingPenRecord.value = false
+          showForm.value = false
+        }
+
+        const confirmStage = () => {
+          showConfirmDialog.value = true
+        }
+
+        const confirmArchive = () => {
+          isConfirmed.value = true
+          archiveStatus.value = '已归档'
+          completedSteps.value.push('stageArchive_2')
+          showConfirmDialog.value = false
+          setTimeout(() => {
+            window.location.href = '09-ExperimentEnd.html'
+          }, 500)
+        }
+
+        const cancelConfirm = () => {
+          showConfirmDialog.value = false
+          stageSummary.value = ''
+        }
+
+        return {
+          experimentCode, experimentInfo, currentStep, completedSteps, currentStageName,
+          penInitialInfo, treatmentGroups, penEndRecords, penEndForms, stageEndRecords,
+          activeTreatment, reportActiveTreatment, editingPenRecord, showForm,
+          treatmentEndDates, isConfirmed, showConfirmDialog, stageSummary, archiveStatus,
+          flowSteps, currentStepTitle, stageReport, treatmentGroupSummary,
+          filteredPenRecords, filteredStageReport, reportSummary, stageReportDetails,
+          getCurrentStageName, canAccessStep, selectStep, goToGrouping, goBackToStageDone,
+          toggleForm, onTreatmentDateChange, editPenRecord, cancelPenEdit, submitPenRecords, confirmStage, confirmArchive, cancelConfirm,
+          isHeaderCollapsed, toggleHeader, goToOverview,
+          getTreatmentSummary
+        }
+      },
+      mounted() {
+        setTimeout(() => {
+          const mainContent = document.querySelector('.main-content')
+          if (mainContent) {
+            mainContent.addEventListener('scroll', this.handleScroll)
+            this.scrollTarget = mainContent
+          }
+        }, 100)
+      },
+      beforeUnmount() {
+        if (this.scrollTarget) {
+          this.scrollTarget.removeEventListener('scroll', this.handleScroll)
+        }
+      }
+    }).use(ElementPlus).mount('#app')
+  </script>
+</body>
+</html>

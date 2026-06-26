@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猪实验数据 - 日常巡栏 02-ZZB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus/dist/index.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; }
+    .sidebar { width: 220px; height: 100vh; background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%); position: fixed; left: 0; top: 0; z-index: 100; color: #fff; }
+    .sidebar-logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-logo-title { font-size: 16px; font-weight: bold; color: #fff; }
+    .sidebar-menu { padding: 10px 0; }
+    .sidebar-menu-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: all 0.3s; font-size: 14px; }
+    .sidebar-menu-item:hover { background-color: rgba(255,255,255,0.1); }
+    .sidebar-menu-item.active { background-color: #1ab394; }
+    .sidebar-menu-item .icon { font-size: 18px; margin-right: 12px; width: 20px; text-align: center; }
+    .sidebar-menu-item .sub-icon { font-size: 10px; margin-left: auto; }
+    .top-nav { height: 60px; background-color: #fff; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; position: fixed; top: 0; right: 0; left: 220px; z-index: 99; }
+    .top-nav-container { max-width: 1600px; width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .top-nav-left { display: flex; align-items: center; }
+    .top-nav-title { font-size: 16px; font-weight: bold; color: #333; }
+    .top-nav-breadcrumb { font-size: 13px; color: #999; margin-left: 15px; display: flex; align-items: center; }
+    .top-nav-breadcrumb span { margin-right: 5px; }
+    .top-nav-right { display: flex; align-items: center; gap: 20px; }
+    .lang-switch { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; cursor: pointer; font-size: 13px; }
+    .lang-switch:hover { background-color: #f5f5f5; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background-color: #1ab394; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
+    .user-name { font-size: 14px; color: #333; }
+    .main-content { margin-left: 220px; margin-top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
+    .container { padding: 20px; max-width: 1600px; margin: 0 auto; }
+    .experiment-header { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s; }
+    .experiment-header.collapsed { padding: 12px 20px; }
+    .exp-code { font-size: 18px; font-weight: bold; color: #1ab394; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+    .exp-code .collapse-toggle { font-size: 12px; color: #999; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .exp-code .collapse-toggle:hover { color: #1ab394; }
+    .experiment-header.collapsed .info-grid, .experiment-header.collapsed .stages-row { display: none; }
+    .experiment-header.collapsed .exp-code { margin-bottom: 0; }
+    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .info-item { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; }
+    .info-label { color: #999; font-size: 14px; }
+    .info-value { color: #333; font-weight: 500; }
+    .stages-row { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; margin-top: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stages-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .status-flow { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .status-title { font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #333; }
+    .flow-container { display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 0; }
+    .flow-item { display: flex; align-items: center; }
+    .flow-node { min-width: 110px; max-width: 130px; padding: 12px 8px; text-align: center; border-radius: 6px; font-size: 12px; background-color: #f5f7fa; border: 1px solid #e6e6e6; cursor: pointer; transition: all 0.3s; word-break: break-all; line-height: 1.4; }
+    .flow-node:hover:not(.locked) { background-color: #e8f5e9; border-color: #a5d6a7; }
+    .flow-node.completed { background-color: #e8f5e9; border-color: #1ab394; color: #1ab394; font-weight: bold; }
+    .flow-node.active { background-color: #1ab394; border-color: #1ab394; color: #fff; font-weight: bold; box-shadow: 0 2px 8px rgba(26,179,148,0.3); }
+    .flow-node.locked { opacity: 0.5; cursor: not-allowed; }
+    .flow-arrow { margin: 0 6px; color: #ccc; font-size: 14px; }
+    .flow-arrow.active { color: #1ab394; }
+    .content-container { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 20px; }
+    .content-header { padding: 15px 20px; border-bottom: 1px solid #e6e6e6; background-color: #fafafa; display: flex; justify-content: space-between; align-items: center; }
+    .content-title { font-size: 16px; font-weight: bold; color: #333; }
+    .content-body { padding: 20px; }
+    .tab-container { border-bottom: 1px solid #e6e6e6; margin-bottom: 20px; }
+    .tab-item { display: inline-block; padding: 10px 20px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; margin-right: 10px; transition: all 0.3s; }
+    .tab-item.active { color: #1ab394; border-bottom-color: #1ab394; font-weight: bold; }
+    .section-box { background-color: #fafafa; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e6e6e6; }
+    .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .form-item { display: flex; flex-direction: column; }
+    .form-item label { font-size: 13px; color: #666; margin-bottom: 6px; }
+    .form-item.delete-cell { justify-content: flex-end; }
+    .form-item.delete-cell .delete-btn { margin-top: auto; }
+    .form-item label.required::before { content: '*'; color: #f56c6c; margin-right: 4px; }
+    .form-item .el-input, .form-item .el-select { width: 100%; }
+    .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn-group .el-button { flex: 1; }
+    .record-table { margin-top: 20px; }
+    .record-table .el-table { --el-table-header-text-color: #666; --el-table-row-hover-bg-color: #f8f9fa; }
+    .record-table .el-table th { background-color: #fafafa; }
+    .record-table .el-table__body tr { cursor: pointer; }
+    .log-add { color: #1ab394; font-weight: bold; }
+    .log-edit { color: #3b82f6; font-weight: bold; }
+    .log-delete { color: #f56c6c; font-weight: bold; }
+    .log-detail { font-size: 12px; color: #666; margin-bottom: 4px; }
+    .upload-area { border: 2px dashed #d9d9d9; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; }
+    .upload-area:hover { border-color: #1ab394; background-color: #fafafa; }
+    .upload-area.dragover { border-color: #1ab394; background-color: #e8f5e9; }
+    .upload-icon { font-size: 48px; margin-bottom: 15px; color: #ccc; }
+    .upload-text { color: #999; font-size: 14px; }
+    .summary-card { background-color: #fafafa; padding: 20px; border-radius: 8px; text-align: center; }
+    .edit-dialog-content { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; }
+    .edit-form-item { display: flex; align-items: center; gap: 10px; }
+    .edit-form-item label { min-width: 120px; font-weight: bold; color: #666; }
+    .edit-form-item .el-input, .edit-form-item .el-select { flex: 1; }
+    .summary-value { font-size: 24px; font-weight: bold; color: #1ab394; }
+    .summary-label { font-size: 14px; color: #999; margin-top: 5px; }
+    .report-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .el-button--primary { background-color: #1ab394; border-color: #1ab394; }
+    .el-button--primary:hover { background-color: #18a689; border-color: #18a689; }
+    .collapse-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #fafafa; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
+    .collapse-title { font-size: 14px; font-weight: bold; color: #333; }
+    .collapse-icon { font-size: 16px; transition: transform 0.3s; }
+    .collapse-icon.expanded { transform: rotate(180deg); }
+    .collapse-content { padding-left: 15px; }
+    .add-row-btn { margin-bottom: 15px; }
+    .quick-add-btn { margin-left: 10px; }
+    .pen-filter { margin-bottom: 20px; }
+    .pen-filter .el-select { width: 200px; }
+    .date-filter { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
+    .date-filter .el-input { width: 180px; }
+    .query-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; width: 90%; max-width: 1000px; max-height: 80vh; overflow: hidden; }
+    .query-modal-header { padding: 15px 20px; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; }
+    .query-modal-title { font-size: 16px; font-weight: bold; }
+    .query-modal-close { cursor: pointer; color: #999; font-size: 20px; }
+    .query-modal-body { padding: 20px; overflow-y: auto; max-height: 60vh; }
+    .query-modal-footer { padding: 15px 20px; border-top: 1px solid #e6e6e6; display: flex; justify-content: flex-end; gap: 10px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+    .delete-btn { background-color: #f56c6c !important; color: #fff !important; border-color: #f56c6c !important; }
+    .delete-btn:hover { background-color: #f44336 !important; border-color: #f44336 !important; }
+    .query-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background-color: #fafafa; border-radius: 8px; }
+    .pen-info-box { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid #e6e6e6; }
+    .pen-info-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; }
+    .pen-info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .pen-info-item { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; }
+    .pen-info-label { color: #999; font-size: 13px; }
+    .pen-info-value { color: #333; font-weight: 500; }
+    .edit-pen-info-btn { color: #1ab394; cursor: pointer; }
+    .pen-info-edit-form { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e6e6e6; }
+    .readonly-field { background-color: #f5f5f5; cursor: not-allowed; }
+    .user-role-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; }
+    .user-role-badge.admin { background-color: #e8f5e9; color: #1ab394; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div style="font-size: 32px; margin-bottom: 8px;">🔬</div>
+        <div class="sidebar-logo-title">实验研发</div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="sidebar-menu-item"><span class="icon">📚</span><span>知识库</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item"><span class="icon">📋</span><span>项目管理</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item"><span class="icon">🏭</span><span>实验场</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item"><span class="icon">🐷</span><span>猪实验数据</span><span class="sub-icon">▶</span></div>
+        <div class="sidebar-menu-item active" style="padding-left: 50px;" @click="goToOverview"><span class="icon">📊</span><span>实验概览</span></div>
+        <div class="sidebar-menu-item" style="padding-left: 50px;"><span class="icon">📈</span><span>报表分析</span></div>
+        <div class="sidebar-menu-item"><span class="icon">🐔</span><span>家禽实验数据</span><span class="sub-icon">▶</span></div>
+      </div>
+    </div>
+
+    <div class="top-nav">
+      <div class="top-nav-container">
+        <div class="top-nav-left">
+          <div class="top-nav-breadcrumb">
+            <span>猪实验数据</span><span>›</span><span>猪实验数据</span><span>›</span><span style="color: #1ab394;">{{ experimentCode }}</span>
+          </div>
+        </div>
+        <div class="top-nav-right">
+          <button class="lang-switch">中文</button>
+          <div class="user-info"><div class="user-avatar">李</div><div class="user-name">李永霞</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="container">
+        <div :class="['experiment-header', { collapsed: isHeaderCollapsed }]">
+          <div class="exp-code">
+            <span>{{ experimentCode }}<span class="user-role-badge admin">场长</span></span>
+            <span class="collapse-toggle" @click="toggleHeader">
+              <span>{{ isHeaderCollapsed ? '▶' : '▼' }}</span>
+              <span>{{ isHeaderCollapsed ? '展开详情' : '收起' }}</span>
+            </span>
+          </div>
+          <div class="info-grid">
+          <div class="info-item"><span class="info-label">动物方向</span><span class="info-value">{{ experimentInfo.animalType }}</span></div>
+          <div class="info-item"><span class="info-label">实验类型</span><span class="info-value">{{ experimentInfo.experimentType }}</span></div>
+          <div class="info-item"><span class="info-label">生长阶段</span><span class="info-value">{{ experimentInfo.growthStage }}</span></div>
+          <div class="info-item"><span class="info-label">实验场</span><span class="info-value">{{ experimentInfo.farm }}</span></div>
+          <div class="info-item"><span class="info-label">项目负责人</span><span class="info-value">{{ experimentInfo.projectManager }}</span></div>
+          <div class="info-item"><span class="info-label">项目成员</span><span class="info-value">{{ experimentInfo.projectMembers }}</span></div>
+          <div class="info-item"><span class="info-label">实验周期</span><span class="info-value">{{ experimentInfo.startDate }} 至 {{ experimentInfo.endDate }}</span></div>
+          <div class="info-item"><span class="info-label">实验名称</span><span class="info-value">{{ experimentInfo.name }}</span></div>
+        </div>
+        <div class="stages-row">
+          <span class="info-label">试验阶段</span>
+          <span class="info-value stages-value">{{ experimentInfo.stages.map((s, i) => `${String(i + 1).padStart(2, '0')}-${s}`).join('/') }}</span>
+        </div>
+      </div>
+
+      <div class="status-flow">
+        <div class="status-title">实验进度</div>
+        <div class="flow-container">
+          <template v-for="(step, index) in flowSteps" :key="step.id">
+            <div class="flow-item">
+              <div :class="['flow-node', { completed: completedSteps.includes(step.id), active: currentStep === step.id, locked: !canAccessStep(step.id) && currentStep !== step.id }]" @click="selectStep(step.id)">
+                {{ step.name }}
+              </div>
+              <span v-if="index < flowSteps.length - 1" :class="['flow-arrow', { active: completedSteps.includes(step.id) }]">→</span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div v-if="currentStep.startsWith('daily_')" class="content-container">
+        <div class="content-header">
+          <div class="content-title">{{ currentStepTitle }}</div>
+          <div class="btn-group" style="flex: none; gap: 10px;">
+            <el-button type="primary" @click="downloadModuleTemplate">下载导入模板</el-button>
+            <el-button @click="showImportDialog = true">批量导入数据</el-button>
+          </div>
+        </div>
+        <div class="content-body">
+          <div class="query-bar">
+            <label style="font-weight: bold;">日期：</label>
+            <el-input v-model="queryDate" type="date" @change="onDateChange"></el-input>
+            <label style="font-weight: bold; margin-left: 15px;">选择栏位：</label>
+            <el-select v-model="selectedPen" placeholder="请选择栏位" @change="onPenChange" style="width: 200px;">
+              <el-option v-for="pen in penList" :key="pen.id" :label="`${getPenRecordStatus(pen.id, queryDate) ? '✅' : '○'} 栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option>
+            </el-select>
+            <span style="color: #999; font-size: 12px;">选择栏位以筛选该栏位的记录数据</span>
+            <el-button type="primary" @click="filterRecords">查询</el-button>
+            <el-button @click="resetFilter">重置</el-button>
+          </div>
+
+          <div v-if="selectedPen && selectedPen !== 'all'" class="pen-info-box">
+            <div class="pen-info-title">
+              栏位初始信息
+              <span v-if="canEditPenInfo" class="edit-pen-info-btn" @click="togglePenInfoEdit">
+                {{ isEditingPenInfo ? '取消编辑' : '编辑' }}
+              </span>
+            </div>
+            <div v-if="!isEditingPenInfo" class="pen-info-grid">
+              <div class="pen-info-item"><span class="pen-info-label">品系</span><span class="pen-info-value">{{ currentPenInfo.strain }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">耳标颜色</span><span class="pen-info-value">{{ currentPenInfo.earTagColor }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">耳标序号</span><span class="pen-info-value">{{ currentPenInfo.earTagNumber }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">性别</span><span class="pen-info-value">{{ currentPenInfo.gender }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">断奶时间</span><span class="pen-info-value">{{ currentPenInfo.weaningTime }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">断奶日龄</span><span class="pen-info-value">{{ currentPenInfo.weaningAge }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">开始时间</span><span class="pen-info-value">{{ currentPenInfo.startTime }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">初始日龄</span><span class="pen-info-value">{{ currentPenInfo.initialAge }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">初始称重(Kg)</span><span class="pen-info-value">{{ currentPenInfo.initialWeight }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">初始头数</span><span class="pen-info-value">{{ currentPenInfo.initialHeadCount }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">初始只均重(Kg)</span><span class="pen-info-value">{{ currentPenInfo.initialAvgWeight }}</span></div>
+              <div class="pen-info-item"><span class="pen-info-label">初始余料(Kg)</span><span class="pen-info-value">{{ currentPenInfo.initialRemainingFeed }}</span></div>
+            </div>
+            <div v-else class="pen-info-edit-form">
+              <div class="form-grid-3">
+                <div class="form-item">
+                  <label>开始时间</label>
+                  <el-select v-model="penInfoForm.startTime" @change="onStartTimeChange" style="width: 100%;">
+                    <el-option value="">请选择开始时间</el-option>
+                    <el-option v-for="opt in startTimeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+                  </el-select>
+                </div>
+                <div class="form-item">
+                  <label>初始日龄(天)</label>
+                  <el-input v-model="penInfoForm.initialAge" class="readonly-field"></el-input>
+                </div>
+                <div class="form-item">
+                  <label>初始称重(Kg)</label>
+                  <el-input v-model="penInfoForm.initialWeight" class="readonly-field"></el-input>
+                </div>
+                <div class="form-item">
+                  <label>初始头数</label>
+                  <el-input v-model="penInfoForm.initialHeadCount" class="readonly-field"></el-input>
+                </div>
+                <div class="form-item">
+                  <label>初始只均重(Kg)</label>
+                  <el-input v-model="penInfoForm.initialAvgWeight" class="readonly-field"></el-input>
+                </div>
+                <div class="form-item">
+                  <label>初始余料(Kg)</label>
+                  <el-input v-model="penInfoForm.initialRemainingFeed" class="readonly-field"></el-input>
+                </div>
+              </div>
+              <div class="btn-group" style="justify-content: flex-end; margin-top: 20px;">
+                <el-button @click="cancelPenInfoEdit">取消</el-button>
+                <el-button type="primary" @click="savePenInfo">保存</el-button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-container">
+            <div v-for="tab in moduleTabs" :key="tab.id" :class="['tab-item', { active: activeModule === tab.id }]" @click="activeModule = tab.id">
+              {{ tab.name }}
+            </div>
+          </div>
+
+          <div v-if="selectedPen" class="section-box">
+            <div class="section-title">数据记录表 - {{ getCurrentModuleName() }} ({{ currentDateDisplay }})</div>
+            <div v-if="filteredSubmittedRecords.length > 0" class="record-table">
+              <el-table :data="filteredSubmittedRecords" border style="width: 100%; font-size: 13px;" @row-click="editSubmittedRecord">
+                <el-table-column v-for="col in currentModuleColumns" :key="col.key" :label="col.label" :prop="col.key">
+                  <template #default="scope">
+                    <span v-if="col.key === 'penId'">{{ getPenLabel(scope.row.penId) }}</span>
+                    <span v-else-if="col.key === 'deathReason'">{{ scope.row.deathReason?.join(', ') || '-' }}</span>
+                    <span v-else>{{ scope.row[col.key] || '-' }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+            <div v-else style="text-align: center; padding: 30px; color: #999;">
+              <div style="font-size: 32px; margin-bottom: 10px;">📝</div>
+              <div>当前日期 {{ currentDateDisplay }} 暂无已提交的{{ getCurrentModuleName() }}记录</div>
+            </div>
+          </div>
+
+          <el-dialog v-model="editDialogVisible" :title="`修改${getCurrentModuleName()}记录`" width="600px">
+            <div v-if="editingRecord" class="edit-dialog-content">
+              <div v-for="col in currentModuleColumns.filter(c => c.key !== 'submitter' && c.key !== 'submitTime')" :key="col.key" class="edit-form-item">
+                <label>{{ col.label }}:</label>
+                <el-date-picker v-if="col.key === 'recordTime'" v-model="editingRecord[col.key]" type="date" value-format="YYYY-MM-DD" style="flex: 1;"></el-date-picker>
+                <el-input v-else-if="col.key === 'penId'" v-model="editingRecord[col.key]" disabled></el-input>
+                <el-select v-else-if="col.key === 'gender' || col.key === 'deathGender' || col.key === 'cullGender' || col.key === 'diarrheaGender'" v-model="editingRecord[col.key]">
+                  <el-option label="公" value="公"></el-option>
+                  <el-option label="母" value="母"></el-option>
+                </el-select>
+                <el-select v-else-if="col.key === 'deathReason'" v-model="editingRecord[col.key]" multiple>
+                  <el-option label="疾病" value="disease"></el-option>
+                  <el-option label="外伤" value="injury"></el-option>
+                  <el-option label="其他" value="other"></el-option>
+                </el-select>
+                <el-select v-else-if="col.key === 'diarrheaScore'" v-model="editingRecord[col.key]">
+                  <el-option label="0" value="0"></el-option>
+                  <el-option label="1" value="1"></el-option>
+                  <el-option label="2" value="2"></el-option>
+                  <el-option label="3" value="3"></el-option>
+                </el-select>
+                <el-select v-else-if="col.key === 'medicineStatus'" v-model="editingRecord[col.key]">
+                  <el-option label="正常" value="normal"></el-option>
+                  <el-option label="使用中" value="using"></el-option>
+                  <el-option label="已用完" value="used"></el-option>
+                </el-select>
+                <el-select v-else-if="col.key === 'vaccineStatus'" v-model="editingRecord[col.key]">
+                  <el-option label="液体" value="liquid"></el-option>
+                  <el-option label="固体" value="solid"></el-option>
+                </el-select>
+                <el-select v-else-if="col.key === 'healthStatus'" v-model="editingRecord[col.key]">
+                  <el-option label="健康" value="healthy"></el-option>
+                  <el-option label="异常" value="abnormal"></el-option>
+                  <el-option label="需观察" value="monitor"></el-option>
+                </el-select>
+                <el-input v-else v-model="editingRecord[col.key]" type="number"></el-input>
+              </div>
+            </div>
+            <template #footer>
+              <el-button @click="editDialogVisible = false">取消</el-button>
+              <el-button type="primary" @click="confirmEditRecord">确认修改</el-button>
+            </template>
+          </el-dialog>
+
+          <div v-if="activeModule === 'death'" class="section-box">
+            <div class="section-title">死淘记录</div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录日期</label><el-input v-model="record.recordTime" type="date"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label class="required">当日死亡数量</label><el-input v-model="record.deathCount" type="number" placeholder="整数" @input="calculateCurrentCount(index)"></el-input></div>
+              <div class="form-item"><label>当日死亡重量(Kg)</label><el-input v-model="record.deathWeight" type="number" step="0.01" placeholder="两位小数"></el-input></div>
+              <div class="form-item"><label>死亡性别</label><el-select v-model="record.gender"><el-option label="公" value="公"></el-option><el-option label="母" value="母"></el-option></el-select></div>
+              <div class="form-item"><label>死亡原因</label><el-select v-model="record.deathReason" multiple @change="handleDeathReasonChange(record)"><el-option label="疾病" value="disease"></el-option><el-option label="外伤" value="injury"></el-option><el-option label="其他" value="other"></el-option></el-select></div>
+              <div class="form-item" v-if="record.showOtherReason"><label>其他原因</label><el-input v-model="record.otherReasonText" placeholder="请输入其他原因"></el-input></div>
+              <div class="form-item">
+                <label>死亡猪只天数</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <el-input v-model="record.deathDays" type="number" disabled></el-input>
+                  <el-tooltip content="死亡猪只天数 = (记录时间 - 开始时间) × 当日死亡数量" placement="top">
+                    <span class="tooltip-icon">ℹ️</span>
+                  </el-tooltip>
+                  <span style="color: #1ab394; font-size: 12px;"></span>
+                </div>
+              </div>
+              <div class="form-item">
+                <label>累计死亡数量</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <el-input v-model="record.cumDeathCount" type="number" disabled></el-input>
+                  <el-tooltip content="累计 = 初始头数 - 当前存栏 - 累计淘汰数量" placement="top">
+                    <span class="tooltip-icon">ℹ️</span>
+                  </el-tooltip>
+                </div>
+              </div>
+              <div class="form-item">
+                <label>累计死亡重量(Kg)</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <el-input v-model="record.cumDeathWeight" type="number" step="0.01" disabled></el-input>
+                  <el-tooltip content="累计 = 所有历史死亡重量之和" placement="top">
+                    <span class="tooltip-icon">ℹ️</span>
+                  </el-tooltip>
+                </div>
+              </div>
+              <div class="form-item"><label>当日淘汰数量</label><el-input v-model="record.cullCount" type="number" @input="calculateCurrentCount(index)"></el-input></div>
+              <div class="form-item"><label>当日淘汰重量(Kg)</label><el-input v-model="record.cullWeight" type="number" step="0.01"></el-input></div>
+              <div class="form-item"><label>淘汰性别</label><el-select v-model="record.cullGender"><el-option label="公" value="公"></el-option><el-option label="母" value="母"></el-option></el-select></div>
+              <div class="form-item">
+                <label>淘汰猪只天数</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <el-input v-model="record.cullDays" type="number" disabled></el-input>
+                  <el-tooltip content="淘汰猪只天数 = (记录时间 - 开始时间) × 当日淘汰数量" placement="top">
+                    <span class="tooltip-icon">ℹ️</span>
+                  </el-tooltip>
+                  <span style="color: #1ab394; font-size: 12px;"></span>
+                </div>
+              </div>
+              <div class="form-item">
+                <label>累计淘汰数量</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <el-input v-model="record.cumCullCount" type="number" disabled></el-input>
+                  <el-tooltip content="累计 = 所有历史淘汰数量之和" placement="top">
+                    <span class="tooltip-icon">ℹ️</span>
+                  </el-tooltip>
+                </div>
+              </div>
+              <div class="form-item">
+                <label>累计淘汰重量(Kg)</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <el-input v-model="record.cumCullWeight" type="number" step="0.01" disabled></el-input>
+                  <el-tooltip content="累计 = 所有历史淘汰重量之和" placement="top">
+                    <span class="tooltip-icon">ℹ️</span>
+                  </el-tooltip>
+                </div>
+              </div>
+              <div class="form-item"><label>当日存栏数量</label><el-input v-model="record.currentCount" type="number" disabled></el-input></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addDeathRecord">+ 添加行</el-button>
+          </div>
+
+          <div v-if="activeModule === 'feed'" class="section-box">
+            <div class="section-title">采食记录</div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录时间</label><el-input v-model="record.recordTime" type="date"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label>饲喂量(Kg)</label><el-input v-model="record.feedAmount" type="number" step="0.01"></el-input></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addFeedRecord">+ 添加行</el-button>
+          </div>
+
+          <div v-if="activeModule === 'diarrhea'" class="section-box">
+            <div class="section-title">腹泻记录</div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录日期</label><el-input v-model="record.recordTime" type="date" @change="calculateDiarrheaAge(index)"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label class="required">腹泻评分</label><el-select v-model="record.diarrheaScore"><el-option label="0" value="0"></el-option><el-option label="1" value="1"></el-option><el-option label="2" value="2"></el-option><el-option label="3" value="3"></el-option></el-select></div>
+              <div class="form-item"><label>腹泻日龄</label><el-input v-model="record.diarrheaAge" type="number"></el-input></div>
+              <div class="form-item"><label>腹泻头数</label><el-input v-model="record.diarrheaHeadCount" type="number"></el-input></div>
+              <div class="form-item"><label>腹泻性别</label><el-select v-model="record.diarrheaGender"><el-option label="公" value="公"></el-option><el-option label="母" value="母"></el-option></el-select></div>
+              <div class="form-item"><label>猪只健康状况</label><el-select v-model="record.healthStatus"><el-option label="健康" value="healthy"></el-option><el-option label="异常" value="abnormal"></el-option><el-option label="需观察" value="monitor"></el-option></el-select></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addDiarrheaRecord">+ 添加行</el-button>
+          </div>
+
+          <div v-if="activeModule === 'medicine'" class="section-box">
+            <div class="section-title">药品记录</div>
+            <div class="collapse-header" @click="medicineExpanded = !medicineExpanded">
+              <div class="collapse-title">药品查询</div>
+              <span :class="['collapse-icon', { expanded: medicineExpanded }]">▼</span>
+            </div>
+            <div v-if="medicineExpanded" class="collapse-content">
+              <div class="form-grid-3" style="margin-bottom: 15px;">
+                <div class="form-item"><label>药品名称</label><el-input v-model="medicineQuery.name" placeholder="请输入药品名称"></el-input></div>
+                <div class="form-item"><label>药品代码</label><el-input v-model="medicineQuery.code" placeholder="请输入药品代码"></el-input></div>
+                <div class="form-item"><label>药品类别</label><el-input v-model="medicineQuery.type" placeholder="请输入药品类别"></el-input></div>
+              </div>
+              <el-button type="primary" @click="searchMedicine">查询</el-button>
+              <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                <div v-for="item in medicineList" :key="item.code" class="form-grid-3" style="background: #fafafa; padding: 10px; border-radius: 4px; margin-bottom: 10px; cursor: pointer;" @click="selectMedicine(item)">
+                  <div><strong>名称:</strong> {{ item.name }}</div>
+                  <div><strong>代码:</strong> {{ item.code }}</div>
+                  <div><strong>类别:</strong> {{ item.type }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录时间</label><el-input v-model="record.recordTime" type="date"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label>产品名称</label><el-input v-model="record.productName"></el-input></div>
+              <div class="form-item"><label>产品代码</label><el-input v-model="record.productCode"></el-input></div>
+              <div class="form-item"><label>产品类别</label><el-input v-model="record.productType"></el-input></div>
+              <div class="form-item"><label>产品规格</label><el-input v-model="record.productSpec"></el-input></div>
+              <div class="form-item"><label>规格单位</label><el-input v-model="record.specUnit"></el-input></div>
+              <div class="form-item"><label>供应商名称</label><el-input v-model="record.supplierName"></el-input></div>
+              <div class="form-item"><label>供应商代码</label><el-input v-model="record.supplierCode"></el-input></div>
+              <div class="form-item"><label>药品状态</label><el-select v-model="record.medicineStatus"><el-option label="正常" value="normal"></el-option><el-option label="使用中" value="using"></el-option><el-option label="已用完" value="used"></el-option></el-select></div>
+              <div class="form-item"><label>猪只健康状况</label><el-select v-model="record.healthStatus"><el-option label="健康" value="healthy"></el-option><el-option label="异常" value="abnormal"></el-option><el-option label="需观察" value="monitor"></el-option></el-select></div>
+              <div class="form-item"><label>治疗范围</label><el-input v-model="record.treatmentRange"></el-input></div>
+              <div class="form-item"><label>给药途径</label><el-input v-model="record.adminRoute"></el-input></div>
+              <div class="form-item"><label>用量</label><el-input v-model="record.dosage"></el-input></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addMedicineRecord">+ 添加行</el-button>
+          </div>
+
+          <div v-if="activeModule === 'vaccine'" class="section-box">
+            <div class="section-title">疫苗记录</div>
+            <div class="collapse-header" @click="vaccineExpanded = !vaccineExpanded">
+              <div class="collapse-title">疫苗查询</div>
+              <span :class="['collapse-icon', { expanded: vaccineExpanded }]">▼</span>
+            </div>
+            <div v-if="vaccineExpanded" class="collapse-content">
+              <div class="form-grid-3" style="margin-bottom: 15px;">
+                <div class="form-item"><label>疫苗名称</label><el-input v-model="vaccineQuery.name" placeholder="请输入疫苗名称"></el-input></div>
+                <div class="form-item"><label>疫苗代码</label><el-input v-model="vaccineQuery.code" placeholder="请输入疫苗代码"></el-input></div>
+                <div class="form-item"><label>疫苗类型</label><el-input v-model="vaccineQuery.type" placeholder="请输入疫苗类型"></el-input></div>
+              </div>
+              <el-button type="primary" @click="searchVaccine">查询</el-button>
+              <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                <div v-for="item in vaccineList" :key="item.code" class="form-grid-3" style="background: #fafafa; padding: 10px; border-radius: 4px; margin-bottom: 10px; cursor: pointer;" @click="selectVaccine(item)">
+                  <div><strong>名称:</strong> {{ item.name }}</div>
+                  <div><strong>代码:</strong> {{ item.code }}</div>
+                  <div><strong>类型:</strong> {{ item.type }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录日期</label><el-input v-model="record.recordTime" type="date"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label>产品名称</label><el-input v-model="record.productName"></el-input></div>
+              <div class="form-item"><label>产品代码</label><el-input v-model="record.productCode"></el-input></div>
+              <div class="form-item"><label>疫苗状态</label><el-select v-model="record.vaccineStatus"><el-option label="液体" value="liquid"></el-option><el-option label="固体" value="solid"></el-option></el-select></div>
+              <div class="form-item"><label>免疫范围</label><el-input v-model="record.immuneRange"></el-input></div>
+              <div class="form-item"><label>免疫途径</label><el-input v-model="record.immuneRoute"></el-input></div>
+              <div class="form-item"><label>用量</label><el-input v-model="record.dosage"></el-input></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addVaccineRecord">+ 添加行</el-button>
+          </div>
+
+          <div v-if="activeModule === 'environment'" class="section-box">
+            <div class="section-title">环控记录</div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录日期</label><el-input v-model="record.recordTime" type="date"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label>日用水量(L/单元)</label><el-input v-model="record.dailyWaterUsage" type="number"></el-input></div>
+              <div class="form-item"><label>预估猪只饮水量(L/只)</label><el-input v-model="record.waterIntake" type="number"></el-input></div>
+              <div class="form-item"><label>舍内最高温度(℃)</label><el-input v-model="record.maxTemp" type="number"></el-input></div>
+              <div class="form-item"><label>舍内平均温度(℃)</label><el-input v-model="record.avgTemp" type="number"></el-input></div>
+              <div class="form-item"><label>舍内最低温度(℃)</label><el-input v-model="record.minTemp" type="number"></el-input></div>
+              <div class="form-item"><label>舍内最高湿度(%)</label><el-input v-model="record.maxHumidity" type="number"></el-input></div>
+              <div class="form-item"><label>舍内平均湿度(%)</label><el-input v-model="record.avgHumidity" type="number"></el-input></div>
+              <div class="form-item"><label>舍内最低湿度(%)</label><el-input v-model="record.minHumidity" type="number"></el-input></div>
+              <div class="form-item"><label>最高压力(Pa)</label><el-input v-model="record.maxPressure" type="number" step="0.01"></el-input></div>
+              <div class="form-item"><label>平均压力(Pa)</label><el-input v-model="record.avgPressure" type="number" step="0.01"></el-input></div>
+              <div class="form-item"><label>最低压力(Pa)</label><el-input v-model="record.minPressure" type="number" step="0.01"></el-input></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addEnvironmentRecord">+ 添加行</el-button>
+          </div>
+
+          <div v-if="activeModule === 'weight'" class="section-box">
+            <div class="section-title">称重记录</div>
+            <div v-for="(record, index) in currentModuleRecords" :key="index" class="form-grid-3" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div class="form-item"><label class="required">记录时间</label><el-input v-model="record.recordTime" type="date"></el-input></div>
+              <div class="form-item"><label class="required">栋-单元-栏位</label><el-select v-model="record.penId" disabled><el-option v-for="pen in penList" :key="pen.id" :label="`栋${pen.building}-单元${pen.unit}-栏位${pen.pen}`" :value="pen.id"></el-option></el-select></div>
+              <div class="form-item"><label>称重重量(Kg)</label><el-input v-model="record.weight" type="number" step="0.01" @change="calculateAvgWeight(index)"></el-input></div>
+              <div class="form-item"><label>当日存栏只均重(Kg)</label><el-input v-model="record.avgWeight" type="number" step="0.01" disabled></el-input></div>
+              <div class="form-item"><label>栏位余料(Kg)</label><el-input v-model="record.remainingFeed" type="number" step="0.01"></el-input></div>
+              <div class="form-item delete-cell"><el-button class="delete-btn" @click="removeRecord(index)">删除</el-button></div>
+            </div>
+            <el-button type="primary" class="add-row-btn" @click="addWeightRecord">+ 添加行</el-button>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px;">
+            <el-button @click="saveDraft">保存草稿</el-button>
+            <el-button type="primary" @click="saveAllRecords">保存记录</el-button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="currentStep === 'group'" class="content-container">
+        <div class="content-header"><div class="content-title">返回实验分组</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
+          <div>请点击下方按钮返回实验分组页面</div>
+          <el-button type="primary" style="margin-top: 20px;" @click="goToGrouping">返回实验分组</el-button>
+        </div>
+      </div>
+
+      <div v-if="currentStep.startsWith('stageEnd_')" class="content-container">
+        <div class="content-header"><div class="content-title">阶段结束统计</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
+          <div>当前阶段：{{ getCurrentStageName() }} - 阶段结束统计</div>
+        </div>
+      </div>
+
+      <div v-if="currentStep.startsWith('stageArchive_')" class="content-container">
+        <div class="content-header"><div class="content-title">阶段归档</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 15px;">📦</div>
+          <div>当前阶段：{{ getCurrentStageName() }} - 阶段归档</div>
+        </div>
+      </div>
+
+      <div v-if="currentStep === 'completed'" class="content-container">
+        <div class="content-header"><div class="content-title">实验完成</div></div>
+        <div class="content-body" style="text-align: center; padding: 60px;">
+          <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+          <div style="font-size: 18px; font-weight: bold; color: #333;">实验已完成</div>
+        </div>
+      </div>
+
+      <div v-if="selectedPen" class="content-container">
+        <div class="content-header"><div class="content-title">操作日志</div></div>
+        <div class="content-body">
+          <div v-if="operationLogs.length > 0" class="record-table">
+            <el-table :data="operationLogs" border style="width: 100%; font-size: 13px;">
+              <el-table-column prop="logTime" label="操作时间" width="150"></el-table-column>
+              <el-table-column prop="operator" label="操作人" width="100"></el-table-column>
+              <el-table-column prop="operationType" label="操作类型" width="100">
+                <template #default="scope">
+                  <span :class="getOperationClass(scope.row.operationType)">{{ getOperationLabel(scope.row.operationType) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="moduleName" label="模块" width="100"></el-table-column>
+              <el-table-column prop="penId" label="栏位" width="120">
+                <template #default="scope">{{ getPenLabel(scope.row.penId) }}</template>
+              </el-table-column>
+              <el-table-column prop="detail" label="操作明细" min-width="300">
+                <template #default="scope">
+                  <div v-if="scope.row.beforeData" class="log-detail">
+                    <div><strong>修改前:</strong> {{ scope.row.beforeData }}</div>
+                  </div>
+                  <div v-if="scope.row.afterData" class="log-detail">
+                    <div><strong>修改后:</strong> {{ scope.row.afterData }}</div>
+                  </div>
+                  <div v-if="!scope.row.beforeData && !scope.row.afterData" class="log-detail">
+                    {{ scope.row.detail }}
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <div v-else style="text-align: center; padding: 30px; color: #999;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📋</div>
+            <div>暂无操作日志</div>
+          </div>
+        </div>
+      </div>
+
+      <el-dialog title="批量导入数据" v-model="showImportDialog" width="600px">
+        <div class="upload-area" :class="{ dragover: isDragging }" @dragover.prevent="isDragging = true" @dragleave="isDragging = false" @drop.prevent="handleDrop">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">拖拽Excel文件到此处，或点击选择文件</div>
+          <input type="file" accept=".xlsx,.xls" style="display: none;" ref="fileInput" @change="handleFileSelect">
+          <el-button type="primary" style="margin-top: 15px;" @click="triggerFileInput">选择文件</el-button>
+        </div>
+        <div style="margin-top: 20px;">
+          <label style="font-weight: bold;">选择导入模块：</label>
+          <el-select v-model="importModule" style="width: 200px; margin-left: 10px;">
+            <el-option v-for="tab in moduleTabs" :key="tab.id" :label="tab.name" :value="tab.id"></el-option>
+          </el-select>
+        </div>
+        <template #footer>
+          <el-button @click="showImportDialog = false">取消</el-button>
+          <el-button type="primary" @click="importData">开始导入</el-button>
+        </template>
+      </el-dialog>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus/dist/index.full.js"></script>
+
+  <script>
+    const { createApp, ref, computed, reactive } = Vue
+    const { ElInput, ElButton, ElSelect, ElOption, ElDialog, ElTable, ElTableColumn, ElTooltip } = ElementPlus
+
+    createApp({
+      components: { ElInput, ElButton, ElSelect, ElOption, ElDialog, ElTable, ElTableColumn, ElTooltip },
+      setup() {
+        const experimentCode = ref('SWINE-NUR-DY-0126')
+        const experimentInfo = ref({
+          animalType: '猪', experimentType: '饲料营养实验 - 营养实验', growthStage: '保育', farm: 'DY',
+          projectManager: '李一一', projectMembers: '张三、李四、王五',
+          startDate: '2026-01-26', endDate: '2026-04-26', name: '保育阶段营养试验', stages: ['DRB', 'ZZB']
+        })
+        const isHeaderCollapsed = ref(false)
+        const scrollTarget = ref(null)
+        const currentStep = ref('daily_2')
+        const completedSteps = ref(['group', 'daily_1', 'stageEnd_1', 'stageArchive_1'])
+        const currentStageName = ref('02-ZZB')
+        const selectedPen = ref('p1')
+        const queryDate = ref('2026-03-01')
+        const dateRange = ref([queryDate.value, queryDate.value])
+        const activeModule = ref('death')
+        const showImportDialog = ref(false)
+        const importModule = ref('death')
+        const isDragging = ref(false)
+        const medicineExpanded = ref(false)
+        const vaccineExpanded = ref(false)
+        const isEditingPenInfo = ref(false)
+
+        const medicineQuery = ref({ name: '', code: '', type: '' })
+        const medicineList = ref([
+          { name: '阿莫西林', code: 'AMX-001', type: '抗生素', spec: '500mg', specUnit: '片', supplierName: '华北制药', supplierCode: 'HB-001' },
+          { name: '头孢噻呋', code: 'CEF-002', type: '抗生素', spec: '1g', specUnit: '支', supplierName: '齐鲁制药', supplierCode: 'QL-002' },
+          { name: '维生素C', code: 'VTC-003', type: '维生素', spec: '100mg', specUnit: '片', supplierName: '养生堂', supplierCode: 'YS-003' }
+        ])
+
+        const vaccineQuery = ref({ name: '', code: '', type: '' })
+        const vaccineList = ref([
+          { name: '猪瘟疫苗', code: 'VSV-001', type: '灭活疫苗', spec: '2ml', supplierName: '中牧股份' },
+          { name: '蓝耳病疫苗', code: 'PRRS-002', type: '减毒活疫苗', spec: '1ml', supplierName: '海利生物' },
+          { name: '伪狂犬疫苗', code: 'PRV-003', type: '灭活疫苗', spec: '2ml', supplierName: '科前生物' }
+        ])
+
+        const penList = ref([
+          { id: 'p1', building: '1', unit: '1', pen: '1', treatment: '1', block: '1' },
+          { id: 'p2', building: '1', unit: '1', pen: '2', treatment: '1', block: '1' },
+          { id: 'p3', building: '1', unit: '2', pen: '3', treatment: '2', block: '1' },
+          { id: 'p4', building: '1', unit: '2', pen: '4', treatment: '2', block: '2' },
+          { id: 'p5', building: '2', unit: '1', pen: '5', treatment: '3', block: '2' },
+          { id: 'p6', building: '2', unit: '1', pen: '6', treatment: '3', block: '2' }
+        ])
+
+        const previousStageData = ref({
+          p1: { endDate: '2026-02-28', endAge: '60', endWeight: '135', endHeadCount: '10', endAvgWeight: '13.5', endRemainingFeed: '20' },
+          p2: { endDate: '2026-02-28', endAge: '60', endWeight: '130', endHeadCount: '10', endAvgWeight: '13.0', endRemainingFeed: '20' },
+          p3: { endDate: '2026-02-28', endAge: '60', endWeight: '138', endHeadCount: '8', endAvgWeight: '17.25', endRemainingFeed: '25' },
+          p4: { endDate: '2026-02-28', endAge: '60', endWeight: '133', endHeadCount: '8', endAvgWeight: '16.62', endRemainingFeed: '25' },
+          p5: { endDate: '2026-02-28', endAge: '60', endWeight: '125', endHeadCount: '10', endAvgWeight: '12.5', endRemainingFeed: '15' },
+          p6: { endDate: '2026-02-28', endAge: '60', endWeight: '125', endHeadCount: '10', endAvgWeight: '12.5', endRemainingFeed: '15' }
+        })
+
+        const penInitialInfo = ref({
+          p1: { strain: '杜长大', earTagColor: '红色', earTagNumber: 'DLY-001', gender: '公', weaningTime: '2026-01-20', weaningAge: '21', startTime: '2026-02-28', initialAge: '60', initialWeight: '135', initialHeadCount: '10', initialAvgWeight: '13.5', initialRemainingFeed: '20' },
+          p2: { strain: '杜长大', earTagColor: '红色', earTagNumber: 'DLY-002', gender: '母', weaningTime: '2026-01-20', weaningAge: '21', startTime: '2026-02-28', initialAge: '60', initialWeight: '130', initialHeadCount: '10', initialAvgWeight: '13.0', initialRemainingFeed: '20' },
+          p3: { strain: '杜长大', earTagColor: '蓝色', earTagNumber: 'DLY-003', gender: '公', weaningTime: '2026-01-20', weaningAge: '21', startTime: '2026-02-28', initialAge: '60', initialWeight: '138', initialHeadCount: '8', initialAvgWeight: '17.25', initialRemainingFeed: '25' },
+          p4: { strain: '杜长大', earTagColor: '蓝色', earTagNumber: 'DLY-004', gender: '母', weaningTime: '2026-01-20', weaningAge: '21', startTime: '2026-02-28', initialAge: '60', initialWeight: '133', initialHeadCount: '8', initialAvgWeight: '16.62', initialRemainingFeed: '25' },
+          p5: { strain: '三元', earTagColor: '绿色', earTagNumber: 'SY-001', gender: '公', weaningTime: '2026-01-20', weaningAge: '21', startTime: '2026-02-28', initialAge: '60', initialWeight: '125', initialHeadCount: '10', initialAvgWeight: '12.5', initialRemainingFeed: '15' },
+          p6: { strain: '三元', earTagColor: '绿色', earTagNumber: 'SY-002', gender: '母', weaningTime: '2026-01-20', weaningAge: '21', startTime: '2026-02-28', initialAge: '60', initialWeight: '125', initialHeadCount: '10', initialAvgWeight: '12.5', initialRemainingFeed: '15' }
+        })
+
+        const penInfoForm = reactive({
+          startTime: '',
+          initialAge: '',
+          initialWeight: '',
+          initialHeadCount: '',
+          initialAvgWeight: '',
+          initialRemainingFeed: ''
+        })
+
+        const startTimeOptions = computed(() => {
+          const options = []
+          const prevData = previousStageData.value[selectedPen.value]
+          if (prevData) {
+            options.push({ value: prevData.endDate, label: `${prevData.endDate} (上一阶段结束日期，自动填充)` })
+          }
+          options.push({ value: '2026-03-01', label: '2026-03-01 (手动录入)' })
+          options.push({ value: '2026-03-05', label: '2026-03-05 (手动录入)' })
+          return options
+        })
+
+        const canEditPenInfo = computed(() => {
+          return true
+        })
+
+        const moduleTabs = ref([
+          { id: 'death', name: '死淘记录' },
+          { id: 'feed', name: '采食记录' },
+          { id: 'diarrhea', name: '腹泻记录' },
+          { id: 'medicine', name: '药品记录' },
+          { id: 'vaccine', name: '疫苗记录' },
+          { id: 'environment', name: '环控记录' },
+          { id: 'weight', name: '称重记录' }
+        ])
+
+        const moduleRecords = ref({
+          death: [{ recordTime: '', penId: '', deathPenCount: '', deathCount: '', deathWeight: '', gender: '', deathReason: [], deathDays: '', cumDeathCount: '', cumDeathWeight: '', cullCount: '', cullWeight: '', cullGender: '', cullDays: '', cumCullCount: '', cumCullWeight: '', currentCount: '' }],
+          feed: [{ recordTime: '', penId: '', feedAmount: '' }],
+          diarrhea: [{ recordTime: '', penId: '', diarrheaScore: '', diarrheaAge: '', diarrheaHeadCount: '', diarrheaGender: '', healthStatus: '' }],
+          medicine: [{ recordTime: '', penId: '', productName: '', productCode: '', productType: '', productSpec: '', specUnit: '', supplierName: '', supplierCode: '', medicineStatus: '', treatmentRange: '', adminRoute: '', adminRouteText: '', dosage: '' }],
+          vaccine: [{ recordTime: '', penId: '', productName: '', productCode: '', vaccineStatus: '', immuneRange: '', immuneRoute: '', dosage: '' }],
+          environment: [{ recordTime: '', penId: '', waterIntake: '', temperature: '', humidity: '', waterPressure: '' }],
+          weight: [{ recordTime: '', penId: '', weightTime: '', weight: '', avgWeight: '', remainingFeed: '' }]
+        })
+
+        const flowSteps = computed(() => {
+          const steps = [{ id: 'group', name: '实验分组' }]
+          experimentInfo.value.stages.forEach((stage, index) => {
+            const stageNum = String(index + 1).padStart(2, '0')
+            steps.push({ id: `daily_${index + 1}`, name: `日常巡栏\n${stageNum}-${stage}` })
+            steps.push({ id: `stageEnd_${index + 1}`, name: '阶段结束' })
+            steps.push({ id: `stageArchive_${index + 1}`, name: '阶段归档' })
+          })
+          steps.push({ id: 'completed', name: '实验结束' })
+          return steps
+        })
+
+        const currentStepTitle = computed(() => {
+          const step = flowSteps.value.find(s => s.id === currentStep.value)
+          if (!step) return ''
+          if (currentStep.value.startsWith('daily_')) {
+            return `${step.name.replace('\n', ' ')} - 巡栏数据录入`
+          }
+          return step.name
+        })
+
+        const currentModuleRecords = computed(() => moduleRecords.value[activeModule.value])
+
+        const currentDateDisplay = computed(() => {
+          return dateRange.value[0] || getQueryDate()
+        })
+
+        const getCurrentModuleName = () => {
+          const tab = moduleTabs.value.find(t => t.id === activeModule.value)
+          return tab ? tab.name : ''
+        }
+
+        const moduleColumns = {
+          death: [
+            { key: 'recordTime', label: '记录日期' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'deathCount', label: '当日死亡数量' },
+            { key: 'deathWeight', label: '当日死亡重量(Kg)' },
+            { key: 'gender', label: '死亡性别' },
+            { key: 'deathReason', label: '死亡原因' },
+            { key: 'deathDays', label: '死亡猪只天数' },
+            { key: 'cumDeathCount', label: '累计死亡数量' },
+            { key: 'cumDeathWeight', label: '累计死亡重量(Kg)' },
+            { key: 'cullCount', label: '当日淘汰数量' },
+            { key: 'cullWeight', label: '当日淘汰重量(Kg)' },
+            { key: 'cullGender', label: '淘汰性别' },
+            { key: 'cullDays', label: '淘汰天数' },
+            { key: 'cumCullCount', label: '累计淘汰数量' },
+            { key: 'cumCullWeight', label: '累计淘汰重量(Kg)' },
+            { key: 'currentCount', label: '当日存栏数量' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ],
+          feed: [
+            { key: 'recordTime', label: '记录时间' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'feedAmount', label: '饲喂量(Kg)' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ],
+          diarrhea: [
+            { key: 'recordTime', label: '记录日期' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'diarrheaScore', label: '腹泻评分' },
+            { key: 'diarrheaAge', label: '腹泻日龄' },
+            { key: 'diarrheaHeadCount', label: '腹泻头数' },
+            { key: 'diarrheaGender', label: '腹泻性别' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ],
+          medicine: [
+            { key: 'recordTime', label: '记录时间' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'productName', label: '产品名称' },
+            { key: 'productCode', label: '产品代码' },
+            { key: 'productType', label: '产品类别' },
+            { key: 'productSpec', label: '产品规格' },
+            { key: 'specUnit', label: '规格单位' },
+            { key: 'supplierName', label: '供应商名称' },
+            { key: 'supplierCode', label: '供应商代码' },
+            { key: 'medicineStatus', label: '药品状态' },
+            { key: 'healthStatus', label: '猪只健康状况' },
+            { key: 'treatmentRange', label: '治疗范围' },
+            { key: 'adminRoute', label: '给药途径' },
+            { key: 'dosage', label: '用量' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ],
+          vaccine: [
+            { key: 'recordTime', label: '记录日期' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'productName', label: '产品名称' },
+            { key: 'productCode', label: '产品代码' },
+            { key: 'vaccineStatus', label: '疫苗状态' },
+            { key: 'immuneRange', label: '免疫范围' },
+            { key: 'immuneRoute', label: '免疫途径' },
+            { key: 'dosage', label: '用量' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ],
+          environment: [
+            { key: 'recordTime', label: '记录日期' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'dailyWaterUsage', label: '日用水量(L/单元)' },
+            { key: 'waterIntake', label: '预估猪只饮水量(L/只)' },
+            { key: 'maxTemp', label: '舍内最高温度(℃)' },
+            { key: 'avgTemp', label: '舍内平均温度(℃)' },
+            { key: 'minTemp', label: '舍内最低温度(℃)' },
+            { key: 'maxHumidity', label: '舍内最高湿度(%)' },
+            { key: 'avgHumidity', label: '舍内平均湿度(%)' },
+            { key: 'minHumidity', label: '舍内最低湿度(%)' },
+            { key: 'maxPressure', label: '最高压力(Pa)' },
+            { key: 'avgPressure', label: '平均压力(Pa)' },
+            { key: 'minPressure', label: '最低压力(Pa)' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ],
+          weight: [
+            { key: 'recordTime', label: '记录日期' },
+            { key: 'penId', label: '栋-单元-栏位' },
+            { key: 'weight', label: '称重重量(Kg)' },
+            { key: 'avgWeight', label: '当日存栏只均重(Kg)' },
+            { key: 'remainingFeed', label: '栏位余料(Kg)' },
+            { key: 'submitter', label: '提交人' },
+            { key: 'submitTime', label: '提交时间' }
+          ]
+        }
+
+        const submittedRecords = ref({
+          death: [], feed: [], diarrhea: [], medicine: [], vaccine: [], environment: [], weight: []
+        })
+
+        const operationLogs = ref([])
+
+        const currentPenInfo = computed(() => {
+          return penInitialInfo.value[selectedPen.value] || {}
+        })
+
+        const totalRecords = computed(() => {
+          return Object.values(submittedRecords.value).reduce((sum, records) => sum + records.length, 0)
+        })
+
+        const deathCount = computed(() => {
+          return submittedRecords.value.death.reduce((sum, r) => sum + (parseInt(r.deathCount) || 0), 0)
+        })
+
+        const avgTemperature = computed(() => {
+          const envRecords = submittedRecords.value.environment
+          if (envRecords.length === 0) return 0
+          const sum = envRecords.reduce((s, r) => s + (parseFloat(r.avgTemp) || 0), 0)
+          return (sum / envRecords.length).toFixed(1)
+        })
+
+        const filteredSubmittedRecords = computed(() => {
+          const penId = selectedPen.value
+          const records = submittedRecords.value[activeModule.value] || []
+          return records.filter(r => !penId || r.penId === penId)
+        })
+
+        const currentModuleColumns = computed(() => {
+          return moduleColumns[activeModule.value] || []
+        })
+
+        const getStepIndex = (stepId) => {
+          return flowSteps.value.findIndex(s => s.id === stepId)
+        }
+
+        const canAccessStep = (stepId) => {
+          const currentIndex = getStepIndex(currentStep.value)
+          const targetIndex = getStepIndex(stepId)
+          if (targetIndex === -1) return false
+          if (completedSteps.value.includes(stepId)) return true
+          return targetIndex <= currentIndex + 1
+        }
+
+        const selectStep = (stepId) => {
+          if (canAccessStep(stepId)) {
+            currentStep.value = stepId
+            if (stepId.startsWith('daily_')) {
+              const index = parseInt(stepId.split('_')[1]) - 1
+              currentStageName.value = `${String(index + 1).padStart(2, '0')}-${experimentInfo.value.stages[index]}`
+            }
+          }
+        }
+
+        const onPenChange = () => {
+          initRecordsPenId()
+          isEditingPenInfo.value = false
+        }
+
+        const onDateChange = () => {
+        }
+
+        const getPenRecordStatus = (penId, date) => {
+          const targetDate = date || new Date().toISOString().split('T')[0]
+          return Object.keys(submittedRecords.value).some(moduleId => {
+            return submittedRecords.value[moduleId].some(record => {
+              return record.penId === penId && record.recordTime === targetDate
+            })
+          })
+        }
+
+        const updatePenInfo = (field, value) => {
+          if (penInitialInfo.value[selectedPen.value]) {
+            penInitialInfo.value[selectedPen.value][field] = value
+          }
+        }
+
+        const addRecord = () => {
+          const newRecord = getEmptyRecord(activeModule.value)
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value[activeModule.value].push(newRecord)
+        }
+
+        const getEmptyRecord = (moduleId) => {
+          const templates = {
+            death: { recordTime: getQueryDate(), penId: '', deathCount: '', deathWeight: '', gender: '', deathReason: [], showOtherReason: false, otherReasonText: '', deathDays: '', cumDeathCount: '', cumDeathWeight: '', cullCount: '', cullWeight: '', cullGender: '', cullDays: '', cumCullCount: '', cumCullWeight: '', currentCount: '' },
+            feed: { recordTime: getQueryDate(), penId: '', feedAmount: '' },
+            diarrhea: { recordTime: getQueryDate(), penId: '', diarrheaScore: '', diarrheaAge: '', diarrheaHeadCount: '', diarrheaGender: '', healthStatus: '' },
+            medicine: { recordTime: getQueryDate(), penId: '', productName: '', productCode: '', productType: '', productSpec: '', specUnit: '', supplierName: '', supplierCode: '', medicineStatus: '', treatmentRange: '', adminRoute: '', adminRouteText: '', dosage: '' },
+            vaccine: { recordTime: getQueryDate(), penId: '', productName: '', productCode: '', vaccineStatus: '', immuneRange: '', immuneRoute: '', dosage: '' },
+            environment: { recordTime: getQueryDate(), penId: '', dailyWaterUsage: '', waterIntake: '', maxTemp: '', avgTemp: '', minTemp: '', maxHumidity: '', avgHumidity: '', minHumidity: '', maxPressure: '', avgPressure: '', minPressure: '' },
+            weight: { recordTime: getQueryDate(), penId: '', weight: '', avgWeight: '', remainingFeed: '' }
+          }
+          return { ...templates[moduleId] }
+        }
+
+        const getQueryDate = () => {
+          const now = new Date()
+          return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        }
+
+        const getPenLabel = (penId) => {
+          const pen = penList.value.find(p => p.id === penId)
+          return pen ? `栋${pen.building}-单元${pen.unit}-栏位${pen.pen}` : penId
+        }
+
+        const addDeathRecord = () => {
+          const newRecord = getEmptyRecord('death')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.death.push(newRecord)
+        }
+
+        const handleDeathReasonChange = (record) => {
+          record.showOtherReason = record.deathReason.includes('other')
+        }
+        const addFeedRecord = () => {
+          const newRecord = getEmptyRecord('feed')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.feed.push(newRecord)
+        }
+        const addDiarrheaRecord = () => {
+          const newRecord = getEmptyRecord('diarrhea')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.diarrhea.push(newRecord)
+        }
+        const addMedicineRecord = () => {
+          const newRecord = getEmptyRecord('medicine')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.medicine.push(newRecord)
+        }
+        const addVaccineRecord = () => {
+          const newRecord = getEmptyRecord('vaccine')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.vaccine.push(newRecord)
+        }
+        const addEnvironmentRecord = () => {
+          const newRecord = getEmptyRecord('environment')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.environment.push(newRecord)
+        }
+        const addWeightRecord = () => {
+          const newRecord = getEmptyRecord('weight')
+          newRecord.penId = selectedPen.value || ''
+          moduleRecords.value.weight.push(newRecord)
+        }
+
+        const removeRecord = (index) => { moduleRecords.value[activeModule.value].splice(index, 1); calculateAllCurrentCount() }
+
+        const calculateCurrentCount = (index) => {
+          const records = moduleRecords.value.death
+          const penInfo = penInitialInfo.value[selectedPen.value]
+          if (!penInfo) return
+
+          let remainingCount = parseInt(penInfo.initialHeadCount) || 0
+          let cumDeath = 0
+          let cumCull = 0
+          const startDate = new Date(penInfo.startTime)
+
+          records.forEach((record, i) => {
+            cumDeath += parseInt(record.deathCount) || 0
+            cumCull += parseInt(record.cullCount) || 0
+
+            if (record.recordTime && startDate) {
+              const recordDate = new Date(record.recordTime)
+              const daysDiff = Math.floor((recordDate - startDate) / (1000 * 60 * 60 * 24))
+              record.deathDays = Math.max(0, daysDiff) * (parseInt(record.deathCount) || 0)
+              record.cullDays = Math.max(0, daysDiff) * (parseInt(record.cullCount) || 0)
+            }
+
+            if (i === index || index === undefined) {
+              record.cumDeathCount = cumDeath
+              record.cumCullCount = cumCull
+              record.currentCount = Math.max(0, remainingCount - cumDeath - cumCull)
+            }
+          })
+        }
+
+        const calculateAllCurrentCount = () => {
+          calculateCurrentCount()
+        }
+
+        const calculateDiarrheaAge = (index) => {
+          const records = moduleRecords.value.diarrhea
+          const penInfo = penInitialInfo.value[selectedPen.value]
+          if (!penInfo || !records[index] || !records[index].recordTime) return
+
+          const startDate = new Date(penInfo.startTime)
+          const recordDate = new Date(records[index].recordTime)
+          const daysDiff = Math.floor((recordDate - startDate) / (1000 * 60 * 60 * 24))
+          records[index].diarrheaAge = Math.max(0, daysDiff + parseInt(penInfo.initialAge || 0))
+        }
+
+        const calculateAllDiarrheaAge = () => {
+          moduleRecords.value.diarrhea.forEach((record, index) => {
+            calculateDiarrheaAge(index)
+          })
+        }
+
+        const calculateAvgWeight = (index) => {
+          const records = moduleRecords.value.weight
+          const penInfo = penInitialInfo.value[selectedPen.value]
+          if (!penInfo || !records[index] || !records[index].weight) return
+
+          const currentCount = parseInt(penInfo.initialCount || 0) -
+                              parseInt(moduleRecords.value.death.reduce((sum, r) => sum + parseInt(r.cumDeathCount || 0), 0)) -
+                              parseInt(moduleRecords.value.death.reduce((sum, r) => sum + parseInt(r.cumCullCount || 0), 0))
+          if (currentCount > 0) {
+            records[index].avgWeight = (parseFloat(records[index].weight) / currentCount).toFixed(2)
+          }
+        }
+
+        const calculateAllAvgWeight = () => {
+          moduleRecords.value.weight.forEach((record, index) => {
+            calculateAvgWeight(index)
+          })
+        }
+
+        const filterRecords = () => { console.log('Filter records:', dateRange.value) }
+        const resetFilter = () => {
+          dateRange.value = [queryDate, queryDate]
+          selectedPen.value = 'p1'
+        }
+        const searchMedicine = () => { console.log('Search medicine:', medicineQuery.value) }
+        const searchVaccine = () => { console.log('Search vaccine:', vaccineQuery.value) }
+
+        const selectMedicine = (item) => {
+          const records = moduleRecords.value.medicine
+          const targetRecord = records.length > 0 && !records[records.length - 1].productName ? records[records.length - 1] : records.push(getEmptyRecord('medicine')) && records[records.length - 1]
+          targetRecord.productName = item.name
+          targetRecord.productCode = item.code
+          targetRecord.productType = item.type
+          targetRecord.productSpec = item.spec
+          targetRecord.specUnit = item.specUnit
+          targetRecord.supplierName = item.supplierName
+          targetRecord.supplierCode = item.supplierCode
+        }
+
+        const selectVaccine = (item) => {
+          const records = moduleRecords.value.vaccine
+          const targetRecord = records.length > 0 && !records[records.length - 1].productName ? records[records.length - 1] : records.push(getEmptyRecord('vaccine')) && records[records.length - 1]
+          targetRecord.productName = item.name
+          targetRecord.productCode = item.code
+        }
+
+        const saveDraft = () => { alert('草稿已保存！') }
+
+        const saveAllRecords = () => {
+          const currentRecords = moduleRecords.value[activeModule.value]
+          const validRecords = currentRecords.filter(r => r.recordTime && r.penId)
+          if (validRecords.length === 0) {
+            alert('请至少填写一条有效记录（记录时间和栏位为必填）')
+            return
+          }
+
+          const submitTime = new Date().toLocaleString('zh-CN')
+          const moduleId = activeModule.value
+
+          validRecords.forEach(record => {
+            const recordData = {
+              ...record,
+              submitter: '当前用户',
+              submitTime: submitTime
+            }
+            submittedRecords.value[moduleId].push(recordData)
+
+            const afterData = JSON.stringify(recordData).replace(/["{}]/g, '').replace(/,/g, ', ')
+            addLog('add', getCurrentModuleName(), record.penId, '新增记录', '', afterData)
+          })
+
+          const emptyRecordTemplates = {
+            death: { recordTime: getQueryDate(), penId: selectedPen.value || '', deathCount: '', deathWeight: '', gender: '', deathReason: [], showOtherReason: false, otherReasonText: '', deathDays: '', cumDeathCount: '', cumDeathWeight: '', cullCount: '', cullWeight: '', cullGender: '', cullDays: '', cumCullCount: '', cumCullWeight: '', currentCount: '' },
+            feed: { recordTime: getQueryDate(), penId: selectedPen.value || '', feedAmount: '' },
+            diarrhea: { recordTime: getQueryDate(), penId: selectedPen.value || '', diarrheaScore: '', diarrheaAge: '', diarrheaHeadCount: '', diarrheaGender: '', healthStatus: '' },
+            medicine: { recordTime: getQueryDate(), penId: selectedPen.value || '', productName: '', productCode: '', productType: '', productSpec: '', specUnit: '', supplierName: '', supplierCode: '', medicineStatus: '', treatmentRange: '', adminRoute: '', adminRouteText: '', dosage: '' },
+            vaccine: { recordTime: getQueryDate(), penId: selectedPen.value || '', productName: '', productCode: '', vaccineStatus: '', immuneRange: '', immuneRoute: '', dosage: '' },
+            environment: { recordTime: getQueryDate(), penId: selectedPen.value || '', dailyWaterUsage: '', waterIntake: '', maxTemp: '', avgTemp: '', minTemp: '', maxHumidity: '', avgHumidity: '', minHumidity: '', maxPressure: '', avgPressure: '', minPressure: '' },
+            weight: { recordTime: getQueryDate(), penId: selectedPen.value || '', weight: '', avgWeight: '', remainingFeed: '' }
+          }
+
+          moduleRecords.value[moduleId] = [emptyRecordTemplates[moduleId]]
+
+          alert(`成功保存 ${validRecords.length} 条${moduleTabs.value.find(t => t.id === activeModule.value)?.name}记录！`)
+        }
+
+        const downloadModuleTemplate = () => {
+          const headers = {
+            death: ['记录时间', '栋-单元-栏位', '当日死亡栏位', '当日死亡数量', '当日死亡重量(Kg)', '死亡性别', '死亡原因', '死亡猪只天数', '累计死亡数量', '累计死亡重量(Kg)', '当日淘汰数量', '当日淘汰重量(Kg)', '淘汰性别', '淘汰天数', '累计淘汰数量', '累计淘汰重量(Kg)', '当日存栏数量'],
+            feed: ['记录时间', '栋-单元-栏位', '饲喂量(Kg)'],
+            diarrhea: ['记录时间', '栋-单元-栏位', '腹泻评分', '腹泻日龄', '腹泻头数', '腹泻性别', '猪只健康状况'],
+            medicine: ['记录时间', '栋-单元-栏位', '产品名称', '产品代码', '产品类别', '产品规格', '规格单位', '供应商名称', '供应商代码', '药品状态', '治疗范围', '给药途径', '用量'],
+            vaccine: ['记录时间', '栋-单元-栏位', '产品名称', '产品代码', '疫苗状态', '免疫范围', '免疫途径', '用量'],
+            environment: ['记录时间', '栋-单元-栏位', '猪只饮水量(L/只)', '舍内温度(℃)', '舍内湿度(%)', '水表压力(Pa)'],
+            weight: ['记录时间', '栋-单元-栏位', '称重时间', '称重重量(Kg)', '当日存栏只均重(Kg)', '栏位余料(Kg)']
+          }
+          let csv = headers[activeModule.value].join(',') + '\n'
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+          const link = document.createElement('a')
+          link.href = URL.createObjectURL(blob)
+          link.download = `${moduleTabs.value.find(t => t.id === activeModule.value)?.name}导入模板.csv`
+          link.click()
+        }
+
+        const triggerFileInput = () => { document.querySelector('input[type="file"]').click() }
+        const handleFileSelect = (event) => { const file = event.target.files[0]; if (file) handleFile(file) }
+        const handleDrop = (event) => { isDragging.value = false; const file = event.dataTransfer.files[0]; if (file) handleFile(file) }
+        const handleFile = (file) => { console.log('Selected file:', file.name) }
+        const importData = () => { alert(`正在导入${moduleTabs.value.find(t => t.id === importModule.value)?.name}数据...\n导入成功！`); showImportDialog.value = false }
+
+        const getCurrentStageName = () => {
+          if (currentStep.value.startsWith('daily_') || currentStep.value.startsWith('stageEnd_') || currentStep.value.startsWith('stageArchive_')) {
+            const index = parseInt(currentStep.value.split('_')[1]) - 1
+            if (experimentInfo.value.stages[index]) {
+              return `${String(index + 1).padStart(2, '0')}-${experimentInfo.value.stages[index]}`
+            }
+          }
+          return ''
+        }
+
+        const goToGrouping = () => { window.location.href = '02-Grouping.html' }
+        const goToOverview = () => { window.location.href = '00-Experiment_overview.html' }
+        const toggleHeader = () => { isHeaderCollapsed.value = !isHeaderCollapsed.value }
+        const handleScroll = (e) => {
+          const target = e.target || scrollTarget.value || window
+          const scrollTop = target.scrollTop || window.scrollY || document.documentElement.scrollTop || document.body.scrollTop
+          isHeaderCollapsed.value = scrollTop > 50
+        }
+
+        const initRecordsPenId = () => {
+          Object.keys(moduleRecords.value).forEach(moduleId => {
+            moduleRecords.value[moduleId].forEach(record => {
+              if (record.hasOwnProperty('penId') && !record.penId) {
+                record.penId = selectedPen.value || ''
+              }
+              if (record.hasOwnProperty('recordTime') && !record.recordTime) {
+                record.recordTime = getQueryDate()
+              }
+            })
+          })
+        }
+        initRecordsPenId()
+
+        const togglePenInfoEdit = () => {
+          if (isEditingPenInfo.value) {
+            cancelPenInfoEdit()
+          } else {
+            const penInfo = penInitialInfo.value[selectedPen.value]
+            if (penInfo) {
+              penInfoForm.startTime = penInfo.startTime
+              penInfoForm.initialAge = penInfo.initialAge
+              penInfoForm.initialWeight = penInfo.initialWeight
+              penInfoForm.initialHeadCount = penInfo.initialHeadCount
+              penInfoForm.initialAvgWeight = penInfo.initialAvgWeight
+              penInfoForm.initialRemainingFeed = penInfo.initialRemainingFeed
+            }
+          }
+          isEditingPenInfo.value = !isEditingPenInfo.value
+        }
+
+        const cancelPenInfoEdit = () => {
+          isEditingPenInfo.value = false
+          penInfoForm.startTime = ''
+          penInfoForm.initialAge = ''
+          penInfoForm.initialWeight = ''
+          penInfoForm.initialHeadCount = ''
+          penInfoForm.initialAvgWeight = ''
+          penInfoForm.initialRemainingFeed = ''
+        }
+
+        const onStartTimeChange = (val) => {
+          if (!val) return
+          const prevData = previousStageData.value[selectedPen.value]
+          if (prevData && val === prevData.endDate) {
+            penInfoForm.initialAge = prevData.endAge
+            penInfoForm.initialWeight = prevData.endWeight
+            penInfoForm.initialHeadCount = prevData.endHeadCount
+            penInfoForm.initialAvgWeight = prevData.endAvgWeight
+            penInfoForm.initialRemainingFeed = prevData.endRemainingFeed
+          } else {
+            penInfoForm.initialAge = ''
+            penInfoForm.initialWeight = ''
+            penInfoForm.initialHeadCount = ''
+            penInfoForm.initialAvgWeight = ''
+            penInfoForm.initialRemainingFeed = ''
+          }
+        }
+
+        const savePenInfo = () => {
+          if (penInitialInfo.value[selectedPen.value]) {
+            penInitialInfo.value[selectedPen.value].startTime = penInfoForm.startTime
+            penInitialInfo.value[selectedPen.value].initialAge = penInfoForm.initialAge
+            penInitialInfo.value[selectedPen.value].initialWeight = penInfoForm.initialWeight
+            penInitialInfo.value[selectedPen.value].initialHeadCount = penInfoForm.initialHeadCount
+            penInitialInfo.value[selectedPen.value].initialAvgWeight = penInfoForm.initialAvgWeight
+            penInitialInfo.value[selectedPen.value].initialRemainingFeed = penInfoForm.initialRemainingFeed
+          }
+          isEditingPenInfo.value = false
+          alert('栏位初始信息已保存！')
+        }
+
+        const editDialogVisible = ref(false)
+        const editingRecord = ref(null)
+
+        const editSubmittedRecord = (row) => {
+          editingRecord.value = { ...row }
+          editDialogVisible.value = true
+        }
+
+        const confirmEditRecord = () => {
+          if (!editingRecord.value) return
+          const moduleId = activeModule.value
+          const records = submittedRecords.value[moduleId]
+          const index = records.findIndex(r => r.submitTime === editingRecord.value.submitTime && r.penId === editingRecord.value.penId)
+          if (index !== -1) {
+            const beforeData = JSON.stringify(records[index]).replace(/["{}]/g, '').replace(/,/g, ', ')
+            records[index] = { ...editingRecord.value }
+            const afterData = JSON.stringify(records[index]).replace(/["{}]/g, '').replace(/,/g, ', ')
+            addLog('edit', getCurrentModuleName(), records[index].penId, '修改记录', beforeData, afterData)
+          }
+          editDialogVisible.value = false
+          editingRecord.value = null
+        }
+
+        const addLog = (type, module, pen, detail, before, after) => {
+          operationLogs.value.unshift({
+            logTime: new Date().toLocaleString('zh-CN'),
+            operator: '当前用户',
+            operationType: type,
+            moduleName: module,
+            penId: pen,
+            detail: detail,
+            beforeData: before,
+            afterData: after
+          })
+        }
+
+        const getOperationLabel = (type) => {
+          const labels = { add: '新增', edit: '修改', delete: '删除' }
+          return labels[type] || type
+        }
+
+        const getOperationClass = (type) => {
+          const classes = { add: 'log-add', edit: 'log-edit', delete: 'log-delete' }
+          return classes[type] || ''
+        }
+
+        return {
+          experimentCode, experimentInfo, currentStep, completedSteps, currentStageName,
+          selectedPen, dateRange, activeModule, showImportDialog, importModule, isDragging, queryDate,
+          medicineExpanded, vaccineExpanded, medicineQuery, medicineList, vaccineQuery, vaccineList,
+          penList, penInitialInfo, moduleTabs, moduleRecords, flowSteps, currentStepTitle, currentModuleRecords,
+          currentPenInfo, totalRecords, deathCount, avgTemperature, currentDateDisplay, currentModuleColumns, filteredSubmittedRecords,
+          getStepIndex, canAccessStep, selectStep, getCurrentModuleName, getPenLabel, getPenRecordStatus,
+          onPenChange, onDateChange, updatePenInfo, addRecord, addDeathRecord, addFeedRecord, addDiarrheaRecord,
+          addMedicineRecord, addVaccineRecord, addEnvironmentRecord, addWeightRecord, removeRecord,
+          calculateCurrentCount, calculateAllCurrentCount, handleDeathReasonChange,
+          calculateDiarrheaAge, calculateAllDiarrheaAge, calculateAvgWeight, calculateAllAvgWeight,
+          filterRecords, resetFilter, searchMedicine, searchVaccine, selectMedicine, selectVaccine,
+          saveDraft, saveAllRecords, downloadModuleTemplate, triggerFileInput, handleFileSelect,
+          handleDrop, handleFile, importData, getCurrentStageName, goToGrouping, getQueryDate,
+          editDialogVisible, editingRecord, editSubmittedRecord, confirmEditRecord,
+          operationLogs, addLog, getOperationLabel, getOperationClass,
+          isEditingPenInfo, togglePenInfoEdit, cancelPenInfoEdit, onStartTimeChange, savePenInfo,
+          penInfoForm, startTimeOptions, canEditPenInfo, previousStageData,
+          isHeaderCollapsed, toggleHeader, goToOverview
+        }
+      },
+      mounted() {
+        setTimeout(() => {
+          const mainContent = document.querySelector('.main-content')
+          if (mainContent) {
+            mainContent.addEventListener('scroll', this.handleScroll)
+            this.scrollTarget = mainContent
+          }
+        }, 100)
+      },
+      beforeUnmount() {
+        if (this.scrollTarget) {
+          this.scrollTarget.removeEventListener('scroll', this.handleScroll)
+        }
+      }
+    }).use(ElementPlus).mount('#app')
+  </script>
+</body>
+</html>

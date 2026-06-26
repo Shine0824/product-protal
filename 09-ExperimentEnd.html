@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猪实验数据 - 实验结束</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; }
+    .container { padding: 20px; max-width: 1600px; margin: 0 auto; }
+    .experiment-header { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+    .exp-code { font-size: 18px; font-weight: bold; color: #1ab394; margin-bottom: 15px; }
+    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .info-item { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; }
+    .info-label { color: #999; font-size: 14px; }
+    .info-value { color: #333; font-weight: 500; }
+    .stages-row { display: flex; justify-content: space-between; padding: 10px; background-color: #fafafa; border-radius: 4px; margin-top: 15px; }
+    .status-flow { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+    .status-title { font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #333; }
+    .flow-container { display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 0; }
+    .flow-item { display: flex; align-items: center; }
+    .flow-node { min-width: 110px; max-width: 130px; padding: 12px 8px; text-align: center; border-radius: 6px; font-size: 12px; background-color: #f5f7fa; border: 1px solid #e6e6e6; cursor: pointer; transition: all 0.3s; word-break: break-all; line-height: 1.4; }
+    .flow-node:hover:not(.locked) { background-color: #e8f5e9; border-color: #a5d6a7; }
+    .flow-node.completed { background-color: #e8f5e9; border-color: #1ab394; color: #1ab394; font-weight: bold; }
+    .flow-node.active { background-color: #1ab394; border-color: #1ab394; color: #fff; font-weight: bold; box-shadow: 0 2px 8px rgba(26,179,148,0.3); }
+    .flow-node.locked { opacity: 0.5; cursor: not-allowed; }
+    .flow-arrow { margin: 0 6px; color: #ccc; font-size: 14px; }
+    .flow-arrow.active { color: #1ab394; }
+    .content-container { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; }
+    .content-header { padding: 15px 20px; border-bottom: 1px solid #e6e6e6; background-color: #fafafa; }
+    .content-title { font-size: 16px; font-weight: bold; color: #333; }
+    .content-body { padding: 20px; }
+    .section-box { background-color: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+    .section-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    .report-summary { display: flex; flex-wrap: wrap; gap: 15px; }
+    .summary-card { flex: 1; min-width: 180px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: #fff; text-align: center; }
+    .summary-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .summary-card.green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .summary-card.teal { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .summary-card.purple { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+    .summary-card.yellow { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .summary-value { font-size: 28px; font-weight: bold; }
+    .summary-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+    .treatment-tab { display: flex; gap: 10px; margin-bottom: 15px; }
+    .treatment-tab button { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .treatment-tab button.active { background: #1ab394; color: #fff; border-color: #1ab394; }
+    .stage-tab { display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .stage-tab button { padding: 8px 20px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .stage-tab button.active { background: #1ab394; color: #fff; border-color: #1ab394; }
+    .table-wrapper { overflow-x: auto; }
+    .confirm-buttons { display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; }
+    .confirm-btn { padding: 10px 24px; font-size: 14px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
+    .confirm-btn.confirm { background: #1ab394; color: #fff; }
+    .confirm-btn.confirm:hover { background: #17a689; }
+    .confirm-btn.confirm:disabled { background: #ccc; cursor: not-allowed; }
+    .confirm-btn.back { background: #fff; color: #666; border: 1px solid #ddd; }
+    .confirm-btn.back:hover { background: #f5f5f5; }
+    .experiment-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+    .stage-summary-card { padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
+    .stage-summary-card-total { background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-color: #1ab394; }
+    .stage-name { font-size: 14px; font-weight: bold; color: #1ab394; margin-bottom: 12px; }
+    .stage-summary-card-total .stage-name { color: #0f7a65; font-size: 15px; }
+    .stage-metric { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; }
+    .stage-metric .label { color: #666; }
+    .stage-metric .value { font-weight: bold; color: #333; }
+    .stage-summary-card-total .stage-metric .value { color: #0f7a65; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="experiment-header">
+        <div class="exp-code">{{ experimentCode }}</div>
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">动物方向</span><span class="info-value">{{ experimentInfo.animalType }}</span></div>
+          <div class="info-item"><span class="info-label">实验类型</span><span class="info-value">{{ experimentInfo.experimentType }}</span></div>
+          <div class="info-item"><span class="info-label">生长阶段</span><span class="info-value">{{ experimentInfo.growthStage }}</span></div>
+          <div class="info-item"><span class="info-label">实验场</span><span class="info-value">{{ experimentInfo.farm }}</span></div>
+          <div class="info-item"><span class="info-label">项目负责人</span><span class="info-value">{{ experimentInfo.projectManager }}</span></div>
+          <div class="info-item"><span class="info-label">项目成员</span><span class="info-value">{{ experimentInfo.projectMembers }}</span></div>
+          <div class="info-item"><span class="info-label">实验周期</span><span class="info-value">{{ experimentInfo.startDate }} 至 {{ experimentInfo.endDate }}</span></div>
+          <div class="info-item"><span class="info-label">实验名称</span><span class="info-value">{{ experimentInfo.name }}</span></div>
+        </div>
+        <div class="stages-row">
+          <span class="info-label">试验阶段</span>
+          <span class="info-value stages-value">{{ experimentInfo.stages.map((s, i) => `${String(i + 1).padStart(2, '0')}-${s}`).join('/') }}</span>
+        </div>
+      </div>
+
+      <div class="status-flow">
+        <div class="status-title">实验进度</div>
+        <div class="flow-container">
+          <div v-for="(step, index) in flowSteps" :key="step.id" class="flow-item">
+            <div :class="['flow-node', { completed: completedSteps.includes(step.id), active: currentStep === step.id, locked: !canAccessStep(step.id) }]" @click="selectStep(step.id)">
+              {{ step.name }}
+            </div>
+            <span v-if="index < flowSteps.length - 1" :class="['flow-arrow', { active: completedSteps.includes(step.id) }]">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirm-buttons">
+        <button class="confirm-btn back" @click="goBackToStageArchive">实验回退</button>
+        <button class="confirm-btn confirm" :disabled="isConfirmed" @click="confirmExperimentEnd">
+          {{ isConfirmed ? '已确认' : '确认实验结束' }}
+        </button>
+        <div v-if="isConfirmed" style="padding: 8px 16px; background: #d4edda; color: #155724; border-radius: 4px; font-size: 13px;">
+          ✅ 实验结束已确认，数据不可修改
+        </div>
+      </div>
+
+      <div class="content-container">
+        <div class="content-header"><div class="content-title">实验阶段概览</div></div>
+        <div class="content-body">
+          <div class="section-box">
+            <div class="section-title">实验汇总指标</div>
+            <div class="report-summary">
+              <div class="summary-card"><div class="summary-value">{{ experimentSummary.totalWeightGain }}</div><div class="summary-label">总增重(Kg)</div></div>
+              <div class="summary-card orange"><div class="summary-value">{{ experimentSummary.totalDays }}</div><div class="summary-label">实验总天数(天)</div></div>
+              <div class="summary-card green"><div class="summary-value">{{ experimentSummary.mortalityRate }}%</div><div class="summary-label">总死亡率</div></div>
+              <div class="summary-card teal"><div class="summary-value">{{ experimentSummary.avgADG }}</div><div class="summary-label">日均增重ADG(Kg)</div></div>
+              <div class="summary-card purple"><div class="summary-value">{{ experimentSummary.totalFeedCost }}</div><div class="summary-label">总饲料成本(元)</div></div>
+              <div class="summary-card yellow"><div class="summary-value">{{ experimentSummary.totalRevenue }}</div><div class="summary-label">总利润(元)</div></div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-title">各阶段汇总</div>
+            <div class="table-wrapper">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段名称</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日期范围</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段天数(天)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段增重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">死亡率(%)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日均增重ADG(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日头均采食ADFI(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">料肉比FCR</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">Duration(天)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料成本(元)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">造肉成本FCG</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">利润(元)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料回报ROF(%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(stage, index) in stageSummaries" :key="index" :style="{ background: stage.isTotal ? '#d4edda' : '#fff' }">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: {{ stage.isTotal ? '#0f7a65' : '#333' }};">{{ stage.stageName }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.startDate }} ~ {{ stage.endDate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.stageDays }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.weightGain }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.mortalityRate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.ADG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.ADFI }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.FCR }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.duration }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.feedCost }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.FCG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.revenue }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage.ROF }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-title">实验合并记录 - {{ experimentMergeDateRange }}</div>
+            <div class="treatment-tab">
+              <button :class="{ active: activeTreatment === 'all' }" @click="activeTreatment = 'all'">全部处理组</button>
+              <button :class="{ active: activeTreatment === '1' }" @click="activeTreatment = '1'">处理组1</button>
+              <button :class="{ active: activeTreatment === '2' }" @click="activeTreatment = '2'">处理组2</button>
+              <button :class="{ active: activeTreatment === '3' }" @click="activeTreatment = '3'">处理组3</button>
+            </div>
+            <div class="table-wrapper">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">处理组</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">栋</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">单元</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">栏位</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">开始日期</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始日龄</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始称重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始头数</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束日期</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束日龄</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束称重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束头数</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">料号</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料价格(元/Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">猪价(元/Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">备注</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="record in filteredExperimentRecords" :key="record.penId">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.treatment }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.building }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.unit }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.pen }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.startDate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialAge }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.initialAvgWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endDate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endAge }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ record.endAvgWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage2EndRecords[record.penId]?.feedNo || '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage2EndRecords[record.penId]?.feedPrice || '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage2EndRecords[record.penId]?.pigPrice || '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ stage2EndRecords[record.penId]?.remark || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div v-if="activeTreatment === 'all'" class="table-wrapper" style="margin-top: 15px;">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;" colspan="4">处理组汇总</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">总初始称重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">总结束称重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">总增重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">总初始头数</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">总结束头数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="tg in treatmentGroupSummaries" :key="tg.treatment" style="background: #f0fff0;">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;" colspan="4">处理组{{ tg.treatment }}汇总</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalInitialWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalEndWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalWeightGain }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalInitialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalEndHeadCount }}</td>
+                  </tr>
+                  <tr style="background: #d4edda; font-weight: bold;">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;" colspan="4">实验汇总</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ experimentRecordsSummary.totalInitialWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ experimentRecordsSummary.totalEndWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ experimentRecordsSummary.totalWeightGain }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ experimentRecordsSummary.totalInitialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ experimentRecordsSummary.totalEndHeadCount }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-title">实验合并报表 - {{ experimentMergeDateRange }}</div>
+            <div class="stage-tab">
+              <button :class="{ active: activeStageTab === 'merge' }" @click="activeStageTab = 'merge'">实验合并</button>
+              <button v-for="(stage, index) in experimentInfo.stages" :key="index" :class="{ active: activeStageTab === `stage${index + 1}` }" @click="activeStageTab = `stage${index + 1}`">{{ String(index + 1).padStart(2, '0') }}-{{ stage }}</button>
+            </div>
+            <div class="treatment-tab">
+              <button :class="{ active: reportActiveTreatment === 'all' }" @click="reportActiveTreatment = 'all'">全部处理组</button>
+              <button :class="{ active: reportActiveTreatment === '1' }" @click="reportActiveTreatment = '1'">处理组1</button>
+              <button :class="{ active: reportActiveTreatment === '2' }" @click="reportActiveTreatment = '2'">处理组2</button>
+              <button :class="{ active: reportActiveTreatment === '3' }" @click="reportActiveTreatment = '3'">处理组3</button>
+            </div>
+            <div class="table-wrapper">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">处理组</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">栋</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">单元</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">栏位</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段天数(天)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始头数(头)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束头数(头)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">死亡率(%)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">初始只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">结束只均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日增重ADG(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料消耗(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">日头均采食ADFI(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">料肉比FCR</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">阶段实验天数(Duration)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">总饲料成本(Total feed cost)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">造肉成本(FCG)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">利润(Revenue)</th>
+                    <th style="padding: 8px; text-align: center; background: #f5f5f5; border: 1px solid #ddd;">饲料回报(ROF)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="report in filteredStageDetailReport" :key="report.penId">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.treatment }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.building }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.unit }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.pen }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.stageDays }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.initialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.endHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.mortalityRate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.initialAvgWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.endAvgWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.ADG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.feedConsumed }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.ADFI }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.FCR }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.duration }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.totalFeedCost }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.FCG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.revenue }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ report.ROF }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div v-if="reportActiveTreatment === 'all'" class="table-wrapper" style="margin-top: 15px;">
+              <table border="1" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;" colspan="4">处理组汇总</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">阶段天数</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">初始头数</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">结束头数</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">死亡率(%)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">初始均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">结束均重(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">ADG(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">饲料消耗(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">ADFI(Kg)</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">FCR</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">Duration</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">饲料成本</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">FCG</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">利润</th>
+                    <th style="padding: 8px; text-align: center; background: #e8f5e9; border: 1px solid #ddd;">ROF(%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="tg in treatmentGroupReportSummaries" :key="tg.treatment" style="background: #f0fff0;">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;" colspan="4">处理组{{ tg.treatment }}汇总</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.stageDays }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalInitialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalEndHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalMortalityRate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.avgInitialWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.avgEndWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.avgADG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalFeedConsumed }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.avgADFI }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.avgFCR }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.duration }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.totalFeedCost }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.FCG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.revenue }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ tg.ROF }}</td>
+                  </tr>
+                  <tr style="background: #d4edda; font-weight: bold;">
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;" colspan="4">{{ activeStageTab === 'merge' ? '实验汇总' : '阶段汇总' }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.stageDays }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.totalInitialHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.totalEndHeadCount }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.totalMortalityRate }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.avgInitialWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.avgEndWeight }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.avgADG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.totalFeedConsumed }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.avgADFI }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.avgFCR }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.duration }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.totalFeedCost }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.FCG }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.revenue }}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">{{ fullReportSummary.ROF }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue
+    createApp({
+      setup() {
+        const experimentCode = ref('SWINE-NUR-DY-0126')
+        const experimentInfo = ref({
+          animalType: '猪',
+          experimentType: '饲料营养实验 - 营养实验',
+          growthStage: '保育',
+          farm: 'DY',
+          projectManager: '李一一',
+          projectMembers: '张三、李四、王五',
+          startDate: '2026-01-26',
+          endDate: '2026-04-15',
+          name: '保育阶段营养试验',
+          stages: ['DRB', 'ZZB']
+        })
+        const currentStep = ref('completed')
+        const completedSteps = ref(['group', 'daily_1', 'stageEnd_1', 'stageArchive_1', 'daily_2', 'stageEnd_2', 'stageArchive_2'])
+        const activeTreatment = ref('all')
+        const reportActiveTreatment = ref('all')
+        const activeStageTab = ref('merge')
+        const isConfirmed = ref(false)
+
+        const penInitialInfo = ref({
+          p1: { treatment: '1', building: '1', unit: '1', pen: '1', startTime: '2026-01-26', initialAge: '60', initialWeight: '135', initialHeadCount: '10', initialAvgWeight: '13.5', initialRemainingFeed: '20' },
+          p2: { treatment: '1', building: '1', unit: '1', pen: '2', startTime: '2026-01-26', initialAge: '60', initialWeight: '130', initialHeadCount: '10', initialAvgWeight: '13.0', initialRemainingFeed: '20' },
+          p3: { treatment: '2', building: '1', unit: '2', pen: '3', startTime: '2026-01-26', initialAge: '60', initialWeight: '138', initialHeadCount: '8', initialAvgWeight: '17.25', initialRemainingFeed: '25' },
+          p4: { treatment: '2', building: '1', unit: '2', pen: '4', startTime: '2026-01-26', initialAge: '60', initialWeight: '133', initialHeadCount: '8', initialAvgWeight: '16.62', initialRemainingFeed: '25' },
+          p5: { treatment: '3', building: '1', unit: '2', pen: '5', startTime: '2026-01-26', initialAge: '60', initialWeight: '125', initialHeadCount: '10', initialAvgWeight: '12.5', initialRemainingFeed: '15' },
+          p6: { treatment: '3', building: '1', unit: '2', pen: '6', startTime: '2026-01-26', initialAge: '60', initialWeight: '125', initialHeadCount: '10', initialAvgWeight: '12.5', initialRemainingFeed: '15' }
+        })
+
+        const treatmentGroups = ref([
+          { treatment: '1', pens: ['p1', 'p2'] },
+          { treatment: '2', pens: ['p3', 'p4'] },
+          { treatment: '3', pens: ['p5', 'p6'] }
+        ])
+
+        const stage1EndRecords = ref({
+          p1: { endDate: '2026-02-28', endAge: '93', endWeight: '205', endHeadCount: '10', endAvgWeight: '20.5', endRemainingFeed: '5', feedNo: 'FEED-001', feedPrice: '3.5', pigPrice: '18', remark: '' },
+          p2: { endDate: '2026-02-28', endAge: '93', endWeight: '200', endHeadCount: '10', endAvgWeight: '20.0', endRemainingFeed: '5', feedNo: 'FEED-001', feedPrice: '3.5', pigPrice: '18', remark: '' },
+          p3: { endDate: '2026-02-28', endAge: '93', endWeight: '210', endHeadCount: '8', endAvgWeight: '26.25', endRemainingFeed: '8', feedNo: 'FEED-001', feedPrice: '3.5', pigPrice: '18', remark: '' },
+          p4: { endDate: '2026-02-28', endAge: '93', endWeight: '205', endHeadCount: '8', endAvgWeight: '25.62', endRemainingFeed: '8', feedNo: 'FEED-001', feedPrice: '3.5', pigPrice: '18', remark: '' },
+          p5: { endDate: '2026-02-28', endAge: '93', endWeight: '195', endHeadCount: '10', endAvgWeight: '19.5', endRemainingFeed: '4', feedNo: 'FEED-001', feedPrice: '3.5', pigPrice: '18', remark: '' },
+          p6: { endDate: '2026-02-28', endAge: '93', endWeight: '195', endHeadCount: '10', endAvgWeight: '19.5', endRemainingFeed: '4', feedNo: 'FEED-001', feedPrice: '3.5', pigPrice: '18', remark: '' }
+        })
+
+        const stage2EndRecords = ref({
+          p1: { endDate: '2026-04-15', endAge: '107', endWeight: '285', endHeadCount: '9', endAvgWeight: '31.67', endRemainingFeed: '8', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' },
+          p2: { endDate: '2026-04-15', endAge: '107', endWeight: '280', endHeadCount: '9', endAvgWeight: '31.11', endRemainingFeed: '8', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' },
+          p3: { endDate: '2026-04-15', endAge: '107', endWeight: '292', endHeadCount: '7', endAvgWeight: '41.71', endRemainingFeed: '10', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' },
+          p4: { endDate: '2026-04-15', endAge: '107', endWeight: '285', endHeadCount: '7', endAvgWeight: '40.71', endRemainingFeed: '10', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' },
+          p5: { endDate: '2026-04-15', endAge: '107', endWeight: '275', endHeadCount: '9', endAvgWeight: '30.56', endRemainingFeed: '6', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' },
+          p6: { endDate: '2026-04-15', endAge: '107', endWeight: '275', endHeadCount: '9', endAvgWeight: '30.56', endRemainingFeed: '6', feedNo: 'FEED-002', feedPrice: '3.8', pigPrice: '19', remark: '' }
+        })
+
+        const flowSteps = computed(() => {
+          const steps = [{ id: 'group', name: '实验分组' }]
+          experimentInfo.value.stages.forEach((stage, index) => {
+            const stageNum = String(index + 1).padStart(2, '0')
+            steps.push({ id: `daily_${index + 1}`, name: `日常巡栏\n${stageNum}-${stage}` })
+            steps.push({ id: `stageEnd_${index + 1}`, name: '阶段结束' })
+            steps.push({ id: `stageArchive_${index + 1}`, name: '阶段归档' })
+          })
+          steps.push({ id: 'completed', name: '实验结束' })
+          return steps
+        })
+
+        const canAccessStep = function(stepId) {
+          const stepIndex = flowSteps.value.findIndex(function(s) { return s.id === stepId })
+          const currentIndex = flowSteps.value.findIndex(function(s) { return s.id === currentStep.value })
+          return stepIndex <= currentIndex
+        }
+
+        const experimentMergeDateRange = computed(() => {
+          return experimentInfo.value.startDate + ' ~ ' + experimentInfo.value.endDate
+        })
+
+        const experimentRecords = computed(() => {
+          return Object.keys(penInitialInfo.value).map(function(pId) {
+            return {
+              penId: pId,
+              ...penInitialInfo.value[pId],
+              startDate: penInitialInfo.value[pId].startTime,
+              endDate: stage2EndRecords.value[pId].endDate,
+              endAge: stage2EndRecords.value[pId].endAge,
+              endWeight: stage2EndRecords.value[pId].endWeight,
+              endHeadCount: stage2EndRecords.value[pId].endHeadCount,
+              endAvgWeight: stage2EndRecords.value[pId].endAvgWeight
+            }
+          })
+        })
+
+        const treatmentGroupSummaries = computed(() => {
+          return treatmentGroups.value.map(function(tg) {
+            const records = experimentRecords.value.filter(function(r) { return r.treatment === tg.treatment })
+            const totalInitialWeight = records.reduce(function(sum, r) { return sum + parseFloat(r.initialWeight) }, 0).toFixed(1)
+            const totalEndWeight = records.reduce(function(sum, r) { return sum + parseFloat(r.endWeight) }, 0).toFixed(1)
+            const totalWeightGain = (parseFloat(totalEndWeight) - parseFloat(totalInitialWeight)).toFixed(1)
+            const totalInitialHeadCount = records.reduce(function(sum, r) { return sum + parseInt(r.initialHeadCount) }, 0)
+            const totalEndHeadCount = records.reduce(function(sum, r) { return sum + parseInt(r.endHeadCount) }, 0)
+            return {
+              treatment: tg.treatment,
+              totalInitialWeight: totalInitialWeight,
+              totalEndWeight: totalEndWeight,
+              totalWeightGain: totalWeightGain,
+              totalInitialHeadCount: totalInitialHeadCount,
+              totalEndHeadCount: totalEndHeadCount
+            }
+          })
+        })
+
+        const experimentRecordsSummary = computed(() => {
+          const records = experimentRecords.value
+          const totalInitialWeight = records.reduce(function(sum, r) { return sum + parseFloat(r.initialWeight) }, 0).toFixed(1)
+          const totalEndWeight = records.reduce(function(sum, r) { return sum + parseFloat(r.endWeight) }, 0).toFixed(1)
+          const totalWeightGain = (parseFloat(totalEndWeight) - parseFloat(totalInitialWeight)).toFixed(1)
+          const totalInitialHeadCount = records.reduce(function(sum, r) { return sum + parseInt(r.initialHeadCount) }, 0)
+          const totalEndHeadCount = records.reduce(function(sum, r) { return sum + parseInt(r.endHeadCount) }, 0)
+          return {
+            totalInitialWeight: totalInitialWeight,
+            totalEndWeight: totalEndWeight,
+            totalWeightGain: totalWeightGain,
+            totalInitialHeadCount: totalInitialHeadCount,
+            totalEndHeadCount: totalEndHeadCount
+          }
+        })
+
+        const filteredExperimentRecords = computed(() => {
+          if (activeTreatment.value === 'all') {
+            return experimentRecords.value
+          }
+          return experimentRecords.value.filter(function(r) { return r.treatment === activeTreatment.value })
+        })
+
+        const experimentSummary = computed(() => {
+          const initialWeight = Object.values(penInitialInfo.value).reduce(function(sum, p) { return sum + parseFloat(p.initialWeight) }, 0)
+          const endWeight = Object.values(stage2EndRecords.value).reduce(function(sum, p) { return sum + parseFloat(p.endWeight) }, 0)
+          const totalWeightGain = (endWeight - initialWeight).toFixed(1)
+          const startDate = new Date(experimentInfo.value.startDate)
+          const endDate = new Date(experimentInfo.value.endDate)
+          const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
+          const initialHC = Object.values(penInitialInfo.value).reduce(function(sum, p) { return sum + parseInt(p.initialHeadCount) }, 0)
+          const endHC = Object.values(stage2EndRecords.value).reduce(function(sum, p) { return sum + parseInt(p.endHeadCount) }, 0)
+          const mortalityRate = initialHC > 0 ? ((initialHC - endHC) / initialHC * 100).toFixed(2) : '0'
+          const avgADG = totalDays > 0 ? ((endWeight - initialWeight) / endHC / totalDays).toFixed(3) : '0'
+          
+          const stage1FeedConsumed = Object.keys(penInitialInfo.value).reduce(function(sum, pId) {
+            return sum + parseFloat(penInitialInfo.value[pId].initialRemainingFeed) - parseFloat(stage1EndRecords.value[pId].endRemainingFeed)
+          }, 0)
+          const stage2FeedConsumed = Object.keys(stage1EndRecords.value).reduce(function(sum, pId) {
+            return sum + parseFloat(stage1EndRecords.value[pId].endRemainingFeed) - parseFloat(stage2EndRecords.value[pId].endRemainingFeed)
+          }, 0)
+          const totalFeedCost = ((stage1FeedConsumed + stage2FeedConsumed) * 3.5).toFixed(2)
+          const revenue = ((endWeight - initialWeight) * 18 - parseFloat(totalFeedCost)).toFixed(2)
+
+          return { totalWeightGain, totalDays, mortalityRate, avgADG, totalFeedCost, totalRevenue: revenue }
+        })
+
+        const stageSummaries = computed(() => {
+          const stageData = []
+
+          const totalInitialWeight = Object.values(penInitialInfo.value).reduce(function(sum, p) { return sum + parseFloat(p.initialWeight) }, 0)
+          const totalEndWeight = Object.values(stage2EndRecords.value).reduce(function(sum, p) { return sum + parseFloat(p.endWeight) }, 0)
+          const totalWeightGain = (totalEndWeight - totalInitialWeight).toFixed(1)
+          const totalStageDays = Math.floor((new Date(experimentInfo.value.endDate) - new Date(experimentInfo.value.startDate)) / (1000 * 60 * 60 * 24))
+          const totalInitialHC = Object.values(penInitialInfo.value).reduce(function(sum, p) { return sum + parseInt(p.initialHeadCount) }, 0)
+          const totalEndHC = Object.values(stage2EndRecords.value).reduce(function(sum, p) { return sum + parseInt(p.endHeadCount) }, 0)
+          const totalMortalityRate = totalInitialHC > 0 ? ((totalInitialHC - totalEndHC) / totalInitialHC * 100).toFixed(2) : '0'
+          const totalInitialAvgWeight = Object.values(penInitialInfo.value).reduce(function(sum, p) { return sum + parseFloat(p.initialAvgWeight) }, 0) / Object.keys(penInitialInfo.value).length
+          const totalEndAvgWeight = Object.values(stage2EndRecords.value).reduce(function(sum, p) { return sum + parseFloat(p.endAvgWeight) }, 0) / Object.keys(stage2EndRecords.value).length
+          const totalADG = totalStageDays > 0 ? ((totalEndAvgWeight - totalInitialAvgWeight) / totalStageDays).toFixed(3) : '0'
+          const totalFeedConsumed = Object.keys(penInitialInfo.value).reduce(function(sum, pId) {
+            return sum + parseFloat(penInitialInfo.value[pId].initialRemainingFeed) - parseFloat(stage2EndRecords.value[pId].endRemainingFeed)
+          }, 0).toFixed(2)
+          const totalADFI = totalStageDays > 0 && totalEndHC > 0 ? (parseFloat(totalFeedConsumed) / totalStageDays / totalEndHC).toFixed(3) : '0'
+          const totalFCR = parseFloat(totalWeightGain) !== 0 ? (parseFloat(totalFeedConsumed) / Math.abs(parseFloat(totalWeightGain))).toFixed(2) : '0'
+          const totalFeedCost = (parseFloat(totalFeedConsumed) * 3.5).toFixed(2)
+          const totalFCG = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedCost) / parseFloat(totalWeightGain)).toFixed(2) : '0'
+          const totalRevenue = (parseFloat(totalWeightGain) * 18 - parseFloat(totalFeedCost)).toFixed(2)
+          const totalROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(totalRevenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+
+          stageData.push({
+            stageName: '实验汇总',
+            startDate: experimentInfo.value.startDate,
+            endDate: experimentInfo.value.endDate,
+            stageDays: totalStageDays,
+            weightGain: totalWeightGain,
+            mortalityRate: totalMortalityRate,
+            ADG: totalADG,
+            ADFI: totalADFI,
+            FCR: totalFCR,
+            duration: totalStageDays,
+            feedCost: totalFeedCost,
+            FCG: totalFCG,
+            revenue: totalRevenue,
+            ROF: totalROF,
+            isTotal: true
+          })
+
+          experimentInfo.value.stages.forEach(function(stage, index) {
+            const stageStartDate = index === 0 ? experimentInfo.value.startDate : stage1EndRecords.value['p1'].endDate
+            const stageEndDate = index === 0 ? stage1EndRecords.value['p1'].endDate : stage2EndRecords.value['p1'].endDate
+            const stageDays = Math.floor((new Date(stageEndDate) - new Date(stageStartDate)) / (1000 * 60 * 60 * 24))
+            
+            const initialRecords = index === 0 ? penInitialInfo.value : stage1EndRecords.value
+            const endRecords = index === 0 ? stage1EndRecords.value : stage2EndRecords.value
+            
+            const initialWeight = Object.values(initialRecords).reduce(function(sum, p) { return sum + parseFloat(p.initialWeight || p.endWeight) }, 0)
+            const endWeight = Object.values(endRecords).reduce(function(sum, p) { return sum + parseFloat(p.endWeight) }, 0)
+            const weightGain = endWeight - initialWeight
+            
+            const initialHC = Object.values(initialRecords).reduce(function(sum, p) { return sum + parseInt(p.initialHeadCount || p.endHeadCount) }, 0)
+            const endHC = Object.values(endRecords).reduce(function(sum, p) { return sum + parseInt(p.endHeadCount) }, 0)
+            const mortalityRate = initialHC > 0 ? ((initialHC - endHC) / initialHC * 100).toFixed(2) : '0'
+            
+            const initialAvgWeight = Object.values(initialRecords).reduce(function(sum, p) { return sum + parseFloat(p.initialAvgWeight || p.endAvgWeight) }, 0) / Object.keys(initialRecords).length
+            const endAvgWeight = Object.values(endRecords).reduce(function(sum, p) { return sum + parseFloat(p.endAvgWeight) }, 0) / Object.keys(endRecords).length
+            const ADG = stageDays > 0 ? ((endAvgWeight - initialAvgWeight) / stageDays).toFixed(3) : '0'
+            
+            const feedConsumed = Object.keys(initialRecords).reduce(function(sum, pId) {
+              const initialFeed = parseFloat(initialRecords[pId].initialRemainingFeed || initialRecords[pId].endRemainingFeed)
+              const endFeed = parseFloat(endRecords[pId].endRemainingFeed)
+              return sum + initialFeed - endFeed
+            }, 0).toFixed(2)
+            const ADFI = stageDays > 0 && endHC > 0 ? (parseFloat(feedConsumed) / stageDays / endHC).toFixed(3) : '0'
+            const FCR = weightGain !== 0 ? (parseFloat(feedConsumed) / Math.abs(weightGain)).toFixed(2) : '0'
+            const feedCost = (parseFloat(feedConsumed) * 3.5).toFixed(2)
+            const FCG = weightGain > 0 ? (parseFloat(feedCost) / weightGain).toFixed(2) : '0'
+            const revenue = (weightGain * 18 - parseFloat(feedCost)).toFixed(2)
+            const ROF = parseFloat(feedCost) > 0 ? (parseFloat(revenue) / parseFloat(feedCost) * 100).toFixed(2) : '0'
+
+            stageData.push({
+              stageName: String(index + 1).padStart(2, '0') + '-' + stage,
+              startDate: stageStartDate,
+              endDate: stageEndDate,
+              stageDays: stageDays,
+              weightGain: weightGain.toFixed(1),
+              mortalityRate: mortalityRate,
+              ADG: ADG,
+              ADFI: ADFI,
+              FCR: FCR,
+              duration: stageDays,
+              feedCost: feedCost,
+              FCG: FCG,
+              revenue: revenue,
+              ROF: ROF,
+              isTotal: false
+            })
+          })
+
+          return stageData
+        })
+
+        const stageDetailReports = computed(() => {
+          const reports = []
+          experimentInfo.value.stages.forEach(function(_, index) {
+            const stageStartDate = index === 0 ? experimentInfo.value.startDate : stage1EndRecords.value['p1'].endDate
+            const initialRecords = index === 0 ? penInitialInfo.value : stage1EndRecords.value
+            const endRecords = index === 0 ? stage1EndRecords.value : stage2EndRecords.value
+            
+            Object.keys(initialRecords).forEach(function(pId) {
+              const pen = initialRecords[pId]
+              const end = endRecords[pId]
+              const stageDays = Math.floor((new Date(end.endDate) - new Date(stageStartDate)) / (1000 * 60 * 60 * 24))
+              const initialHC = parseInt(pen.initialHeadCount || pen.endHeadCount)
+              const endHC = parseInt(end.endHeadCount)
+              const mortalityRate = initialHC > 0 ? ((initialHC - endHC) / initialHC * 100).toFixed(2) : '0'
+              
+              const initialFeed = parseFloat(pen.initialRemainingFeed || pen.endRemainingFeed)
+              const feedConsumed = (initialFeed - parseFloat(end.endRemainingFeed)).toFixed(2)
+              
+              const initialAvgWeight = parseFloat(pen.initialAvgWeight || pen.endAvgWeight)
+              const endAvgWeight = parseFloat(end.endAvgWeight)
+              const ADG = stageDays > 0 ? ((endAvgWeight - initialAvgWeight) / stageDays).toFixed(3) : '0'
+              const ADFI = stageDays > 0 && endHC > 0 ? (parseFloat(feedConsumed) / stageDays / endHC).toFixed(3) : '0'
+              
+              const initialWeight = parseFloat(pen.initialWeight || pen.endWeight)
+              const endWeight = parseFloat(end.endWeight)
+              const weightGain = endWeight - initialWeight
+              const FCR = weightGain !== 0 ? (parseFloat(feedConsumed) / Math.abs(weightGain)).toFixed(2) : '0'
+              
+              const totalFeedCost = (parseFloat(feedConsumed) * 3.5).toFixed(2)
+              const FCG = weightGain > 0 ? (parseFloat(totalFeedCost) / weightGain).toFixed(2) : '0'
+              const revenue = (weightGain * 18 - parseFloat(totalFeedCost)).toFixed(2)
+              const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+
+              reports.push({
+                penId: pId + '_stage' + (index + 1),
+                stageIndex: index,
+                treatment: pen.treatment,
+                building: pen.building,
+                unit: pen.unit,
+                pen: pen.pen,
+                stageDays: stageDays,
+                initialHeadCount: initialHC,
+                endHeadCount: endHC,
+                mortalityRate: mortalityRate,
+                initialAvgWeight: initialAvgWeight.toString(),
+                endAvgWeight: endAvgWeight.toString(),
+                ADG: ADG,
+                feedConsumed: feedConsumed,
+                ADFI: ADFI,
+                FCR: FCR,
+                duration: stageDays,
+                totalFeedCost: totalFeedCost,
+                FCG: FCG,
+                revenue: revenue,
+                ROF: ROF
+              })
+            })
+          })
+          return reports
+        })
+
+        const mergeReportDetails = computed(() => {
+          return Object.keys(penInitialInfo.value).map(function(pId) {
+            const pen = penInitialInfo.value[pId]
+            const stage1End = stage1EndRecords.value[pId]
+            const stage2End = stage2EndRecords.value[pId]
+            const stageDays = Math.floor((new Date(stage2End.endDate) - new Date(experimentInfo.value.startDate)) / (1000 * 60 * 60 * 24))
+            const initialHC = parseInt(pen.initialHeadCount)
+            const endHC = parseInt(stage2End.endHeadCount)
+            const mortalityRate = initialHC > 0 ? ((initialHC - endHC) / initialHC * 100).toFixed(2) : '0'
+            
+            const feedConsumed = (parseFloat(pen.initialRemainingFeed) - parseFloat(stage2End.endRemainingFeed)).toFixed(2)
+            const initialAvgWeight = parseFloat(pen.initialAvgWeight)
+            const endAvgWeight = parseFloat(stage2End.endAvgWeight)
+            const ADG = stageDays > 0 ? ((endAvgWeight - initialAvgWeight) / stageDays).toFixed(3) : '0'
+            const ADFI = stageDays > 0 && endHC > 0 ? (parseFloat(feedConsumed) / stageDays / endHC).toFixed(3) : '0'
+            
+            const initialWeight = parseFloat(pen.initialWeight)
+            const endWeight = parseFloat(stage2End.endWeight)
+            const weightGain = endWeight - initialWeight
+            const FCR = weightGain > 0 ? (parseFloat(feedConsumed) / weightGain).toFixed(2) : '0'
+            
+            const totalFeedCost = (parseFloat(feedConsumed) * 3.5).toFixed(2)
+            const FCG = weightGain > 0 ? (parseFloat(totalFeedCost) / weightGain).toFixed(2) : '0'
+            const revenue = (weightGain * 18 - parseFloat(totalFeedCost)).toFixed(2)
+            const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+
+            return {
+              penId: pId + '_merge',
+              stageIndex: -1,
+              treatment: pen.treatment,
+              building: pen.building,
+              unit: pen.unit,
+              pen: pen.pen,
+              stageDays: stageDays,
+              initialHeadCount: initialHC,
+              endHeadCount: endHC,
+              mortalityRate: mortalityRate,
+              initialAvgWeight: initialAvgWeight.toString(),
+              endAvgWeight: endAvgWeight.toString(),
+              ADG: ADG,
+              feedConsumed: feedConsumed,
+              ADFI: ADFI,
+              FCR: FCR,
+              duration: stageDays,
+              totalFeedCost: totalFeedCost,
+              FCG: FCG,
+              revenue: revenue,
+              ROF: ROF
+            }
+          })
+        })
+
+        const currentStageDetailReport = computed(() => {
+          if (activeStageTab.value === 'merge') {
+            return mergeReportDetails.value
+          }
+          const stageIndex = parseInt(activeStageTab.value.replace('stage', '')) - 1
+          return stageDetailReports.value.filter(function(r) { return r.stageIndex === stageIndex })
+        })
+
+        const treatmentGroupReportSummaries = computed(() => {
+          const allReports = currentStageDetailReport.value
+          return treatmentGroups.value.map(function(tg) {
+            const filtered = allReports.filter(function(r) { return r.treatment === tg.treatment })
+            const stageDays = filtered.length > 0 ? filtered[0].stageDays : 0
+            const totalInitialHeadCount = filtered.reduce(function(sum, r) { return sum + r.initialHeadCount }, 0)
+            const totalEndHeadCount = filtered.reduce(function(sum, r) { return sum + r.endHeadCount }, 0)
+            const totalMortalityRate = totalInitialHeadCount > 0 ? ((totalInitialHeadCount - totalEndHeadCount) / totalInitialHeadCount * 100).toFixed(2) : '0'
+            const avgInitialWeight = totalInitialHeadCount > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.initialAvgWeight) * r.initialHeadCount }, 0) / totalInitialHeadCount).toFixed(2) : '0'
+            const avgEndWeight = totalEndHeadCount > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.endAvgWeight) * r.endHeadCount }, 0) / totalEndHeadCount).toFixed(2) : '0'
+            const avgADG = filtered.length > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.ADG) }, 0) / filtered.length).toFixed(3) : '0'
+            const totalFeedConsumed = filtered.reduce(function(sum, r) { return sum + parseFloat(r.feedConsumed) }, 0).toFixed(2)
+            const avgADFI = filtered.length > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.ADFI) }, 0) / filtered.length).toFixed(3) : '0'
+            const avgFCR = filtered.length > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.FCR) }, 0) / filtered.length).toFixed(2) : '0'
+            const totalFeedCost = filtered.reduce(function(sum, r) { return sum + parseFloat(r.totalFeedCost) }, 0).toFixed(2)
+            const totalWeightGain = filtered.reduce(function(sum, r) { return sum + (parseFloat(r.endAvgWeight) - parseFloat(r.initialAvgWeight)) * r.endHeadCount }, 0)
+            const FCG = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedCost) / totalWeightGain).toFixed(2) : '0'
+            const revenue = filtered.reduce(function(sum, r) { return sum + parseFloat(r.revenue) }, 0).toFixed(2)
+            const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+            return {
+              treatment: tg.treatment,
+              stageDays: stageDays,
+              totalInitialHeadCount: totalInitialHeadCount,
+              totalEndHeadCount: totalEndHeadCount,
+              totalMortalityRate: totalMortalityRate,
+              avgInitialWeight: avgInitialWeight,
+              avgEndWeight: avgEndWeight,
+              avgADG: avgADG,
+              totalFeedConsumed: totalFeedConsumed,
+              avgADFI: avgADFI,
+              avgFCR: avgFCR,
+              duration: stageDays,
+              totalFeedCost: totalFeedCost,
+              FCG: FCG,
+              revenue: revenue,
+              ROF: ROF
+            }
+          })
+        })
+
+        const fullReportSummary = computed(() => {
+          const allReports = currentStageDetailReport.value
+          const stageDays = allReports.length > 0 ? allReports[0].stageDays : 0
+          const totalInitialHeadCount = allReports.reduce(function(sum, r) { return sum + r.initialHeadCount }, 0)
+          const totalEndHeadCount = allReports.reduce(function(sum, r) { return sum + r.endHeadCount }, 0)
+          const totalMortalityRate = totalInitialHeadCount > 0 ? ((totalInitialHeadCount - totalEndHeadCount) / totalInitialHeadCount * 100).toFixed(2) : '0'
+          const avgInitialWeight = totalInitialHeadCount > 0 ? (allReports.reduce(function(sum, r) { return sum + parseFloat(r.initialAvgWeight) * r.initialHeadCount }, 0) / totalInitialHeadCount).toFixed(2) : '0'
+          const avgEndWeight = totalEndHeadCount > 0 ? (allReports.reduce(function(sum, r) { return sum + parseFloat(r.endAvgWeight) * r.endHeadCount }, 0) / totalEndHeadCount).toFixed(2) : '0'
+          const avgADG = allReports.length > 0 ? (allReports.reduce(function(sum, r) { return sum + parseFloat(r.ADG) }, 0) / allReports.length).toFixed(3) : '0'
+          const totalFeedConsumed = allReports.reduce(function(sum, r) { return sum + parseFloat(r.feedConsumed) }, 0).toFixed(2)
+          const avgADFI = allReports.length > 0 ? (allReports.reduce(function(sum, r) { return sum + parseFloat(r.ADFI) }, 0) / allReports.length).toFixed(3) : '0'
+          const avgFCR = allReports.length > 0 ? (allReports.reduce(function(sum, r) { return sum + parseFloat(r.FCR) }, 0) / allReports.length).toFixed(2) : '0'
+          const totalFeedCost = allReports.reduce(function(sum, r) { return sum + parseFloat(r.totalFeedCost) }, 0).toFixed(2)
+          const totalWeightGain = allReports.reduce(function(sum, r) { return sum + (parseFloat(r.endAvgWeight) - parseFloat(r.initialAvgWeight)) * r.endHeadCount }, 0)
+          const FCG = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedCost) / totalWeightGain).toFixed(2) : '0'
+          const revenue = allReports.reduce(function(sum, r) { return sum + parseFloat(r.revenue) }, 0).toFixed(2)
+          const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+          return {
+            stageDays: stageDays,
+            totalInitialHeadCount: totalInitialHeadCount,
+            totalEndHeadCount: totalEndHeadCount,
+            totalMortalityRate: totalMortalityRate,
+            avgInitialWeight: avgInitialWeight,
+            avgEndWeight: avgEndWeight,
+            avgADG: avgADG,
+            totalFeedConsumed: totalFeedConsumed,
+            avgADFI: avgADFI,
+            avgFCR: avgFCR,
+            duration: stageDays,
+            totalFeedCost: totalFeedCost,
+            FCG: FCG,
+            revenue: revenue,
+            ROF: ROF
+          }
+        })
+
+        const filteredStageDetailReport = computed(() => {
+          if (reportActiveTreatment.value === 'all') {
+            return currentStageDetailReport.value
+          }
+          return currentStageDetailReport.value.filter(function(r) { return r.treatment === reportActiveTreatment.value })
+        })
+
+        const currentReportSummary = computed(() => {
+          const filtered = filteredStageDetailReport.value
+          const stageDays = filtered.length > 0 ? filtered[0].stageDays : 0
+          const totalInitialHeadCount = filtered.reduce(function(sum, r) { return sum + r.initialHeadCount }, 0)
+          const totalEndHeadCount = filtered.reduce(function(sum, r) { return sum + r.endHeadCount }, 0)
+          const totalMortalityRate = totalInitialHeadCount > 0 ? ((totalInitialHeadCount - totalEndHeadCount) / totalInitialHeadCount * 100).toFixed(2) : '0'
+          const avgInitialWeight = totalInitialHeadCount > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.initialAvgWeight) * r.initialHeadCount }, 0) / totalInitialHeadCount).toFixed(2) : '0'
+          const avgEndWeight = totalEndHeadCount > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.endAvgWeight) * r.endHeadCount }, 0) / totalEndHeadCount).toFixed(2) : '0'
+          const avgADG = filtered.length > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.ADG) }, 0) / filtered.length).toFixed(3) : '0'
+          const totalFeedConsumed = filtered.reduce(function(sum, r) { return sum + parseFloat(r.feedConsumed) }, 0).toFixed(2)
+          const avgADFI = filtered.length > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.ADFI) }, 0) / filtered.length).toFixed(3) : '0'
+          const avgFCR = filtered.length > 0 ? (filtered.reduce(function(sum, r) { return sum + parseFloat(r.FCR) }, 0) / filtered.length).toFixed(2) : '0'
+          const totalFeedCost = filtered.reduce(function(sum, r) { return sum + parseFloat(r.totalFeedCost) }, 0).toFixed(2)
+          const totalWeightGain = filtered.reduce(function(sum, r) { return sum + (parseFloat(r.endAvgWeight) - parseFloat(r.initialAvgWeight)) * r.endHeadCount }, 0)
+          const FCG = parseFloat(totalWeightGain) > 0 ? (parseFloat(totalFeedCost) / totalWeightGain).toFixed(2) : '0'
+          const revenue = filtered.reduce(function(sum, r) { return sum + parseFloat(r.revenue) }, 0).toFixed(2)
+          const ROF = parseFloat(totalFeedCost) > 0 ? (parseFloat(revenue) / parseFloat(totalFeedCost) * 100).toFixed(2) : '0'
+
+          return {
+            stageDays: stageDays,
+            totalInitialHeadCount: totalInitialHeadCount,
+            totalEndHeadCount: totalEndHeadCount,
+            totalMortalityRate: totalMortalityRate,
+            avgInitialWeight: avgInitialWeight,
+            avgEndWeight: avgEndWeight,
+            avgADG: avgADG,
+            totalFeedConsumed: totalFeedConsumed,
+            avgADFI: avgADFI,
+            avgFCR: avgFCR,
+            duration: stageDays,
+            totalFeedCost: totalFeedCost,
+            FCG: FCG,
+            revenue: revenue,
+            ROF: ROF
+          }
+        })
+
+        const selectStep = function(stepId) {
+          if (canAccessStep(stepId)) {
+            currentStep.value = stepId
+          }
+        }
+
+        const goBackToStageArchive = function() {
+          currentStep.value = 'stageArchive_2'
+        }
+
+        const confirmExperimentEnd = function() {
+          isConfirmed.value = true
+        }
+
+        return {
+          experimentCode,
+          experimentInfo,
+          currentStep,
+          completedSteps,
+          activeTreatment,
+          reportActiveTreatment,
+          activeStageTab,
+          isConfirmed,
+          flowSteps,
+          experimentMergeDateRange,
+          experimentRecords,
+          filteredExperimentRecords,
+          experimentSummary,
+          stageSummaries,
+          stageDetailReports,
+          mergeReportDetails,
+          currentStageDetailReport,
+          filteredStageDetailReport,
+          currentReportSummary,
+          treatmentGroupSummaries,
+          experimentRecordsSummary,
+          treatmentGroupReportSummaries,
+          fullReportSummary,
+          stage1EndRecords,
+          stage2EndRecords,
+          canAccessStep,
+          selectStep,
+          goBackToStageArchive,
+          confirmExperimentEnd
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
