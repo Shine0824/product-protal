@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -598,6 +598,7 @@
             <span>猪实验数据</span>
             <span>›</span>
             <span style="color: #1ab394;">SWINE-NUR-DY-0126</span>
+            <span style="color: #333;"> {{ experimentInfo.name }}</span>
           </div>
         </div>
         <div class="top-nav-right">
@@ -661,7 +662,6 @@
       </div>
 
       <div class="status-flow">
-        <div class="status-title">实验进度</div>
         <div class="flow-container">
           <template v-for="(step, index) in flowSteps" :key="step.id">
             <div class="flow-item">

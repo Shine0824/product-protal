@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -154,7 +154,7 @@
       <div class="top-nav-container">
         <div class="top-nav-left">
           <div class="top-nav-breadcrumb">
-            <span>猪实验数据</span><span>›</span><span>猪实验数据</span><span>›</span><span style="color: #1ab394;">{{ experimentCode }}</span>
+            <span>猪实验数据</span><span>›</span><span>猪实验数据</span><span>›</span><span style="color: #1ab394;">{{ experimentCode }}</span><span style="color: #333;"> {{ experimentInfo.name }}</span>
           </div>
         </div>
         <div class="top-nav-right">
@@ -191,7 +191,6 @@
       </div>
 
       <div class="status-flow">
-        <div class="status-title">实验进度</div>
         <div class="flow-container">
           <template v-for="(step, index) in flowSteps" :key="step.id">
             <div class="flow-item">
@@ -565,7 +564,7 @@
 
           <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px;">
             <el-button @click="saveDraft">保存草稿</el-button>
-            <el-button type="primary" @click="saveAllRecords">保存记录</el-button>
+            <el-button type="primary" @click="saveAllRecords">提交记录</el-button>
           </div>
         </div>
       </div>

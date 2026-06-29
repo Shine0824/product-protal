@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -118,7 +118,7 @@
       <div class="top-nav-container">
         <div class="top-nav-left">
           <div class="top-nav-breadcrumb">
-            <span>猪实验数据</span><span>›</span><span>猪实验数据</span><span>›</span><span style="color: #1ab394;">{{ experimentCode }}</span>
+            <span>猪实验数据</span><span>›</span><span>猪实验数据</span><span>›</span><span style="color: #1ab394;">{{ experimentCode }}</span><span style="color: #333;"> {{ experimentInfo.name }}</span>
           </div>
         </div>
         <div class="top-nav-right">
@@ -155,7 +155,6 @@
       </div>
 
       <div class="status-flow">
-        <div class="status-title">实验进度</div>
         <div class="flow-container">
           <div v-for="(step, index) in flowSteps" :key="step.id" class="flow-item">
             <div :class="['flow-node', { completed: completedSteps.includes(step.id), active: currentStep === step.id, locked: !canAccessStep(step.id) }]" @click="selectStep(step.id)">
