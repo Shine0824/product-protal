@@ -222,19 +222,6 @@
   </style>
 </head>
 <body>
-  <div id="passwordOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
-    <div style="background: white; padding: 48px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; min-width: 360px;">
-      <div style="font-size: 48px; margin-bottom: 20px;">🔐</div>
-      <h2 style="font-size: 24px; color: #0f172a; margin-bottom: 8px;">Access Required</h2>
-      <p style="color: #64748b; margin-bottom: 24px; font-size: 14px;">Please enter the access password</p>
-      <input type="password" id="passwordInput" placeholder="Enter password..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key === 'Enter') verifyPassword()">
-      <button onclick="verifyPassword()" style="width: 100%; margin-top: 16px; padding: 14px; background: #1e3a5f; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2d4f7c'" onmouseout="this.style.background='#1e3a5f'">
-        Enter
-      </button>
-      <p id="errorMsg" style="color: #ef4444; font-size: 13px; margin-top: 12px; display: none;">Incorrect password, please try again</p>
-    </div>
-  </div>
-  <div id="mainContent" style="display: none;">
   <header class="header">
     <div class="logo">CPRI Innovation</div>
     <nav class="nav-links">
@@ -311,27 +298,7 @@
       }
     }
 
-    const ACCESS_PASSWORD = 'shine2026';
-
-    function verifyPassword() {
-      const input = document.getElementById('passwordInput');
-      const errorMsg = document.getElementById('errorMsg');
-      if (input.value === ACCESS_PASSWORD) {
-        document.getElementById('passwordOverlay').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-        renderProducts(productsData);
-      } else {
-        errorMsg.style.display = 'block';
-        input.style.borderColor = '#ef4444';
-        setTimeout(() => {
-          errorMsg.style.display = 'none';
-          input.style.borderColor = '#e2e8f0';
-        }, 3000);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {});
+    document.addEventListener('DOMContentLoaded', () => renderProducts(productsData));
   </script>
-</div>
 </body>
 </html>
