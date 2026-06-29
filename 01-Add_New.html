@@ -190,6 +190,59 @@
     .add-stage-btn:hover {
       text-decoration: underline;
     }
+    .tooltip-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+    }
+    .tooltip-icon {
+      font-size: 14px;
+      margin-left: 8px;
+    }
+    .tooltip-text {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+      z-index: 1000;
+      margin-bottom: 8px;
+    }
+    .tooltip-text::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #333;
+    }
+    .tooltip-wrapper:hover .tooltip-text {
+      opacity: 1;
+      visibility: visible;
+    }
+    .member-select-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .import-members {
+      font-size: 12px;
+      color: #1e88e5;
+      text-align: right;
+      cursor: pointer;
+    }
+    .import-members:hover {
+      text-decoration: underline;
+    }
     .modal-footer {
       display: flex;
       justify-content: flex-end;
@@ -258,7 +311,10 @@
         <div class="exp-code-row">
           <label>实验编号：</label>
           <el-input v-model="formData.expCode" class="exp-code-value" placeholder="自动生成"></el-input>
-          <span style="font-size: 12px; color: #999; margin-left: 10px;">格式：SWINE-生长阶段-猪场地点-栋舍单元编号-序号及年份</span>
+          <div class="tooltip-wrapper">
+            <span class="tooltip-icon">ℹ️</span>
+            <span class="tooltip-text">格式：SWINE-生长阶段-猪场地点-栋舍单元编号-序号及年份</span>
+          </div>
         </div>
 
         <div class="modal-body">
@@ -282,16 +338,26 @@
 
           <div class="form-row">
             <div class="form-item">
-              <label class="required">项目负责人</label>
-              <el-input v-model="formData.projectManager" placeholder="请输入"></el-input>
-              <div v-if="errors.projectManager" class="error-message">{{ errors.projectManager }}</div>
-            </div>
-            <div class="form-item">
-              <label>实验负责人</label>
+              <label class="required">实验负责人</label>
               <el-select v-model="formData.experimentManager" placeholder="请选择">
                 <el-option label="请选择" value=""></el-option>
-                <el-option label="项目成员" value="member"></el-option>
+                <el-option label="张三" value="zhangsan"></el-option>
+                <el-option label="李四" value="lisi"></el-option>
+                <el-option label="王五" value="wangwu"></el-option>
               </el-select>
+              <div v-if="errors.experimentManager" class="error-message">{{ errors.experimentManager }}</div>
+            </div>
+            <div class="form-item">
+              <label class="required">项目成员</label>
+              <div class="member-select-container">
+                <el-select v-model="formData.projectMembers" placeholder="请选择" multiple>
+                  <el-option label="张三" value="zhangsan"></el-option>
+                  <el-option label="李四" value="lisi"></el-option>
+                  <el-option label="王五" value="wangwu"></el-option>
+                  <el-option label="赵六" value="zhaoliu"></el-option>
+                </el-select>
+                <span class="import-members" @click="handleImportMembers">从其他项目导入</span>
+              </div>
             </div>
           </div>
 
@@ -446,8 +512,8 @@
         const originalFormData = {
           animalType: '',
           experimentType: '',
-          projectManager: '',
           experimentManager: '',
+          projectMembers: [],
           cooArea: '',
           farm: '',
           startDate: '',
@@ -538,8 +604,8 @@
             errors.experimentType = '请选择实验类型'
             isValid = false
           }
-          if (!formData.projectManager) {
-            errors.projectManager = '请输入项目负责人'
+          if (!formData.experimentManager) {
+            errors.experimentManager = '请选择实验负责人'
             isValid = false
           }
           if (!formData.cooArea) {
@@ -615,6 +681,31 @@
           console.log('提交表单', formData)
           
           window.location.href = '02-Grouping.html?exp=' + formData.expCode
+        }
+
+        const handleImportMembers = () => {
+          ElMessageBox.confirm(
+            '<div style="text-align: left;">' +
+            '<p>选择要导入的项目：</p>' +
+            '<div style="margin-top: 10px;">' +
+            '<label style="display: block; margin-bottom: 8px;"><input type="checkbox" value="project1"> SWINE-NUR-XY-001-2026 - 襄阳保育试验A</label>' +
+            '<label style="display: block; margin-bottom: 8px;"><input type="checkbox" value="project2"> SWINE-FAT-NMG-002-2026 - 内蒙古育肥试验</label>' +
+            '<label style="display: block;"><input type="checkbox" value="project3"> SWINE-NF-DY-003-2026 - 东营保育育肥试验</label>' +
+            '</div>' +
+            '</div>',
+            '从其他项目导入成员',
+            {
+              dangerouslyUseHTMLString: true,
+              confirmButtonText: '导入',
+              cancelButtonText: '取消',
+              type: 'info'
+            }
+          ).then(() => {
+            formData.projectMembers = ['zhangsan', 'lisi']
+            ElMessage.success('成员导入成功')
+          }).catch(() => {
+            return
+          })
         }
 
         const startResize = (e) => {
